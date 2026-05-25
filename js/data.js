@@ -1,0 +1,302 @@
+/* ============================================================
+   data.js — 캐릭터, 단원, 게임 콘텐츠 데이터
+   ============================================================ */
+
+// 단일 진화 캐릭터: 알 → 우주 (10단계)
+const CHARACTERS = [
+    {
+        id: "hero",
+        name: "어드벤처러",
+        base: "🥚",
+        evolved: [
+            "🥚",     // L1: 알
+            "🐣",     // L2: 병아리
+            "🐔",     // L3: 닭
+            "🐉",     // L4: 용
+            "🐲⚔️",   // L5: 용의 전사
+            "👼",     // L6: 천사
+            "😈",     // L7: 악마
+            "⚡👑",   // L8: 제우스
+            "☀️",     // L9: 태양
+            "🌌",     // L10: 우주
+        ],
+    },
+];
+
+// 각 레벨의 이름 (HUD/홈 화면에 표시)
+const LEVEL_NAMES = [
+    "알",         // L1
+    "병아리",      // L2
+    "닭",          // L3
+    "용",          // L4
+    "용의 전사",   // L5
+    "천사",        // L6
+    "악마",        // L7
+    "제우스",      // L8
+    "태양",        // L9
+    "우주",        // L10
+];
+
+// 누적 점수가 얼마면 레벨 N이 되는지 (이전 값의 1.5배 — 더 도전적)
+const LEVEL_THRESHOLDS = [
+    0,        // L1: 알
+    750,      // L2: 병아리
+    2250,     // L3: 닭
+    5250,     // L4: 용
+    10500,    // L5: 용의 전사
+    18750,    // L6: 천사
+    30000,    // L7: 악마
+    45000,    // L8: 제우스
+    67500,    // L9: 태양
+    97500,    // L10: 우주
+];
+
+const MAX_LEVEL = LEVEL_THRESHOLDS.length;
+
+function getLevelFromPoints(points) {
+    let level = 1;
+    for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+        if (points >= LEVEL_THRESHOLDS[i]) level = i + 1;
+    }
+    return Math.min(level, MAX_LEVEL);
+}
+
+function getLevelProgress(points) {
+    const level = getLevelFromPoints(points);
+    if (level >= MAX_LEVEL) {
+        return { current: points, needed: points, ratio: 1, level, atMax: true };
+    }
+    const min = LEVEL_THRESHOLDS[level - 1];
+    const max = LEVEL_THRESHOLDS[level];
+    return {
+        current: points - min,
+        needed: max - min,
+        ratio: (points - min) / (max - min),
+        level,
+        nextLevel: level + 1,
+        atMax: false,
+    };
+}
+
+function getLevelName(level) {
+    return LEVEL_NAMES[Math.min(level, LEVEL_NAMES.length) - 1] || "";
+}
+
+// ============================================================
+// 1단원: 컴퓨터의 기초 — 사격 게임
+// ============================================================
+
+const COMPUTER_PARTS = {
+    monitor: { word: "모니터", emoji: "🖥️" },
+    keyboard: { word: "키보드", emoji: "⌨️" },
+    mouse: { word: "마우스", emoji: "🖱️" },
+    speaker: { word: "스피커", emoji: "🔊" },
+    printer: { word: "프린터", emoji: "🖨️" },
+    body: { word: "본체", emoji: "💻" },
+    cable: { word: "케이블", emoji: "🔌" },
+};
+
+const DISTRACTORS = [
+    "책상", "의자", "종이", "연필",
+    "사과", "공책", "지우개", "가위",
+    "텔레비전", "라디오", "에어컨", "선풍기",
+];
+
+// 각 라운드의 정답이 화면에 계속 떨어짐 (오답 없음)
+const LESSON1_ROUNDS = [
+    { prompt: "컴퓨터의 눈 👀",  hint: "보여주는 친구!", correct: ["monitor"] },
+    { prompt: "컴퓨터의 손 ✋",  hint: "조작하는 친구!", correct: ["keyboard"] },
+    { prompt: "컴퓨터의 머리 🧠", hint: "생각하는 친구!", correct: ["body"] },
+];
+
+// 1단원 게임 설정
+// 라운드별 점수: R1=35, R2=70, R3=105 (이전의 1/3로 낮춤 — 워밍업 단원이라)
+const GAME_CONFIG = {
+    roundDuration: 15000,
+    fallSpeedBase: 160,
+    fallSpeedPerRound: 60,
+    spawnIntervalMs: 320,
+    correctRatio: 0.4,
+    correctPointsBase: 35,    // 실제 점수 = base × (roundIndex + 1)
+    comboBonus: 10,
+    comboMax: 10,
+    wrongPenalty: 10,
+};
+
+// ============================================================
+// 단원 목록
+// ============================================================
+
+const LESSONS = [
+    {
+        id: "lesson1",
+        num: "1단원",
+        title: "컴퓨터의 기초",
+        desc: "컴퓨터 부품의 역할을 알아봐요!",
+        icon: "💻",
+        game: "game1",
+        goalScore: 2000,
+    },
+    {
+        id: "lesson2",
+        num: "2단원",
+        title: "마우스 마스터",
+        desc: "한 번 클릭과 더블클릭을 익혀요!",
+        icon: "🖱️",
+        game: "game2",
+        goalScore: 10000,
+    },
+    {
+        id: "lesson3",
+        num: "3단원",
+        title: "택배 마스터",
+        desc: "물건을 트럭에 실어요! 드래그 실력 UP",
+        icon: "🚚",
+        game: "game3",
+        goalScore: 10000,
+    },
+    {
+        id: "lesson4",
+        num: "4단원",
+        title: "수학 마스터",
+        desc: "덧셈과 곱셈! 정답을 만들어요",
+        icon: "🔢",
+        game: "game5",
+        goalScore: 10000,
+    },
+    {
+        id: "lesson5",
+        num: "5단원",
+        title: "포트리스 챌린지",
+        desc: "꾸욱 눌러 파워! 정확한 사격!",
+        icon: "🎯",
+        game: "game4",
+        goalScore: 10000,
+    },
+];
+
+// ============================================================
+// 테스트 모드: 잠금 무시하고 모든 단원 클릭 가능
+// (실서비스 시 false로 변경)
+// ============================================================
+const BYPASS_LESSON_LOCKS = false;
+
+// ============================================================
+// 2단원: 마우스 마스터 — 다양한 마우스 액션 타겟
+// ============================================================
+
+const MOUSE_TARGETS = {
+    balloon:  { emoji: "🎈", action: "click",    label: "한 번 클릭!", hint: "👆",   points: 400 },
+    box:      { emoji: "📦", action: "dblclick", label: "더블클릭!",   hint: "👆👆", points: 700 },
+};
+
+const MOUSE_GAME_CONFIG = {
+    roundDuration: 15000,
+    spawnIntervalMs: 900,     // 타겟 간격
+    targetLifetime: 4500,
+    rounds: [
+        { types: ["balloon"],         label: "🎈 풍선을 한 번 클릭!" },
+        { types: ["box"],             label: "📦 상자를 더블클릭!" },
+        { types: ["balloon", "box"],  label: "🎈📦 클릭과 더블클릭 섞어서!" },
+    ],
+    wrongPenalty: 30,
+};
+
+// ============================================================
+// 3단원: 택배 마스터 — 빈 트럭에 물건 드래그로 싣기
+// ============================================================
+
+// 트럭에 실을 물건 종류
+const TRUCK_ITEMS = ["📦", "📚", "🎁", "🎒", "🧸", "🪀", "⚽", "🍎", "🥕", "🧃"];
+
+const TRUCK_GAME_CONFIG = {
+    roundDuration: 20000,
+    wrongPenalty: 0,
+    rounds: [
+        { capacity: 3, perItem: 300, fullBonus: 600,  label: "🚚 작은 트럭! 물건 3개!" },
+        { capacity: 5, perItem: 400, fullBonus: 900,  label: "🚛 중간 트럭! 물건 5개!" },
+        { capacity: 7, perItem: 500, fullBonus: 1200, label: "🚚 큰 트럭! 물건 7개!" },
+        { capacity: 8, perItem: 700, fullBonus: 1600, label: "🚛 최종 도전! 물건 8개! 🔥" },
+    ],
+};
+
+// ============================================================
+// 4단원: 윈도우 친구되기 — 아이콘 찾기
+// ============================================================
+
+const DESKTOP_APPS = {
+    youtube:    { emoji: "📺", name: "유튜브",   keywords: ["영상", "동영상", "유튜브"] },
+    music:      { emoji: "🎵", name: "음악",     keywords: ["노래", "음악", "듣고"] },
+    paint:      { emoji: "🎨", name: "그림판",   keywords: ["그림", "그리고", "색칠"] },
+    notes:      { emoji: "📝", name: "메모장",   keywords: ["글", "메모", "적고", "쓰고"] },
+    internet:   { emoji: "🌐", name: "인터넷",   keywords: ["검색", "찾고", "웹"] },
+    camera:     { emoji: "📷", name: "카메라",   keywords: ["사진", "찍고"] },
+    chat:       { emoji: "💬", name: "채팅",     keywords: ["대화", "친구", "메시지"] },
+    game:       { emoji: "🎮", name: "게임",     keywords: ["게임", "놀고"] },
+    calc:       { emoji: "🧮", name: "계산기",   keywords: ["계산", "더하기", "곱하기"] },
+    folder:     { emoji: "📁", name: "내 파일",  keywords: ["파일", "폴더", "저장"] },
+    mail:       { emoji: "📧", name: "이메일",   keywords: ["편지", "메일"] },
+    settings:   { emoji: "⚙️", name: "설정",     keywords: ["설정", "바꾸고"] },
+};
+
+// 라운드별 과제 (질문 + 정답 앱 키)
+const WINDOWS_QUESTS = [
+    { q: "노래를 듣고 싶어! 🎶", answer: "music" },
+    { q: "그림을 그리고 싶어! 🖌️", answer: "paint" },
+    { q: "유튜브 영상을 보고 싶어!", answer: "youtube" },
+    { q: "글을 적어두고 싶어!", answer: "notes" },
+    { q: "사진을 찍어볼까?", answer: "camera" },
+    { q: "5 + 3 은 얼마일까? 계산해 보자!", answer: "calc" },
+    { q: "친구한테 메시지 보내자!", answer: "chat" },
+    { q: "재미있는 게임 한 판! 🎲", answer: "game" },
+    { q: "검색해서 알아보고 싶어!", answer: "internet" },
+    { q: "저장해 둔 파일을 찾자!", answer: "folder" },
+    { q: "선생님께 편지를 보내자!", answer: "mail" },
+    { q: "글자 크기를 바꾸고 싶어!", answer: "settings" },
+    { q: "다시 노래! 신나게!", answer: "music" },
+    { q: "다시 그림 그리기!", answer: "paint" },
+    { q: "다시 유튜브 보자!", answer: "youtube" },
+];
+
+const WINDOWS_GAME_CONFIG = {
+    totalTime: 90000,
+    correctPoints: 200,
+    streakBonus: 50,
+    wrongPenalty: 50,
+    iconsPerRound: 8,
+};
+
+// ============================================================
+// 4단원: 포트리스 챌린지 — 마우스 길게 눌러 파워 충전 → 발사
+// ============================================================
+
+const CANNON_TARGETS = ["🎈", "🎯", "👻", "⭐", "🍎", "🎁", "🪀", "🛸"];
+
+const CANNON_GAME_CONFIG = {
+    totalTime: 30000,             // 30초 (이전 90초)
+    gravity: 600,
+    minPower: 0.15,
+    minSpeed: 500,
+    maxSpeed: 1300,
+    maxChargeMs: 1500,
+    targetSpawnIntervalMs: 1200,  // 더 짧은 시간 보상으로 스폰 빠르게
+    maxTargets: 6,
+    targetLifetimeMs: 14000,
+    targetRadius: 50,
+    hitPoints: 800,                // 시간 줄어든 만큼 점수 상향
+    streakBonus: 200,
+};
+
+// ============================================================
+// 4단원: 수학 덧셈 마스터 — 3단계 덧셈 문제
+// ============================================================
+
+const MATH_GAME_CONFIG = {
+    stages: [
+        { op: "+", digits: 1, problemCount: 5, pointsPerCorrect: 400,  label: "1자리 덧셈" },
+        { op: "×", digits: 1, problemCount: 5, pointsPerCorrect: 700,  label: "구구단 곱셈" },
+        { op: "+", digits: 2, problemCount: 5, pointsPerCorrect: 1200, label: "2자리 덧셈" },
+    ],
+    wrongPenalty: 50,
+};
+
