@@ -112,9 +112,9 @@ SCREEN_RENDERERS.game5 = function (root, params) {
 
     screen.appendChild(card);
 
-    // ----- 플레이어 캐릭터 -----
+    // ----- 플레이어 캐릭터 (수학 카드 우측) -----
     const playerChar = el("div", {
-        class: "player-character",
+        class: "player-character player-character--side",
         text: getCurrentEmoji(),
     });
     screen.appendChild(playerChar);

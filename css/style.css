@@ -1639,58 +1639,80 @@ body {
 
 .player-character {
     position: absolute;
-    bottom: 16px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    font-size: 80px;
-    z-index: 5;
-    animation: bob 2s ease-in-out infinite;
-    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+    transform: translate(-50%, -50%);
+    font-size: 260px;                /* 80 → 260 (약 3배 이상) */
+    z-index: 0;                       /* 배경 레이어 */
+    opacity: 0.25;                    /* 살짝 보이는 워터마크 느낌 */
+    animation: bob-center 3s ease-in-out infinite;
+    filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.15));
     pointer-events: none;
+    line-height: 1;
 }
 
-@keyframes bob {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-8px); }
+@keyframes bob-center {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+    50%      { transform: translate(-50%, -50%) translateY(-14px); }
 }
 
-/* 좌측 하단 코너 (3단원/4단원처럼 중앙에 다른 요소가 있는 경우) */
+/* 코너 변형은 더이상 사용하지 않음 - 모두 중앙 배치 */
 .player-character--corner {
-    left: 24px;
-    transform: translateX(0);
-    font-size: 64px;
-    animation: bob-corner 2s ease-in-out infinite;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 260px;
+    animation: bob-center 3s ease-in-out infinite;
 }
 
-@keyframes bob-corner {
-    0%, 100% { transform: translateX(0) translateY(0); }
-    50% { transform: translateX(0) translateY(-6px); }
-}
-
-/* 레벨업 시 변신 효과 */
+/* 레벨업 변신 효과 (중앙 기준) */
 .player-character.level-up-morph {
-    animation: char-morph 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) !important;
-    filter: drop-shadow(0 0 30px gold) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+    animation: char-morph-center 1s cubic-bezier(0.2, 1.4, 0.4, 1) !important;
+    opacity: 0.6;                     /* 변신 중에는 더 진하게 */
+    filter: drop-shadow(0 0 60px gold) drop-shadow(0 12px 32px rgba(0, 0, 0, 0.2));
 }
 
-.player-character--corner.level-up-morph {
-    animation: char-morph-corner 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) !important;
+@keyframes char-morph-center {
+    0%   { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    25%  { transform: translate(-50%, -50%) scale(0.4) rotate(180deg); }
+    50%  { transform: translate(-50%, -50%) scale(1.6) rotate(360deg); }
+    75%  { transform: translate(-50%, -50%) scale(0.95) rotate(360deg); }
+    100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); }
 }
 
-@keyframes char-morph {
-    0%   { transform: translateX(-50%) scale(1) rotate(0deg); }
-    25%  { transform: translateX(-50%) scale(0.4) rotate(180deg); }
-    50%  { transform: translateX(-50%) scale(1.6) rotate(360deg); }
-    75%  { transform: translateX(-50%) scale(0.95) rotate(360deg); }
-    100% { transform: translateX(-50%) scale(1) rotate(360deg); }
+/* 우측 배치 (4단원 수학 — 카드 옆에 캐릭터) */
+.player-character--side {
+    top: 50%;
+    left: auto;
+    right: 8%;
+    transform: translateY(-50%);
+    font-size: 200px;
+    opacity: 0.85;                     /* 옆에 있으니 잘 보이게 */
+    animation: bob-side 3s ease-in-out infinite;
 }
 
-@keyframes char-morph-corner {
-    0%   { transform: translateX(0) scale(1) rotate(0deg); }
-    25%  { transform: translateX(0) scale(0.4) rotate(180deg); }
-    50%  { transform: translateX(0) scale(1.6) rotate(360deg); }
-    75%  { transform: translateX(0) scale(0.95) rotate(360deg); }
-    100% { transform: translateX(0) scale(1) rotate(360deg); }
+@keyframes bob-side {
+    0%, 100% { transform: translateY(-50%); }
+    50%      { transform: translateY(calc(-50% - 14px)); }
+}
+
+.player-character--side.level-up-morph {
+    animation: char-morph-side 1s cubic-bezier(0.2, 1.4, 0.4, 1) !important;
+    opacity: 1;
+    filter: drop-shadow(0 0 60px gold) drop-shadow(0 12px 32px rgba(0, 0, 0, 0.2));
+}
+
+@keyframes char-morph-side {
+    0%   { transform: translateY(-50%) scale(1) rotate(0deg); }
+    25%  { transform: translateY(-50%) scale(0.4) rotate(180deg); }
+    50%  { transform: translateY(-50%) scale(1.6) rotate(360deg); }
+    75%  { transform: translateY(-50%) scale(0.95) rotate(360deg); }
+    100% { transform: translateY(-50%) scale(1) rotate(360deg); }
+}
+
+/* 좁은 화면에서는 캐릭터 숨김 (카드와 충돌 방지) */
+@media (max-width: 900px) {
+    .player-character--side { display: none; }
 }
 
 .points-float {
