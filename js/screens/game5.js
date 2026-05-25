@@ -9,7 +9,8 @@ SCREEN_RENDERERS.game5 = function (root, params) {
 
     let stageIndex = 0;
     let problemIndexInStage = 0;
-    let score = 0;
+    const startingScore = getStartingScore(params.lessonId);
+    let score = startingScore;
     let correctTotal = 0;
     let wrongInProblem = 0;
     let currentProblem = null;
@@ -22,7 +23,7 @@ SCREEN_RENDERERS.game5 = function (root, params) {
     const goalScore = (LESSONS.find(l => l.id === params.lessonId) || {}).goalScore || 0;
     const stageEl = el("span", { text: "1 / 3" });
     const problemEl = el("span", { text: "0 / 5" });
-    const scoreEl = el("span", { class: "hud-chip__big", text: "0" });
+    const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
     const lvlChip = makeLevelChip();
     lvlChip.update(state.points);
     const exitBtn = el("button", {
@@ -287,10 +288,8 @@ SCREEN_RENDERERS.game5 = function (root, params) {
     function finishGame() {
         document.removeEventListener("keydown", keyHandler);
         Audio.gameOver();
-        recordBestScore(params.lessonId, score);
-        markLessonCompleted(params.lessonId);
         const prevLevel = getLevelFromPoints(state.points);
-        addPoints(score);
+        finishLesson(params.lessonId, score);
         const newLevel = getLevelFromPoints(state.points);
         navigate("results", {
             lessonId: params.lessonId,
@@ -303,6 +302,8 @@ SCREEN_RENDERERS.game5 = function (root, params) {
 
     // ----- 시작 -----
     root.appendChild(screen);
+    showCarryOverBanner(startingScore);
+    updateScoreDisplay();
     showStageBanner(cfg.stages[0].label);
     setTimeout(nextProblem, 1500);
 };

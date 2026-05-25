@@ -9,7 +9,8 @@ SCREEN_RENDERERS.game3 = function (root, params) {
     const cfg = TRUCK_GAME_CONFIG;
 
     let roundIndex = 0;
-    let score = 0;
+    const startingScore = getStartingScore(params.lessonId);
+    let score = startingScore;
     let trucksDelivered = 0;
     let bestStreak = 0;       // 연속 풀로딩 (사용 안 함, 결과에 0으로 전달)
     let itemsLoaded = 0;
@@ -25,7 +26,7 @@ SCREEN_RENDERERS.game3 = function (root, params) {
 
     // ----- HUD -----
     const goalScore = (LESSONS.find(l => l.id === params.lessonId) || {}).goalScore || 0;
-    const scoreEl = el("span", { class: "hud-chip__big", text: "0" });
+    const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
     const roundEl = el("span", { text: `1 / ${cfg.rounds.length}` });
     const timerEl = el("span", { class: "hud-chip__big", text: "20.0", style: { color: "var(--secondary-dark)" } });
     const truckCountEl = el("span", { text: "0" });
@@ -389,10 +390,8 @@ SCREEN_RENDERERS.game3 = function (root, params) {
     function finishGame() {
         cleanup();
         Audio.gameOver();
-        recordBestScore(params.lessonId, score);
-        markLessonCompleted(params.lessonId);
         const prevLevel = getLevelFromPoints(state.points);
-        addPoints(score);
+        finishLesson(params.lessonId, score);
         const newLevel = getLevelFromPoints(state.points);
         navigate("results", {
             lessonId: params.lessonId,
@@ -413,6 +412,8 @@ SCREEN_RENDERERS.game3 = function (root, params) {
     }
 
     root.appendChild(screen);
+    showCarryOverBanner(startingScore);
+    updateScoreDisplay();
     runCountdown(["3", "2", "1", "출발!"], 0, () => {
         startRound();
         rafId = requestAnimationFrame(tick);

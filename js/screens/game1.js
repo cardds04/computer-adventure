@@ -8,7 +8,8 @@ SCREEN_RENDERERS.game1 = function (root, params) {
 
     // ----- 상태 -----
     let roundIndex = 0;
-    let score = 0;
+    const startingScore = getStartingScore(params.lessonId);
+    let score = startingScore;          // 이전 최고점부터 시작
     let combo = 0;
     let bestCombo = 0;
     let fallingWords = [];
@@ -21,7 +22,7 @@ SCREEN_RENDERERS.game1 = function (root, params) {
 
     // ----- HUD -----
     const goalScore = (LESSONS.find(l => l.id === params.lessonId) || {}).goalScore || 0;
-    const scoreEl = el("span", { class: "hud-chip__big", text: "0" });
+    const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
     const roundEl = el("span", { text: `1 / ${LESSON1_ROUNDS.length}` });
     const timerEl = el("span", { class: "hud-chip__big", text: "5.0", style: { color: "var(--secondary-dark)" } });
     const lvlChip = makeLevelChip();
@@ -289,10 +290,8 @@ SCREEN_RENDERERS.game1 = function (root, params) {
     function finishGame() {
         cleanup();
         Audio.gameOver();
-        recordBestScore(params.lessonId, score);
-        markLessonCompleted(params.lessonId);
         const prevLevel = getLevelFromPoints(state.points);
-        addPoints(score);
+        finishLesson(params.lessonId, score);
         const newLevel = getLevelFromPoints(state.points);
         navigate("results", {
             lessonId: params.lessonId,
@@ -317,6 +316,8 @@ SCREEN_RENDERERS.game1 = function (root, params) {
     }
 
     root.appendChild(screen);
+    showCarryOverBanner(startingScore);
+    updateScoreDisplay();
     runCountdown(["3", "2", "1", "출발!"], 0, () => {
         startRound();
         rafId = requestAnimationFrame(tick);

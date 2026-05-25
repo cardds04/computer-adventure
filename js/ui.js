@@ -118,6 +118,22 @@ function updatePlayerCharacters(level) {
     });
 }
 
+// 게임 시작 시 이전 점수가 있으면 안내 배너 표시
+function showCarryOverBanner(prevScore) {
+    if (prevScore <= 0) return;
+    const banner = el("div", { class: "carry-over-banner" },
+        el("span", { text: `🔥 이전 점수 ` }),
+        el("span", { class: "carry-over-banner__score", text: `${prevScore.toLocaleString()}점` }),
+        el("span", { text: `부터 이어서!` }),
+    );
+    document.body.appendChild(banner);
+    setTimeout(() => {
+        banner.style.opacity = "0";
+        banner.style.transform = "translate(-50%, -20px)";
+        setTimeout(() => banner.remove(), 400);
+    }, 2200);
+}
+
 function emitParticles(x, y, count, emojis) {
     for (let i = 0; i < count; i++) {
         const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;

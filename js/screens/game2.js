@@ -8,7 +8,8 @@ SCREEN_RENDERERS.game2 = function (root, params) {
     const cfg = MOUSE_GAME_CONFIG;
 
     let roundIndex = 0;
-    let score = 0;
+    const startingScore = getStartingScore(params.lessonId);
+    let score = startingScore;
     let combo = 0;
     let bestCombo = 0;
     let targets = [];                 // { el, type, action, isDragging, lifetimeTimer }
@@ -20,7 +21,7 @@ SCREEN_RENDERERS.game2 = function (root, params) {
 
     // ----- HUD -----
     const goalScore = (LESSONS.find(l => l.id === params.lessonId) || {}).goalScore || 0;
-    const scoreEl = el("span", { class: "hud-chip__big", text: "0" });
+    const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
     const roundEl = el("span", { text: `1 / ${cfg.rounds.length}` });
     const lvlChip = makeLevelChip();
     lvlChip.update(state.points);
@@ -316,10 +317,8 @@ SCREEN_RENDERERS.game2 = function (root, params) {
     function finishGame() {
         cleanup();
         Audio.gameOver();
-        recordBestScore(params.lessonId, score);
-        markLessonCompleted(params.lessonId);
         const prevLevel = getLevelFromPoints(state.points);
-        addPoints(score);
+        finishLesson(params.lessonId, score);
         const newLevel = getLevelFromPoints(state.points);
         navigate("results", {
             lessonId: params.lessonId,
@@ -339,6 +338,8 @@ SCREEN_RENDERERS.game2 = function (root, params) {
     }
 
     root.appendChild(screen);
+    showCarryOverBanner(startingScore);
+    updateScoreDisplay();
     runCountdown(["3", "2", "1", "출발!"], 0, () => {
         startRound();
         rafId = requestAnimationFrame(tick);

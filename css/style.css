@@ -1710,6 +1710,34 @@ body {
     100% { transform: translateY(-50%) scale(1) rotate(360deg); }
 }
 
+/* 게임 시작 시 이전 점수 안내 */
+.carry-over-banner {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: linear-gradient(135deg, var(--primary), #ffb088);
+    color: white;
+    padding: 12px 28px;
+    border-radius: var(--radius-pill);
+    font-size: 18px;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    transition: opacity 0.4s, transform 0.4s;
+    animation: carry-over-in 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.carry-over-banner__score {
+    color: var(--accent);
+    font-weight: 700;
+    margin: 0 4px;
+}
+
+@keyframes carry-over-in {
+    0%   { transform: translate(-50%, -30px); opacity: 0; }
+    100% { transform: translate(-50%, 0); opacity: 1; }
+}
+
 /* 좁은 화면에서는 캐릭터 숨김 (카드와 충돌 방지) */
 @media (max-width: 900px) {
     .player-character--side { display: none; }

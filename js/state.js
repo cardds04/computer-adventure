@@ -108,3 +108,24 @@ function areAllLessonsPassed() {
 function totalScoreFromBestScores() {
     return LESSONS.reduce((sum, l) => sum + (state.bestScores[l.id] || 0), 0);
 }
+
+// 단원 게임이 끝났을 때: 이전 최고점보다 높으면 차이만큼만 누적 포인트에 더함
+// (재시도해서 점수가 같거나 낮으면 누적 포인트 변화 없음)
+function finishLesson(lessonId, finalScore) {
+    const prevBest = state.bestScores[lessonId] || 0;
+    const gain = Math.max(0, finalScore - prevBest);
+    if (gain > 0) {
+        state.bestScores[lessonId] = finalScore;
+        state.points = Math.max(0, state.points + gain);
+    }
+    if (!state.lessonsCompleted.includes(lessonId)) {
+        state.lessonsCompleted.push(lessonId);
+    }
+    commit();
+    return { gain, prevBest, newBest: state.bestScores[lessonId] || prevBest };
+}
+
+// 단원 시작 시 적용할 시작 점수 (이전 최고점)
+function getStartingScore(lessonId) {
+    return state.bestScores[lessonId] || 0;
+}

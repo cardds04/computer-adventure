@@ -8,7 +8,8 @@ SCREEN_RENDERERS.game4 = function (root, params) {
     const screen = el("div", { class: "screen game" });
     const cfg = CANNON_GAME_CONFIG;
 
-    let score = 0;
+    const startingScore = getStartingScore(params.lessonId);
+    let score = startingScore;
     let hits = 0;
     let shots = 0;
     let streak = 0;
@@ -32,7 +33,7 @@ SCREEN_RENDERERS.game4 = function (root, params) {
 
     // ----- HUD -----
     const goalScore = (LESSONS.find(l => l.id === params.lessonId) || {}).goalScore || 0;
-    const scoreEl = el("span", { class: "hud-chip__big", text: "0" });
+    const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
     const streakEl = el("span", { text: "0" });
     const timerEl = el("span", { class: "hud-chip__big", text: "30.0", style: { color: "var(--secondary-dark)" } });
     const accEl = el("span", { text: "0" });
@@ -416,10 +417,8 @@ SCREEN_RENDERERS.game4 = function (root, params) {
         if (gameOverFlag) return;
         cleanup();
         Audio.gameOver();
-        recordBestScore(params.lessonId, score);
-        markLessonCompleted(params.lessonId);
         const prevLevel = getLevelFromPoints(state.points);
-        addPoints(score);
+        finishLesson(params.lessonId, score);
         const newLevel = getLevelFromPoints(state.points);
         navigate("results", {
             lessonId: params.lessonId,
@@ -440,6 +439,8 @@ SCREEN_RENDERERS.game4 = function (root, params) {
     }
 
     root.appendChild(screen);
+    showCarryOverBanner(startingScore);
+    updateScoreDisplay();
 
     // 화면 크기 측정 후 시작
     requestAnimationFrame(() => {
