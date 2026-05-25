@@ -1667,6 +1667,32 @@ body {
     50% { transform: translateX(0) translateY(-6px); }
 }
 
+/* 레벨업 시 변신 효과 */
+.player-character.level-up-morph {
+    animation: char-morph 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) !important;
+    filter: drop-shadow(0 0 30px gold) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.2));
+}
+
+.player-character--corner.level-up-morph {
+    animation: char-morph-corner 0.9s cubic-bezier(0.2, 1.4, 0.4, 1) !important;
+}
+
+@keyframes char-morph {
+    0%   { transform: translateX(-50%) scale(1) rotate(0deg); }
+    25%  { transform: translateX(-50%) scale(0.4) rotate(180deg); }
+    50%  { transform: translateX(-50%) scale(1.6) rotate(360deg); }
+    75%  { transform: translateX(-50%) scale(0.95) rotate(360deg); }
+    100% { transform: translateX(-50%) scale(1) rotate(360deg); }
+}
+
+@keyframes char-morph-corner {
+    0%   { transform: translateX(0) scale(1) rotate(0deg); }
+    25%  { transform: translateX(0) scale(0.4) rotate(180deg); }
+    50%  { transform: translateX(0) scale(1.6) rotate(360deg); }
+    75%  { transform: translateX(0) scale(0.95) rotate(360deg); }
+    100% { transform: translateX(0) scale(1) rotate(360deg); }
+}
+
 .points-float {
     position: absolute;
     color: var(--secondary-dark);

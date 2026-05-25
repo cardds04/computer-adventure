@@ -81,7 +81,7 @@ function makeLevelChip() {
     return { chip, update };
 }
 
-// 레벨업 시 화면 중앙에 큰 캐릭터 + 텍스트 펑!
+// 레벨업 시 화면 중앙에 큰 캐릭터 + 텍스트 펑! + 하단 캐릭터도 새 모습으로 변신
 function showLevelUpBurst(level) {
     const emoji = getEmojiForLevel(level);
     const levelName = getLevelName(level);
@@ -102,7 +102,20 @@ function showLevelUpBurst(level) {
         emitParticles(cx, cy, 20, ["✨", "⭐", "🌟", "💫", "🎉", "🎊"]);
     }, 200);
 
+    // 화면 하단 (또는 코너) 플레이어 캐릭터를 새 레벨 이모지로 교체 + 변신 효과
+    updatePlayerCharacters(level);
+
     setTimeout(() => burst.remove(), 2200);
+}
+
+// 화면에 있는 모든 .player-character 요소의 이모지를 갱신
+function updatePlayerCharacters(level) {
+    const emoji = getEmojiForLevel(level);
+    document.querySelectorAll(".player-character").forEach(node => {
+        node.textContent = emoji;
+        node.classList.add("level-up-morph");
+        setTimeout(() => node.classList.remove("level-up-morph"), 900);
+    });
 }
 
 function emitParticles(x, y, count, emojis) {
