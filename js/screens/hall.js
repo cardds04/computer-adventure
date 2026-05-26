@@ -64,7 +64,115 @@ SCREEN_RENDERERS.hall = function (root) {
     });
 };
 
-// 레벨 10 이상 도달 시 이름 입력 모달
+// ============================================================
+// 졸업장 화면에서 호출되는 명예의 전당 등록 안내
+// (autoCheck=true: 자동 안내, false: 사용자가 버튼 눌러서 강제 호출)
+// ============================================================
+async function triggerHallEntryFromGraduation(totalScore, autoCheck = false) {
+    // 이미 등록된 이름이 있으면 점수만 갱신하고 안내만 표시
+    if (state.playerName) {
+        const level = getLevelFromPoints(state.points);
+        await addToHall(state.playerName, totalScore, level);
+        showRankInfoModal(totalScore, true);
+        return;
+    }
+
+    const qualifies = await wouldQualifyForTop10(totalScore);
+    if (!qualifies) {
+        if (!autoCheck) {
+            // 사용자가 버튼 눌렀는데 자격이 안 되면 알려줌
+            showRankInfoModal(totalScore, false);
+        }
+        return;
+    }
+
+    const rank = await getRankForScore(totalScore);
+    showHallChoiceModal(totalScore, rank);
+}
+
+// 등록할지 / 더 진행할지 선택 모달
+function showHallChoiceModal(totalScore, rank) {
+    const modal = el("div", { class: "tutorial-modal" });
+    const card = el("div", { class: "tutorial-card", style: { textAlign: "center" } },
+        el("div", { class: "tutorial-card__icon", text: "🏆", style: { fontSize: "72px", margin: "0 auto 12px" } }),
+        el("h2", { class: "tutorial-card__title",
+            style: { textAlign: "center", color: "var(--primary)" },
+            text: `명예의 전당 ${rank}위!` }),
+        el("p", {
+            style: { color: "var(--text-dark)", fontSize: "18px", margin: "16px 0", lineHeight: "1.5" },
+            html: `현재 점수: <b>${totalScore.toLocaleString()}점</b><br>이 점수로 <b>${rank}위</b>에 등록할 수 있어요!`,
+        }),
+        el("p", {
+            style: { color: "var(--text-mid)", fontSize: "15px", margin: "12px 0 20px", lineHeight: "1.5" },
+            text: "지금 이름을 적고 등록하시겠어요?\n아니면 더 진행해서 더 높은 순위를 노릴까요?",
+            class: "hall-choice__sub",
+        }),
+    );
+
+    const registerBtn = el("button", {
+        class: "btn btn--big tutorial-card__cta",
+        text: `📝 ${rank}위에 등록하기`,
+        on: {
+            click: () => {
+                modal.classList.add("fading-out");
+                setTimeout(() => {
+                    modal.remove();
+                    showHallNameEntry(totalScore, getLevelFromPoints(state.points), () => {});
+                }, 280);
+            },
+        },
+    });
+
+    const continueBtn = el("button", {
+        class: "btn btn--secondary",
+        text: "🎮 더 진행해서 도전!",
+        style: { marginTop: "10px", width: "100%" },
+        on: {
+            click: () => {
+                modal.classList.add("fading-out");
+                setTimeout(() => modal.remove(), 280);
+            },
+        },
+    });
+
+    card.appendChild(registerBtn);
+    card.appendChild(continueBtn);
+    modal.appendChild(card);
+    document.body.appendChild(modal);
+}
+
+// 단순 안내 모달 (자격 미달이거나 갱신된 경우)
+function showRankInfoModal(totalScore, qualifies) {
+    const modal = el("div", { class: "tutorial-modal" });
+    const card = el("div", { class: "tutorial-card", style: { textAlign: "center" } },
+        el("div", { class: "tutorial-card__icon",
+            text: qualifies ? "✅" : "💪",
+            style: { fontSize: "64px", margin: "0 auto 12px" } }),
+        el("h2", { class: "tutorial-card__title",
+            style: { textAlign: "center" },
+            text: qualifies ? "기록 갱신!" : "조금 더 도전!" }),
+        el("p", {
+            style: { color: "var(--text-mid)", fontSize: "16px", margin: "16px 0", lineHeight: "1.5" },
+            html: qualifies
+                ? `현재 점수 <b>${totalScore.toLocaleString()}점</b>으로<br>명예의 전당이 갱신되었어요!`
+                : `현재 점수 <b>${totalScore.toLocaleString()}점</b>은<br>아직 Top 10에 들지 못해요.<br>더 도전해보세요!`,
+        }),
+        el("button", {
+            class: "btn btn--big tutorial-card__cta",
+            text: "확인",
+            on: {
+                click: () => {
+                    modal.classList.add("fading-out");
+                    setTimeout(() => modal.remove(), 280);
+                },
+            },
+        }),
+    );
+    modal.appendChild(card);
+    document.body.appendChild(modal);
+}
+
+// 졸업 이후 사용자가 직접 호출하는 이름 입력 모달
 function showHallNameEntry(currentScore, currentLevel, onSaved) {
     const modal = el("div", { class: "tutorial-modal" });
     const card = el("div", { class: "tutorial-card", style: { textAlign: "center" } },

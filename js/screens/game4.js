@@ -240,15 +240,14 @@ SCREEN_RENDERERS.game4 = function (root, params) {
         if (targets.filter(t => t.alive).length >= cfg.maxTargets) return;
 
         const emoji = CANNON_TARGETS[Math.floor(Math.random() * CANNON_TARGETS.length)];
-        // 보너스 빈도 증가 (1/30 → 1/10, 고배수도 더 자주)
+        // 보너스: ×10 / ×30 / ×50 / ×100 (총 10% 확률, ×500 제거)
         let bonusMultiplier = 0;
         if (Math.random() < 1/10) {                  // 10% 보너스
             const r = Math.random();
-            if (r < 0.05)      bonusMultiplier = 500;   // 5%  ← 신규 전설
-            else if (r < 0.20) bonusMultiplier = 100;   // 15%
-            else if (r < 0.45) bonusMultiplier = 50;    // 25%
-            else if (r < 0.70) bonusMultiplier = 30;    // 25%
-            else                bonusMultiplier = 10;   // 30%
+            if (r < 0.15)      bonusMultiplier = 100;   // 15%
+            else if (r < 0.40) bonusMultiplier = 50;    // 25%
+            else if (r < 0.65) bonusMultiplier = 30;    // 25%
+            else                bonusMultiplier = 10;   // 35%
         }
         const isBonus = bonusMultiplier > 0;
         const bonusClass = isBonus ? ` cannon-target--bonus cannon-target--bonus${bonusMultiplier}` : "";

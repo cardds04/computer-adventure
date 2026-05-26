@@ -136,7 +136,13 @@ function getEmojiForLevel(level) {
 // ============================================================
 // 명예의 전당 — Supabase 우선, localStorage 백업
 // ============================================================
-const HALL_KEY = "computer_adventure_hall_v1";
+const HALL_KEY = "computer_adventure_hall_v3";   // v3 = 순위 초기화
+
+// 이전 버전 키 정리
+try {
+    localStorage.removeItem("computer_adventure_hall_v1");
+    localStorage.removeItem("computer_adventure_hall_v2");
+} catch(e) {}
 
 // Supabase 클라이언트 (config.js의 값이 있을 때만 생성)
 let supabaseClient = null;
@@ -232,6 +238,25 @@ async function addToHall(name, score, level) {
 // 동기 (기존 코드 호환용 — 로컬만)
 function getTopHall(n = 10) {
     return getLocalHall().slice(0, n);
+}
+
+// 주어진 점수가 Top 10에 들어가는지
+async function wouldQualifyForTop10(score) {
+    const list = await fetchHallTop(10);
+    if (list.length < 10) return true;
+    const lowest = list[list.length - 1].score || 0;
+    return score > lowest;
+}
+
+// 주어진 점수가 몇 위인지 (1-based, 11 이상이면 11 반환)
+async function getRankForScore(score) {
+    const list = await fetchHallTop(50);
+    let rank = 1;
+    for (const entry of list) {
+        if (entry.score > score) rank++;
+        else break;
+    }
+    return rank;
 }
 
 // ----- 단원 통과 헬퍼 -----

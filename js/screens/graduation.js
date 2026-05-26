@@ -86,6 +86,15 @@ SCREEN_RENDERERS.graduation = function (root) {
     const autoNote = el("div", { class: "diploma-auto-reset",
         text: "⏰ 10분 후 다음 수업을 위해 자동으로 초기화돼요" });
 
+    // 명예의 전당 등록 버튼 (수동 진입 가능)
+    const hallRegisterBtn = el("button", {
+        class: "btn btn--big",
+        text: "🏆 명예의 전당 등록",
+        style: { background: "linear-gradient(135deg, var(--accent), var(--primary))" },
+        on: { click: () => triggerHallEntryFromGraduation(total) },
+    });
+    actions.appendChild(hallRegisterBtn);
+
     screen.appendChild(diploma);
     screen.appendChild(actions);
     screen.appendChild(autoNote);
@@ -94,6 +103,9 @@ SCREEN_RENDERERS.graduation = function (root) {
     // 축하 효과
     Audio.gameOver();
     setTimeout(() => Audio.levelUp(), 300);
+
+    // 졸업 직후 자동 체크: Top10 진입 가능하면 안내 모달
+    setTimeout(() => triggerHallEntryFromGraduation(total, true), 3000);
 
     // 종이꽃 (confetti) 흩뿌리기
     const confettiEmojis = ["🎉", "🎊", "✨", "⭐", "🌟", "💫", "🌸", "🎀"];
