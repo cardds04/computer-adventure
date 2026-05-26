@@ -1,14 +1,48 @@
 /* ============================================================
-   홈 / 단원 허브 — 순차 잠금 시스템 + 졸업
+   홈 / 단원 허브 — 단원 전환 + 스텝 카드 + 명예의 전당
    ============================================================ */
 
 SCREEN_RENDERERS.home = function (root) {
     const screen = el("div", { class: "screen home" });
     const progress = getLevelProgress(state.points);
     const emoji = getCurrentEmoji();
-    const allPassed = areAllLessonsPassed();
+    const currentLessons = getLessonsForUnit(state.currentUnit);
+    const allPassed = areAllLessonsPassed(state.currentUnit);
 
-    // ----- 상단: 캐릭터 패널 -----
+    // ----- 단원 선택 -----
+    const unitSelector = el("div", { class: "unit-selector unit-selector--top" });
+    UNITS.forEach(u => {
+        const isCurrent = u.num === state.currentUnit;
+        const isAvailable = u.active;
+        let cls = "unit-chip";
+        if (isCurrent) cls += " unit-chip--active";
+        else if (!isAvailable) cls += " unit-chip--locked";
+        else cls += " unit-chip--available";
+
+        const chip = el("button", {
+            class: cls,
+            html: (isCurrent || isAvailable)
+                ? `<span class="unit-chip__icon">${u.icon}</span><span>${u.num}단원</span>`
+                : `<span class="unit-chip__num">${u.num}단원</span><span class="unit-chip__lock">🔒</span>`,
+            on: {
+                click: () => {
+                    if (!isAvailable) {
+                        Audio.wrong && Audio.wrong();
+                        showToast(`📚 ${u.num}단원은 준비 중이에요!\n곧 만나요 ✨`);
+                        return;
+                    }
+                    if (state.currentUnit !== u.num) {
+                        state.currentUnit = u.num;
+                        commit();
+                        navigate("home");
+                    }
+                },
+            },
+        });
+        unitSelector.appendChild(chip);
+    });
+
+    // ----- 프로필 패널 -----
     const avatar = el("div", { class: "profile-avatar profile-avatar--big" },
         el("span", { text: emoji }),
         el("span", { class: "profile-avatar__sparkle s1", text: "✨" }),
@@ -40,29 +74,9 @@ SCREEN_RENDERERS.home = function (root) {
         ),
     );
 
-    // 단원 선택 칩 (프로필 패널 바깥 위쪽에 배치)
-    const unitSelector = el("div", { class: "unit-selector unit-selector--top" });
-    UNITS.forEach(u => {
-        const chip = el("button", {
-            class: `unit-chip ${u.active ? "unit-chip--active" : "unit-chip--locked"}`,
-            html: u.active
-                ? `<span class="unit-chip__icon">${u.icon}</span><span>${u.num}단원</span>`
-                : `<span class="unit-chip__num">${u.num}단원</span><span class="unit-chip__lock">🔒</span>`,
-            on: {
-                click: () => {
-                    if (!u.active) {
-                        Audio.wrong && Audio.wrong();
-                        showToast(`📚 ${u.num}단원은 준비 중이에요!\n곧 만나요 ✨`);
-                    }
-                },
-            },
-        });
-        unitSelector.appendChild(chip);
-    });
-
     const profileInfo = el("div", { class: "profile-info" },
         el("div", { class: "profile-info__name",
-            text: allPassed ? "🎓 모든 스텝 통과! 졸업할 수 있어요!" : CURRENT_UNIT_TITLE }),
+            text: allPassed ? "🎓 모든 스텝 통과! 졸업할 수 있어요!" : getCurrentUnitTitle(state.currentUnit) }),
         stats,
         xpBar,
         xpLabel,
@@ -70,7 +84,7 @@ SCREEN_RENDERERS.home = function (root) {
 
     const top = el("div", { class: "home__top" }, avatar, profileInfo);
 
-    // 졸업장 받기 버튼 (모두 통과 시)
+    // 졸업장 받기 버튼
     let graduateBtn = null;
     if (allPassed) {
         graduateBtn = el("button", {
@@ -81,7 +95,7 @@ SCREEN_RENDERERS.home = function (root) {
         });
     }
 
-    // 명예의 전당 게시판 (인라인)
+    // ----- 명예의 전당 게시판 (인라인) -----
     const hallList = el("div", { class: "hall-board__list" });
     hallList.appendChild(el("div", { class: "hall-board__loading", text: "🔄 불러오는 중..." }));
 
@@ -95,7 +109,6 @@ SCREEN_RENDERERS.home = function (root) {
         hallList,
     );
 
-    // 비동기 로딩
     fetchHallTop(10).then(list => {
         hallList.innerHTML = "";
         if (!list || list.length === 0) {
@@ -120,29 +133,19 @@ SCREEN_RENDERERS.home = function (root) {
         });
     }).catch(e => {
         hallList.innerHTML = "";
-        hallList.appendChild(el("div", {
-            class: "hall-board__empty",
-            text: "😢 기록을 불러오지 못했어요.",
-        }));
+        hallList.appendChild(el("div", { class: "hall-board__empty",
+            text: "😢 기록을 불러오지 못했어요." }));
         console.warn(e);
     });
 
-    // 테스트 모드 안내
-    if (BYPASS_LESSON_LOCKS) {
-        const testBanner = el("div", { class: "test-mode-banner",
-            text: "🎮 테스트 모드: 모든 단원 잠금 해제됨" });
-        screen.appendChild(testBanner);
-    }
-
-    // ----- 단원 카드들 -----
+    // ----- 스텝 카드 -----
     const grid = el("div", { class: "lessons-grid" });
-    LESSONS.forEach((lesson, idx) => {
-        const isUnlocked = isLessonUnlocked(idx);
+    currentLessons.forEach((lesson, idx) => {
+        const isUnlocked = isLessonUnlocked(idx, currentLessons);
         const passed = isLessonPassed(lesson.id);
         const best = state.bestScores[lesson.id] || 0;
-        const prevLesson = idx > 0 ? LESSONS[idx - 1] : null;
+        const prevLesson = idx > 0 ? currentLessons[idx - 1] : null;
 
-        // 상태 뱃지
         let statusBadge;
         if (passed) {
             statusBadge = el("div", { class: "level-req level-req--passed",
@@ -155,7 +158,6 @@ SCREEN_RENDERERS.home = function (root) {
                 text: `🔒 ${prevLesson.num} 통과 후 열림` });
         }
 
-        // 최고 점수 + 목표 점수 (한 줄에 비교)
         const bestChip = best > 0 ? el("div", {
             class: "stat-chip stat-chip--score",
             style: { marginTop: "10px" },
@@ -170,7 +172,6 @@ SCREEN_RENDERERS.home = function (root) {
             el("span", { class: "score-goal", text: `${lesson.goalScore.toLocaleString()}점` }),
         ) : null;
 
-        // 진행 바 (목표 대비)
         const goalProgress = Math.min(1, best / lesson.goalScore);
         const goalBar = best > 0 ? el("div", {
             class: "goal-bar",
@@ -203,14 +204,10 @@ SCREEN_RENDERERS.home = function (root) {
                 showToast(`🔒 먼저 ${prevLesson.num}을(를) ${prevLesson.goalScore}점 이상으로 통과해야 해요!`);
             });
         }
-        // 잠금 상태 텍스트의 "N단원" → "스텝 N"로 (lesson.num 사용)
-        if (!isUnlocked && statusBadge) {
-            statusBadge.textContent = `🔒 ${prevLesson.num} 통과 후 열림`;
-        }
         grid.appendChild(card);
     });
 
-    // ----- 하단: 처음부터 다시 -----
+    // 하단: 처음부터 다시
     const resetBtn = el("button", {
         class: "btn btn--ghost",
         text: "처음부터 다시",

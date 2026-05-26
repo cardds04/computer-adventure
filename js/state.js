@@ -18,6 +18,7 @@ function freshState() {
         lessonsCompleted: [],
         bestScores: {},                 // { lesson1: 2700, ... }
         playerName: "",                  // 명예의 전당 이름
+        currentUnit: 1,                  // 현재 보고 있는 단원
     };
 }
 
@@ -260,25 +261,36 @@ async function getRankForScore(score) {
 }
 
 // ----- 단원 통과 헬퍼 -----
+function findLessonById(lessonId) {
+    for (const arr of Object.values(LESSONS_BY_UNIT)) {
+        const l = arr.find(x => x.id === lessonId);
+        if (l) return l;
+    }
+    return null;
+}
+
 function isLessonPassed(lessonId) {
-    const lesson = LESSONS.find(l => l.id === lessonId);
+    const lesson = findLessonById(lessonId);
     if (!lesson) return false;
     const best = state.bestScores[lessonId] || 0;
     return best >= lesson.goalScore;
 }
 
-function isLessonUnlocked(index) {
+function isLessonUnlocked(index, lessonsArr) {
+    const arr = lessonsArr || getLessonsForUnit(state.currentUnit);
     if (BYPASS_LESSON_LOCKS) return true;
     if (index === 0) return true;
-    return isLessonPassed(LESSONS[index - 1].id);
+    return isLessonPassed(arr[index - 1].id);
 }
 
-function areAllLessonsPassed() {
-    return LESSONS.every(l => isLessonPassed(l.id));
+function areAllLessonsPassed(unitNum) {
+    const arr = getLessonsForUnit(unitNum || state.currentUnit);
+    return arr.every(l => isLessonPassed(l.id));
 }
 
-function totalScoreFromBestScores() {
-    return LESSONS.reduce((sum, l) => sum + (state.bestScores[l.id] || 0), 0);
+function totalScoreFromBestScores(unitNum) {
+    const arr = getLessonsForUnit(unitNum || state.currentUnit);
+    return arr.reduce((sum, l) => sum + (state.bestScores[l.id] || 0), 0);
 }
 
 // 단원 게임이 끝났을 때: 이전 최고점보다 높으면 차이만큼만 누적 포인트에 더함

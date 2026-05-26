@@ -471,7 +471,14 @@ body {
    홈 (단원 허브)
    ============================================================ */
 .home {
-    padding: 24px;
+    padding: 24px 24px 40px;
+}
+
+/* 홈 화면은 컨텐츠가 많으니 전체 스크롤 (중앙정렬 해제) */
+.screen.home {
+    justify-content: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .home__top {
@@ -585,8 +592,6 @@ body {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 16px;
-    max-height: calc(100vh - 220px);
-    overflow-y: auto;
     padding: 4px;
 }
 
@@ -2019,6 +2024,970 @@ body {
 }
 
 /* ============================================================
+   2단원 스텝 1: 미로 탈출 게임
+   ============================================================ */
+.game--maze {
+    background: linear-gradient(180deg, #e8d6b3 0%, #d4b896 100%);
+}
+
+.maze-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 30px;             /* HUD 아래 약간 여백 */
+    background: #6b5d3f;
+    border: 5px solid #3d3424;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg), inset 0 0 0 2px #8b7a55;
+    z-index: 5;
+}
+
+.maze-cell {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.maze-cell--wall {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.06), transparent 40%),
+      linear-gradient(180deg, #5d4e37 0%, #3d3424 100%);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.maze-cell--path {
+    background:
+      linear-gradient(180deg, #e8c89e 0%, #d4b896 100%);
+    box-shadow: inset 0 0 0 1px rgba(74, 56, 38, 0.08);
+}
+
+.maze-player {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    transition: left 0.1s ease-out, top 0.1s ease-out;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+    pointer-events: none;
+    opacity: 1 !important;     /* 안전망 */
+}
+
+.maze-player--morph {
+    animation: maze-player-morph 0.9s cubic-bezier(0.2, 1.4, 0.4, 1);
+    filter: drop-shadow(0 0 30px gold) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+}
+
+@keyframes maze-player-morph {
+    0%   { transform: scale(1) rotate(0); }
+    25%  { transform: scale(0.5) rotate(180deg); }
+    50%  { transform: scale(1.5) rotate(360deg); }
+    75%  { transform: scale(0.9) rotate(360deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+.maze-goal {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    animation: maze-bob 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.maze-item {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 8;
+    pointer-events: none;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.maze-item__emoji {
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+.maze-item__value {
+    font-size: 9px;
+    background: white;
+    color: var(--primary);
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-weight: 700;
+    margin-top: -2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    white-space: nowrap;
+}
+
+.maze-item--treasure .maze-item__value {
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+}
+
+.maze-item--treasure {
+    animation: maze-bob 1.6s ease-in-out infinite;
+}
+
+.maze-item--collected {
+    animation: maze-collect 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) forwards !important;
+}
+
+@keyframes maze-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+}
+
+@keyframes maze-collect {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.6) rotate(180deg); }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+
+/* 미로 점수 플로팅 */
+.maze-float {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    font-weight: 900;
+    z-index: 50;
+    pointer-events: none;
+    animation: maze-float-rise 1.2s ease-out forwards;
+    text-shadow: 1px 1px 0 white, 2px 2px 0 rgba(0,0,0,0.15);
+    white-space: nowrap;
+    padding: 4px 10px;
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+}
+
+.maze-float--fruit { background: var(--secondary); color: white; }
+.maze-float--good { background: var(--secondary); color: white; }
+.maze-float--okay { background: var(--accent); color: var(--text-dark); }
+.maze-float--gold {
+    background: linear-gradient(135deg, gold, var(--primary));
+    color: white;
+    font-size: 22px;
+}
+.maze-float--diamond {
+    background: linear-gradient(135deg, #00bfff, #1e90ff);
+    color: white;
+    font-size: 20px;
+}
+.maze-float--rainbow {
+    background: linear-gradient(135deg, #ff0080, #ff8c00, #ffd700, #00ff00, #00ffff, #ff00ff);
+    background-size: 400% 400%;
+    color: white;
+    font-size: 26px;
+    animation: maze-float-rise 1.2s ease-out forwards, bonus500-bg 1.2s linear;
+}
+.maze-float--neutral { background: var(--text-light); color: white; }
+.maze-float--bad { background: #ff6b6b; color: white; }
+.maze-float--worst {
+    background: #1a1a1a;
+    color: #ff4444;
+    font-size: 20px;
+}
+
+@keyframes maze-float-rise {
+    0%   { transform: translate(-50%, -20%) scale(0.5); opacity: 0; }
+    20%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    80%  { transform: translate(-50%, -80%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -120%) scale(0.8); opacity: 0; }
+}
+
+/* 클리어 배너 */
+.maze-win-banner {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    padding: 16px 36px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    animation: win-banner-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.maze-win-banner__title {
+    font-size: 26px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+    margin-bottom: 4px;
+}
+
+.maze-win-banner__sub { font-size: 18px; }
+
+/* 단계 결과 배너 (성공/실패) */
+.maze-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 40px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    animation: win-banner-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.maze-banner--good {
+    background: linear-gradient(135deg, var(--secondary), #7ddbb1);
+    color: white;
+}
+
+.maze-banner--bad {
+    background: linear-gradient(135deg, #ff6b6b, #d63031);
+    color: white;
+}
+
+.maze-banner__title {
+    font-size: 32px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+    margin-bottom: 6px;
+}
+
+.maze-banner__sub { font-size: 18px; }
+
+/* ============================================================
+   2단원 스텝 2: 캥거루 점프
+   ============================================================ */
+.game--jump {
+    background: linear-gradient(180deg, #87ceeb 0%, #b8e6c3 74%, #8b7355 74%, #6b5d3f 100%);
+    overflow: hidden;
+}
+
+.jump-play-area {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.jump-cloud {
+    position: absolute;
+    z-index: 1;
+    opacity: 0.7;
+    animation: jump-cloud-drift 24s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes jump-cloud-drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-130vw); }
+}
+
+.jump-ground {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 26%;
+    background:
+        linear-gradient(180deg, #8b7355 0%, #6b5d3f 100%);
+    border-top: 4px solid #5d4e37;
+    z-index: 2;
+}
+
+.jump-ground::before {
+    /* 잔디 */
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: repeating-linear-gradient(90deg, #7aa84a 0 30px, #5d8a3a 30px 60px);
+}
+
+.jump-player {
+    position: absolute;
+    left: 18%;
+    bottom: 26%;
+    font-size: 100px;
+    line-height: 1;
+    z-index: 10;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transform: translateX(-50%) scaleX(-1);   /* 오른쪽을 바라보게 */
+    transition: transform 0.1s;
+}
+
+.jump-player.jumping {
+    animation: jump-anim 0.3s ease-out;
+}
+
+@keyframes jump-anim {
+    0%   { transform: translateX(-50%) scaleX(-1) rotate(0); }
+    50%  { transform: translateX(-50%) scaleX(-1) rotate(15deg); }
+    100% { transform: translateX(-50%) scaleX(-1) rotate(0); }
+}
+
+.jump-player.hurt {
+    animation: jump-hurt 0.5s;
+}
+
+@keyframes jump-hurt {
+    0%, 100% { transform: translateX(-50%) scaleX(-1); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+    25%, 75% { transform: translateX(-50%) scaleX(-1) translateX(-10px); filter: drop-shadow(0 4px 8px rgba(255,0,0,0.5)) hue-rotate(-30deg); }
+    50%      { transform: translateX(-50%) scaleX(-1) translateX(10px); }
+}
+
+.jump-obj {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 5;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.jump-obj__emoji {
+    font-size: 80px;
+    line-height: 1;
+}
+
+.jump-obj__value {
+    font-size: 11px;
+    background: white;
+    color: var(--primary);
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-weight: 700;
+    margin-top: -2px;
+    box-shadow: var(--shadow-sm);
+}
+
+.jump-obj__multi {
+    font-size: 14px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    padding: 2px 10px;
+    border-radius: 999px;
+    margin-top: -2px;
+    box-shadow: 0 2px 6px rgba(255, 138, 91, 0.6);
+}
+
+.jump-obj--bonus {
+    filter: drop-shadow(0 0 20px gold) drop-shadow(0 0 40px rgba(255, 138, 91, 0.6));
+    animation: jump-bonus-pulse 0.6s ease-in-out infinite;
+}
+
+@keyframes jump-bonus-pulse {
+    0%, 100% { transform: scale(1) rotate(0); }
+    50%      { transform: scale(1.1) rotate(5deg); }
+}
+
+.jump-obj--hit {
+    animation: jump-hit 0.4s forwards;
+}
+
+@keyframes jump-hit {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.5) rotate(180deg); opacity: 0.7; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+.jump-float {
+    position: absolute;
+    font-size: 22px;
+    font-weight: 900;
+    z-index: 30;
+    padding: 4px 12px;
+    border-radius: 999px;
+    pointer-events: none;
+    animation: jump-float-rise 1.1s ease-out forwards;
+    transform: translate(-50%, 0);
+}
+
+.jump-float--good {
+    background: var(--secondary);
+    color: white;
+}
+
+.jump-float--bad {
+    background: #ff6b6b;
+    color: white;
+}
+
+.jump-float--rainbow {
+    background: linear-gradient(135deg, gold, var(--primary), #ff1493);
+    color: white;
+    font-size: 28px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+@keyframes jump-float-rise {
+    0%   { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    20%  { transform: translate(-50%, -30px) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -100px) scale(1); opacity: 0; }
+}
+
+/* ============================================================
+   2단원 스텝 3: 한글 자음 모음
+   ============================================================ */
+.hangul-letter {
+    position: absolute;
+    background: white;
+    border: 4px solid var(--accent);
+    border-radius: 16px;
+    padding: 16px 26px 12px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: default;
+    user-select: none;
+    min-width: 96px;
+    z-index: 7;       /* 하단 안내 배너(z-index 6)보다 위 */
+    white-space: nowrap;
+}
+
+.hangul-letter__char {
+    font-size: 58px;
+    line-height: 1.05;
+    font-weight: 900;
+    color: var(--text-dark);
+    font-family: 'Jua', sans-serif;
+    padding: 0 4px;
+    /* 음절(가, 한 등)도 가려지지 않도록 */
+    display: block;
+}
+
+.hangul-letter__key {
+    font-size: 16px;
+    background: var(--text-dark);
+    color: white;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-family: monospace;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.hangul-letter__bonus {
+    font-size: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-weight: 900;
+    margin-top: 2px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.hangul-letter--bonus {
+    background: linear-gradient(135deg, #fff8e8, #ffeada);
+    border-color: gold;
+    box-shadow: 0 0 24px gold, var(--shadow-md);
+    animation: hangul-bonus-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes hangul-bonus-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50%      { transform: translateX(-50%) scale(1.06); }
+}
+
+.hangul-letter--hit {
+    animation: hangul-hit 0.4s forwards;
+}
+
+@keyframes hangul-hit {
+    0%   { transform: translateX(-50%) scale(1); }
+    50%  { transform: translateX(-50%) scale(1.4); background: var(--secondary); color: white; }
+    100% { transform: translateX(-50%) scale(0); opacity: 0; }
+}
+
+/* ============================================================
+   2단원 스텝 3: 양궁 챌린지
+   ============================================================ */
+.game--archery {
+    background: linear-gradient(180deg, #d4f1c9 0%, #c0e6b3 50%, #a8d399 100%);
+}
+
+.archery-area {
+    position: absolute;
+    inset: 60px 0 0 0;
+    overflow: hidden;
+}
+
+.archer {
+    position: absolute;
+    left: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80px;
+    height: 80px;
+    z-index: 4;
+}
+
+.archer__body {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+}
+
+.archer__bow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 6px;
+    transform: translate(-50%, -50%);
+    transform-origin: center;
+    background: linear-gradient(90deg, transparent 0%, #8b5a2b 20%, #c08850 50%, #8b5a2b 80%, transparent 100%);
+    border-radius: 3px;
+    pointer-events: none;
+}
+
+.archer__bow::after {
+    content: "";
+    position: absolute;
+    right: -2px;
+    top: -10px;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #8b5a2b;
+    border-left: none;
+    border-radius: 0 50% 50% 0;
+}
+
+.archery-aim-line {
+    position: absolute;
+    height: 0;
+    border-top: 3px dashed rgba(255, 255, 255, 0.85);
+    transform-origin: 0 50%;
+    pointer-events: none;
+    z-index: 3;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+}
+
+.archery-arrow {
+    position: absolute;
+    font-size: 32px;
+    color: #4a2c10;
+    pointer-events: none;
+    z-index: 5;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+    line-height: 1;
+}
+
+.archery-target {
+    position: absolute;
+    background: linear-gradient(180deg, #ffffff 0%, #f0e8d8 100%);
+    color: var(--text-dark);
+    border: 4px solid var(--accent);
+    border-radius: 14px;
+    padding: 10px 20px;
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 800;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.12), 0 8px 18px rgba(0,0,0,0.2);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.archery-target__label::before {
+    content: "🎯";
+    margin-right: 8px;
+}
+
+.archery-target--bonus {
+    border-color: gold;
+    background: linear-gradient(180deg, #fff7d6 0%, #ffe680 100%);
+    color: #6b4400;
+    box-shadow:
+        0 0 26px gold,
+        0 5px 0 rgba(0, 0, 0, 0.12),
+        0 8px 22px rgba(255, 200, 0, 0.55);
+    animation: archery-bonus-glow 1.1s ease-in-out infinite alternate;
+}
+
+.archery-target--bonus .archery-target__label::before {
+    content: "🌟";
+}
+
+@keyframes archery-bonus-glow {
+    0%   { box-shadow: 0 0 18px gold, 0 5px 0 rgba(0,0,0,0.12), 0 8px 22px rgba(255,200,0,0.5); }
+    100% { box-shadow: 0 0 36px gold, 0 5px 0 rgba(0,0,0,0.12), 0 10px 28px rgba(255,200,0,0.75); }
+}
+
+.archery-target__bonus {
+    display: inline-block;
+    padding: 2px 10px;
+    background: #d63031;
+    color: white;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 900;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.archery-target--hit {
+    animation: archery-target-hit 0.4s ease-out forwards;
+}
+
+@keyframes archery-target-hit {
+    0%   { transform: translateY(-50%) scale(1); opacity: 1; filter: brightness(1); }
+    50%  { transform: translateY(-50%) scale(1.3); filter: brightness(1.8); }
+    100% { transform: translateY(-50%) scale(0.4); opacity: 0; filter: brightness(0); }
+}
+
+.archery-help {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.85);
+    padding: 8px 18px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    color: var(--text-dark);
+    box-shadow: var(--shadow-sm);
+    pointer-events: none;
+    z-index: 4;
+}
+
+.archery-help span {
+    margin: 0 6px;
+    font-weight: 700;
+}
+
+/* 양궁용 파워 게이지 (가로 바) */
+.power-gauge--archery {
+    right: auto;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    width: 260px;
+    flex-direction: column;
+}
+
+.power-gauge--archery .power-gauge__bar {
+    width: 100%;
+    height: 22px;
+    align-items: stretch;
+    display: flex;
+}
+
+.power-gauge--archery .power-gauge__fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50 0%, #ffeb3b 50%, #f44336 100%);
+    border-radius: 0;
+    transition: width 0.05s linear;
+}
+
+.power-gauge--active .power-gauge__bar {
+    box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.1), 0 0 16px var(--accent), var(--shadow-md);
+    animation: pulse-glow 0.7s ease-in-out infinite;
+}
+
+/* ============================================================
+   2단원 스텝 4: 딜리트 마스터 (그리드 100개)
+   ============================================================ */
+.game--delete {
+    background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 100%);
+}
+
+.delete-grid-area {
+    position: absolute;
+    inset: 70px 16px 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.delete-grid {
+    display: grid;
+    gap: 6px;
+    width: min(100%, 880px);
+    height: min(100%, 88vh);
+    padding: 8px;
+}
+
+.delete-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #ff6b6b 0%, #d63031 100%);
+    color: white;
+    border-radius: 6px;
+    border: 2px solid #8b1a1a;
+    box-shadow:
+        0 3px 0 #8b1a1a,
+        0 4px 6px rgba(0, 0, 0, 0.35),
+        inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+    user-select: none;
+    font-family: monospace;
+    font-weight: 900;
+    line-height: 1;
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    aspect-ratio: 1 / 1;
+}
+
+.delete-cell__num {
+    font-size: clamp(12px, 1.4vw, 18px);
+    opacity: 0.95;
+}
+
+.delete-cell__label {
+    font-size: clamp(7px, 0.85vw, 10px);
+    letter-spacing: 1px;
+    margin-top: 2px;
+    opacity: 0.9;
+}
+
+.delete-cell--next {
+    background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
+    border-color: #b8860b;
+    box-shadow:
+        0 0 16px gold,
+        0 3px 0 #b8860b,
+        0 4px 8px rgba(255, 215, 0, 0.5),
+        inset 0 2px 0 rgba(255, 255, 255, 0.4);
+    color: #4a3000;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+    transform: scale(1.08);
+    z-index: 2;
+    animation: delete-cell-next-pulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes delete-cell-next-pulse {
+    0%   { box-shadow: 0 0 12px gold, 0 3px 0 #b8860b, 0 4px 8px rgba(255, 215, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.4); }
+    100% { box-shadow: 0 0 28px gold, 0 3px 0 #b8860b, 0 6px 14px rgba(255, 215, 0, 0.7), inset 0 2px 0 rgba(255, 255, 255, 0.5); }
+}
+
+.delete-cell--gone {
+    animation: delete-cell-vanish 0.32s ease-in forwards;
+    pointer-events: none;
+}
+
+@keyframes delete-cell-vanish {
+    0%   { transform: scale(1.08); opacity: 1; filter: brightness(1); }
+    50%  { transform: scale(1.3) rotate(180deg); opacity: 0.6; filter: brightness(2) hue-rotate(60deg); }
+    100% { transform: scale(0) rotate(360deg); opacity: 0; filter: brightness(0); }
+}
+
+/* 클리어 배너 */
+.delete-clear-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    padding: 28px 56px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: 0 0 60px gold, var(--shadow-lg);
+    z-index: 200;
+    animation: win-banner-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.delete-clear-banner__title {
+    font-size: 36px;
+    font-weight: 900;
+    text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+    margin-bottom: 8px;
+}
+
+.delete-clear-banner__sub {
+    font-size: 20px;
+    opacity: 0.95;
+}
+
+/* ============================================================
+   2단원 스텝 6: 타자 마스터 (한글 단어 입력)
+   ============================================================ */
+.game--type {
+    background: linear-gradient(180deg, #fdfbfb 0%, #ebedee 100%);
+}
+
+.typing-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(920px, 92vw);
+    background: white;
+    border: 4px solid var(--primary);
+    border-radius: 24px;
+    padding: 36px 44px 30px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    z-index: 2;
+}
+
+.typing-panel__stage {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary-dark);
+    margin-bottom: 22px;
+}
+
+.typing-word {
+    font-size: clamp(48px, 8vw, 90px);
+    font-weight: 900;
+    letter-spacing: 4px;
+    line-height: 1.15;
+    color: var(--text-soft);
+    margin-bottom: 26px;
+    word-break: keep-all;
+    transition: transform 0.2s;
+}
+
+.typing-word--shake {
+    animation: typing-shake 0.3s;
+}
+
+@keyframes typing-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-12px); }
+    50% { transform: translateX(12px); }
+    75% { transform: translateX(-6px); }
+}
+
+.typing-word--done {
+    animation: typing-word-done 0.5s ease-out;
+}
+
+@keyframes typing-word-done {
+    0%   { transform: scale(1); filter: brightness(1); }
+    50%  { transform: scale(1.18); filter: brightness(1.6); color: var(--secondary-dark); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+.typing-word__char {
+    display: inline-block;
+    padding: 0 4px;
+    transition: color 0.15s ease, transform 0.15s ease, background 0.15s ease, text-shadow 0.15s;
+}
+
+.typing-word__char--space {
+    width: 0.45em;
+}
+
+.typing-word__char--done {
+    color: var(--secondary-dark);
+    transform: scale(1.06);
+}
+
+.typing-word__char--current {
+    color: var(--accent);
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 10px;
+    transform: scale(1.15);
+    text-shadow: 0 0 14px gold;
+}
+
+.typing-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    background: #f4f6fa;
+    border: 2px dashed var(--primary);
+    border-radius: var(--radius-pill);
+    font-family: 'Jua', 'Gaegu', sans-serif;
+    font-size: clamp(20px, 2.8vw, 28px);
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-dark);
+}
+
+.typing-progress__label {
+    font-family: 'Jua', 'Gaegu', sans-serif;
+    letter-spacing: 0;
+    font-size: 16px;
+    color: var(--text-soft);
+}
+
+.typing-progress__typed {
+    color: var(--secondary-dark);
+}
+
+.typing-progress__next {
+    color: var(--accent);
+    background: rgba(255, 215, 0, 0.25);
+    padding: 0 8px;
+    border-radius: 8px;
+    animation: typing-next-pulse 0.7s ease-in-out infinite alternate;
+}
+
+@keyframes typing-next-pulse {
+    0%   { transform: scale(1); }
+    100% { transform: scale(1.15); }
+}
+
+.phrase-complete {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    padding: 40px 72px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: 0 0 80px gold, var(--shadow-lg);
+    z-index: 300;
+    animation: win-banner-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.phrase-complete__title {
+    font-size: 48px;
+    font-weight: 900;
+    text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+    margin-bottom: 12px;
+}
+
+.phrase-complete__sub {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.phrase-complete__detail {
+    font-size: 16px;
+    opacity: 0.95;
+}
+
+/* 단원 칩 — 사용 가능한 상태 (잠금 아님, 현재 단원도 아님) */
+.unit-chip--available {
+    background: var(--bg-soft);
+    color: var(--text-dark);
+    border: 2px solid var(--accent);
+    cursor: pointer;
+}
+
+.unit-chip--available:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* ============================================================
    반응형: 태블릿 (~900px 이하)
    ============================================================ */
 @media (max-width: 900px) {
@@ -2422,6 +3391,46 @@ body {
     transform: translate(-50%, -50%);
     font-size: 260px;
     animation: bob-center 3s ease-in-out infinite;
+}
+
+/* 좌상단 배치 (2단원 게임용) — HUD 아래에 워터마크 느낌 */
+.player-character--topleft {
+    position: absolute;
+    top: 70px;
+    left: 24px;
+    transform: none;
+    font-size: 110px;
+    opacity: 0.32;
+    z-index: 0;
+    animation: bob-corner 3s ease-in-out infinite;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.15));
+    pointer-events: none;
+    line-height: 1;
+}
+
+@keyframes bob-corner {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50%      { transform: translateY(-10px) rotate(3deg); }
+}
+
+/* ----- 하단 게임방법 안내 (2단원 공용) ----- */
+.game-bottom-help {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--text-dark);
+    padding: 10px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+    z-index: 6;
+    pointer-events: none;
+    max-width: 92vw;
+    text-align: center;
+    line-height: 1.4;
 }
 
 /* 레벨업 변신 효과 (중앙 기준) */
@@ -2860,6 +3869,34 @@ body {
 @keyframes combo-pop {
     0% { transform: scale(0.5); }
     100% { transform: scale(1); }
+}
+
+/* ----- 게임 시작 안내 한 줄 (투명 텍스트) ----- */
+.intro-instruction {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: 'Jua', 'Gaegu', sans-serif;
+    font-size: clamp(28px, 4.5vw, 56px);
+    font-weight: 900;
+    text-align: center;
+    text-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.55),
+        0 0 24px rgba(0, 0, 0, 0.35);
+    letter-spacing: 1px;
+    z-index: 25;
+    pointer-events: none;
+    white-space: nowrap;
+    opacity: 0.95;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    animation: intro-instruction-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes intro-instruction-pop {
+    0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.95; }
 }
 
 /* ----- 게임 시작 카운트다운 ----- */

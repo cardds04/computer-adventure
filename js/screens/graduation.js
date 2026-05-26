@@ -7,12 +7,14 @@ SCREEN_RENDERERS.graduation = function (root) {
     const screen = el("div", { class: "screen graduation" });
     const emoji = getCurrentEmoji();
     const levelName = getCurrentLevelName();
-    const total = totalScoreFromBestScores();
+    const currentUnit = UNITS.find(u => u.num === state.currentUnit) || UNITS[0];
+    const total = totalScoreFromBestScores(state.currentUnit);
     const today = new Date();
     const dateStr = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
 
     // 단원별 점수 행
-    const scoreRows = LESSONS.map(l => {
+    const lessonsArr = getLessonsForUnit(state.currentUnit);
+    const scoreRows = lessonsArr.map(l => {
         const best = state.bestScores[l.id] || 0;
         return el("div", { class: "diploma-row" },
             el("span", { class: "diploma-row__icon", text: l.icon }),
@@ -36,13 +38,13 @@ SCREEN_RENDERERS.graduation = function (root) {
         el("div", { class: "diploma__header" },
             el("div", { class: "diploma__badge", text: "🎓" }),
             el("div", { class: "diploma__org", text: "송양초등학교 디지털수업" }),
-            el("div", { class: "diploma__unit", text: "🖱️ 마우스편" }),
+            el("div", { class: "diploma__unit", text: `${currentUnit.icon} ${currentUnit.title}` }),
             el("h1", { class: "diploma__title", text: "졸 업 장" }),
         ),
 
         el("div", { class: "diploma__body" },
             el("div", { class: "diploma__intro",
-                text: "위 학생은 마우스편의 모든 스텝을\n성실히 마치고 우수한 성적을 거두었으므로\n이에 졸업장을 수여합니다." }),
+                text: `위 학생은 ${currentUnit.title}의 모든 스텝을\n성실히 마치고 우수한 성적을 거두었으므로\n이에 졸업장을 수여합니다.` }),
 
             el("div", { class: "diploma__avatar" },
                 el("div", { class: "diploma__char", text: emoji }),

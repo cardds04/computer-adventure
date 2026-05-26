@@ -7,11 +7,11 @@ SCREEN_RENDERERS.results = function (root, params) {
     const emoji = getCurrentEmoji();
     const progress = getLevelProgress(state.points);
 
-    // 단원 통과/졸업 여부 확인
-    const lesson = LESSONS.find(l => l.id === params.lessonId);
+    // 단원 통과/졸업 여부 확인 (모든 단원 검색)
+    const lesson = findLessonById(params.lessonId) || { goalScore: 0, num: "?", title: "?" };
     const passed = isLessonPassed(params.lessonId);
-    const justPassed = passed && params.score >= (lesson?.goalScore || 0);
-    const allPassed = areAllLessonsPassed();
+    const justPassed = passed && params.score >= lesson.goalScore;
+    const allPassed = areAllLessonsPassed(state.currentUnit);
 
     const card = el("div", { class: "results__card" },
         el("h2", { class: "results__title", text: justPassed ? "🏆 단원 통과!" : "🎉 미션 완료!" }),

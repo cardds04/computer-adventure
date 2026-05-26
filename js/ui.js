@@ -110,13 +110,20 @@ function showLevelUpBurst(level) {
     setTimeout(() => burst.remove(), 2200);
 }
 
-// 화면에 있는 모든 .player-character 요소의 이모지를 갱신
+// 화면 캐릭터들의 이모지를 새 레벨에 맞춰 갱신
 function updatePlayerCharacters(level) {
     const emoji = getEmojiForLevel(level);
+    // 배경 캐릭터 (큰 워터마크) — translate 기반 애니메이션
     document.querySelectorAll(".player-character").forEach(node => {
         node.textContent = emoji;
         node.classList.add("level-up-morph");
         setTimeout(() => node.classList.remove("level-up-morph"), 900);
+    });
+    // 미로 안 캐릭터 — left/top 기반이라 별도 애니메이션
+    document.querySelectorAll(".maze-player").forEach(node => {
+        node.textContent = emoji;
+        node.classList.add("maze-player--morph");
+        setTimeout(() => node.classList.remove("maze-player--morph"), 900);
     });
 }
 
@@ -196,6 +203,20 @@ function addHelpButton(screen, gameId, pauseHandler) {
         showTutorial(gameId, null, pauseHandler);
     });
     document.body.appendChild(btn);
+}
+
+// 게임 시작 시 한 줄 안내 (예: "방향키로 미로를 통과하세요!")
+// 카운트다운과 함께 화면 가운데에 투명한 큰 글씨로 잠깐 떴다가 사라짐
+function showIntroInstruction(parent, text, durationMs = 2200) {
+    if (!text) return;
+    const banner = el("div", { class: "intro-instruction", text });
+    parent.appendChild(banner);
+    setTimeout(() => {
+        banner.style.opacity = "0";
+        banner.style.transform = "translate(-50%, -50%) scale(0.95)";
+        setTimeout(() => banner.remove(), 420);
+    }, durationMs);
+    return banner;
 }
 
 // 게임 시작 시 이전 점수가 있으면 안내 배너 표시
