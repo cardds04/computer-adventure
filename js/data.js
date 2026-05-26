@@ -111,13 +111,14 @@ const LESSON1_ROUNDS = [
 
 // 1단원 게임 설정
 // 라운드별 점수: R1=35, R2=70, R3=105 (이전의 1/3로 낮춤 — 워밍업 단원이라)
+// 낙하 속도: 이전의 70% (30% 감소) — 더 여유롭게 읽고 클릭할 수 있도록
 const GAME_CONFIG = {
     roundDuration: 15000,
-    fallSpeedBase: 160,
-    fallSpeedPerRound: 60,
+    fallSpeedBase: 112,           // 160 × 0.7
+    fallSpeedPerRound: 42,        // 60 × 0.7  (R1=112, R2=154, R3=196)
     spawnIntervalMs: 320,
     correctRatio: 0.4,
-    correctPointsBase: 35,    // 실제 점수 = base × (roundIndex + 1)
+    correctPointsBase: 35,
     comboBonus: 10,
     comboMax: 10,
     wrongPenalty: 10,
