@@ -411,11 +411,45 @@ SCREEN_RENDERERS.game3 = function (root, params) {
         setTimeout(() => { cd.remove(); runCountdown(numbers, idx + 1, cb); }, 800);
     }
 
+    // 일시정지/재개
+    let _pausedAt = null;
+    let _wasInRound = false;
+    const pauseHandler = {
+        pause() {
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            if (roundTimer) { clearTimeout(roundTimer); roundTimer = null; }
+            _pausedAt = performance.now();
+            _wasInRound = inRound;
+            inRound = false;
+        },
+        resume() {
+            if (_pausedAt === null) return;
+            const pauseDuration = performance.now() - _pausedAt;
+            _pausedAt = null;
+            if (_wasInRound) {
+                roundEndsAt += pauseDuration;
+                inRound = true;
+                const remaining = Math.max(0, roundEndsAt - performance.now());
+                roundTimer = setTimeout(endRound, remaining);
+            }
+            rafId = requestAnimationFrame(tick);
+        },
+    };
+
     root.appendChild(screen);
-    showCarryOverBanner(startingScore);
     updateScoreDisplay();
-    runCountdown(["3", "2", "1", "출발!"], 0, () => {
-        startRound();
-        rafId = requestAnimationFrame(tick);
-    });
+
+    const startGame = () => {
+        showCarryOverBanner(startingScore);
+        runCountdown(["3", "2", "1", "출발!"], 0, () => {
+            startRound();
+            rafId = requestAnimationFrame(tick);
+        });
+    };
+
+    if (!hasSeenTutorial("game3")) {
+        showTutorial("game3", startGame);
+    } else {
+        startGame();
+    }
 };

@@ -438,22 +438,66 @@ SCREEN_RENDERERS.game4 = function (root, params) {
         setTimeout(() => { cd.remove(); runCountdown(numbers, idx + 1, cb); }, 800);
     }
 
+    // 일시정지/재개
+    let _pausedAt = null;
+    const pauseHandler = {
+        pause() {
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            if (targetSpawnTimer) { clearInterval(targetSpawnTimer); targetSpawnTimer = null; }
+            // 타겟 자동 소멸 타이머도 정지
+            targets.forEach(t => {
+                if (t.deathTimer) { clearTimeout(t.deathTimer); t.deathTimer = null; }
+            });
+            _pausedAt = performance.now();
+        },
+        resume() {
+            if (_pausedAt === null) return;
+            const pauseDuration = performance.now() - _pausedAt;
+            _pausedAt = null;
+            // 전체 게임 종료 시각 연장
+            gameEndsAt += pauseDuration;
+            // 타겟 자동 소멸 타이머 재설정 (간단히 풀 lifetime 재시작)
+            targets.forEach(t => {
+                if (t.alive && !t.deathTimer) {
+                    t.deathTimer = setTimeout(() => {
+                        if (!t.alive) return;
+                        t.alive = false;
+                        t.el.style.transition = "opacity 0.5s, transform 0.5s";
+                        t.el.style.opacity = "0";
+                        t.el.style.transform += " scale(0.5)";
+                        setTimeout(() => t.el.remove(), 520);
+                        targets = targets.filter(x => x !== t);
+                    }, cfg.targetLifetimeMs);
+                }
+            });
+            // 스폰 재시작
+            targetSpawnTimer = setInterval(spawnTarget, cfg.targetSpawnIntervalMs);
+            lastTickAt = 0;
+            rafId = requestAnimationFrame(tick);
+        },
+    };
+
     root.appendChild(screen);
-    showCarryOverBanner(startingScore);
     updateScoreDisplay();
 
-    // 화면 크기 측정 후 시작
-    requestAnimationFrame(() => {
-        positionCannon();
-        updateBarrel();
-        runCountdown(["3", "2", "1", "발사!"], 0, () => {
-            Audio.roundStart();
-            gameEndsAt = performance.now() + cfg.totalTime;
-            // 초기 타겟 4개 (시간 줄어든 만큼 빨리 채워줌)
-            for (let i = 0; i < 4; i++) setTimeout(spawnTarget, i * 180);
-            // 주기적 스폰
-            targetSpawnTimer = setInterval(spawnTarget, cfg.targetSpawnIntervalMs);
-            rafId = requestAnimationFrame(tick);
+    const startGame = () => {
+        showCarryOverBanner(startingScore);
+        requestAnimationFrame(() => {
+            positionCannon();
+            updateBarrel();
+            runCountdown(["3", "2", "1", "발사!"], 0, () => {
+                Audio.roundStart();
+                gameEndsAt = performance.now() + cfg.totalTime;
+                for (let i = 0; i < 4; i++) setTimeout(spawnTarget, i * 180);
+                targetSpawnTimer = setInterval(spawnTarget, cfg.targetSpawnIntervalMs);
+                rafId = requestAnimationFrame(tick);
+            });
         });
-    });
+    };
+
+    if (!hasSeenTutorial("game4")) {
+        showTutorial("game4", startGame);
+    } else {
+        startGame();
+    }
 };

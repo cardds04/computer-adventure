@@ -15,6 +15,8 @@ function navigate(screenName, params) {
         console.error("unknown screen:", screenName);
         return;
     }
+    // 이전 화면에서 남은 도움말 버튼/모달 정리
+    document.querySelectorAll(".help-btn, .tutorial-modal, .carry-over-banner, .lvl-up-burst").forEach(n => n.remove());
     app.innerHTML = "";
     renderer(app, params || {});
 }
@@ -116,6 +118,84 @@ function updatePlayerCharacters(level) {
         node.classList.add("level-up-morph");
         setTimeout(() => node.classList.remove("level-up-morph"), 900);
     });
+}
+
+// ----- 튜토리얼 (게임 방법 팝업) -----
+
+function hasSeenTutorial(gameId) {
+    try { return sessionStorage.getItem(`tut_${gameId}`) === "1"; }
+    catch (e) { return false; }
+}
+
+function markTutorialSeen(gameId) {
+    try { sessionStorage.setItem(`tut_${gameId}`, "1"); }
+    catch (e) {}
+}
+
+function showTutorial(gameId, onClose, pauseHandler) {
+    const tut = TUTORIALS[gameId];
+    if (!tut) { onClose && onClose(); return; }
+
+    // 게임 일시정지
+    if (pauseHandler && pauseHandler.pause) pauseHandler.pause();
+
+    const closeModal = () => {
+        modal.classList.add("fading-out");
+        setTimeout(() => {
+            modal.remove();
+            markTutorialSeen(gameId);
+            if (pauseHandler && pauseHandler.resume) pauseHandler.resume();
+            onClose && onClose();
+        }, 280);
+    };
+
+    const modal = el("div", { class: "tutorial-modal" });
+    const card = el("div", { class: "tutorial-card" },
+        el("div", { class: "tutorial-card__header" },
+            el("div", { class: "tutorial-card__icon", text: tut.icon }),
+            el("div", { class: "tutorial-card__title-wrap" },
+                el("div", { class: "tutorial-card__overtitle", text: "게임 방법" }),
+                el("h2", { class: "tutorial-card__title", text: tut.title }),
+            ),
+        ),
+        el("div", { class: "tutorial-card__steps" },
+            ...tut.steps.map((step, i) => el("div", { class: "tutorial-step" },
+                el("div", { class: "tutorial-step__num", text: `${i + 1}` }),
+                el("div", { class: "tutorial-step__illu", text: step.illu }),
+                el("div", { class: "tutorial-step__text", text: step.text }),
+            )),
+        ),
+        el("button", {
+            class: "btn btn--big tutorial-card__cta",
+            text: "이해했어요! 다시 시작! 🚀",
+            on: { click: closeModal },
+        }),
+    );
+    modal.appendChild(card);
+
+    // 모달 배경 클릭 시에도 닫기
+    modal.addEventListener("click", (ev) => {
+        if (ev.target === modal) closeModal();
+    });
+
+    document.body.appendChild(modal);
+}
+
+// 게임 화면에 우측 하단 도움말 버튼 추가 (document.body에 직접 부착해 z-index/스택 문제 회피)
+function addHelpButton(screen, gameId, pauseHandler) {
+    // 이전 게임에서 남은 버튼 제거
+    document.querySelectorAll(".help-btn").forEach(b => b.remove());
+
+    const btn = document.createElement("button");
+    btn.className = "help-btn";
+    btn.title = "게임 방법 다시 보기";
+    btn.innerHTML = '<span class="help-btn__icon">❓</span><span class="help-btn__label">게임방법 다시 보기</span>';
+    btn.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        showTutorial(gameId, null, pauseHandler);
+    });
+    document.body.appendChild(btn);
 }
 
 // 게임 시작 시 이전 점수가 있으면 안내 배너 표시

@@ -302,8 +302,17 @@ SCREEN_RENDERERS.game5 = function (root, params) {
 
     // ----- 시작 -----
     root.appendChild(screen);
-    showCarryOverBanner(startingScore);
     updateScoreDisplay();
-    showStageBanner(cfg.stages[0].label);
-    setTimeout(nextProblem, 1500);
+
+    const startGame = () => {
+        showCarryOverBanner(startingScore);
+        showStageBanner(cfg.stages[0].label);
+        setTimeout(nextProblem, 1500);
+    };
+
+    if (!hasSeenTutorial("game5")) {
+        showTutorial("game5", startGame);
+    } else {
+        startGame();
+    }
 };

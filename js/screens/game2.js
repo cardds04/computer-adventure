@@ -337,11 +337,74 @@ SCREEN_RENDERERS.game2 = function (root, params) {
         setTimeout(() => { cd.remove(); runCountdown(numbers, idx + 1, cb); }, 800);
     }
 
+    // 일시정지/재개
+    let _pausedAt = null;
+    let _wasInRound = false;
+    const pauseHandler = {
+        pause() {
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            if (spawnTimer) { clearInterval(spawnTimer); spawnTimer = null; }
+            if (roundTimer) { clearTimeout(roundTimer); roundTimer = null; }
+            // 각 타겟의 lifetime timer도 정지하고 남은시간 저장
+            targets.forEach(t => {
+                if (t.lifetimeTimer) {
+                    clearTimeout(t.lifetimeTimer);
+                    t.lifetimeTimer = null;
+                    t._remainingLife = (t._spawnedAt || performance.now()) + cfg.targetLifetime - performance.now();
+                }
+            });
+            _pausedAt = performance.now();
+            _wasInRound = inRound;
+            inRound = false;
+        },
+        resume() {
+            if (_pausedAt === null) return;
+            const pauseDuration = performance.now() - _pausedAt;
+            _pausedAt = null;
+            if (_wasInRound) {
+                roundEndsAt += pauseDuration;
+                inRound = true;
+                const round = cfg.rounds[roundIndex];
+                spawnTimer = setInterval(() => spawnTarget(round), cfg.spawnIntervalMs);
+                const remaining = Math.max(0, roundEndsAt - performance.now());
+                roundTimer = setTimeout(endRound, remaining);
+            }
+            // 타겟 lifetime 재개
+            targets.forEach(t => {
+                if (t._remainingLife != null && !t.handled) {
+                    const life = Math.max(200, t._remainingLife);
+                    t.lifetimeTimer = setTimeout(() => {
+                        if (t.handled) return;
+                        t.handled = true;
+                        t.el.style.transition = "opacity 0.3s, transform 0.3s";
+                        t.el.style.opacity = "0";
+                        t.el.style.transform += " scale(0.6)";
+                        setTimeout(() => t.el.remove(), 300);
+                        targets = targets.filter(x => x !== t);
+                        combo = 0;
+                        showCombo();
+                    }, life);
+                    t._remainingLife = null;
+                }
+            });
+            rafId = requestAnimationFrame(tick);
+        },
+    };
+
     root.appendChild(screen);
-    showCarryOverBanner(startingScore);
     updateScoreDisplay();
-    runCountdown(["3", "2", "1", "출발!"], 0, () => {
-        startRound();
-        rafId = requestAnimationFrame(tick);
-    });
+
+    const startGame = () => {
+        showCarryOverBanner(startingScore);
+        runCountdown(["3", "2", "1", "출발!"], 0, () => {
+            startRound();
+            rafId = requestAnimationFrame(tick);
+        });
+    };
+
+    if (!hasSeenTutorial("game2")) {
+        showTutorial("game2", startGame);
+    } else {
+        startGame();
+    }
 };

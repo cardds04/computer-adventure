@@ -315,11 +315,49 @@ SCREEN_RENDERERS.game1 = function (root, params) {
         }, 800);
     }
 
+    // ----- 일시정지/재개 핸들러 -----
+    let _pausedAt = null;
+    let _wasInRound = false;
+    const pauseHandler = {
+        pause() {
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            if (spawnTimer) { clearInterval(spawnTimer); spawnTimer = null; }
+            if (roundTimer) { clearTimeout(roundTimer); roundTimer = null; }
+            _pausedAt = performance.now();
+            _wasInRound = inRound;
+            inRound = false;
+        },
+        resume() {
+            if (_pausedAt === null) return;
+            const pauseDuration = performance.now() - _pausedAt;
+            _pausedAt = null;
+            if (_wasInRound) {
+                roundEndsAt += pauseDuration;
+                inRound = true;
+                const round = LESSON1_ROUNDS[roundIndex];
+                spawnTimer = setInterval(() => spawnOne(round), GAME_CONFIG.spawnIntervalMs);
+                const remaining = Math.max(0, roundEndsAt - performance.now());
+                roundTimer = setTimeout(endRound, remaining);
+            }
+            lastTickAt = 0;
+            rafId = requestAnimationFrame(tick);
+        },
+    };
+
     root.appendChild(screen);
-    showCarryOverBanner(startingScore);
     updateScoreDisplay();
-    runCountdown(["3", "2", "1", "출발!"], 0, () => {
-        startRound();
-        rafId = requestAnimationFrame(tick);
-    });
+
+    const startGame = () => {
+        showCarryOverBanner(startingScore);
+        runCountdown(["3", "2", "1", "출발!"], 0, () => {
+            startRound();
+            rafId = requestAnimationFrame(tick);
+        });
+    };
+
+    if (!hasSeenTutorial("game1")) {
+        showTutorial("game1", startGame);
+    } else {
+        startGame();
+    }
 };

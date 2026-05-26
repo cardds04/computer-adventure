@@ -1710,6 +1710,146 @@ body {
     100% { transform: translateY(-50%) scale(1) rotate(360deg); }
 }
 
+/* ============================================================
+   6단원: 글자 그리기 마스터
+   ============================================================ */
+.game--trace {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.16));
+}
+
+.trace-area {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px 14px;
+    padding: 30px 24px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 95vw;
+    z-index: 3;
+}
+
+.trace-char {
+    position: relative;
+    width: 110px;
+    height: 140px;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #fff8eb 0%, #fffaf0 100%);
+    border: 3px dashed rgba(74, 56, 38, 0.3);
+    overflow: hidden;
+    transition: border 0.3s, background 0.3s, transform 0.3s;
+}
+
+.trace-space {
+    width: 50px;
+    height: 140px;
+}
+
+.trace-char__bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 100px;
+    font-weight: 700;
+    color: rgba(74, 56, 38, 0.18);
+    user-select: none;
+    pointer-events: none;
+}
+
+.trace-char__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+    z-index: 2;
+}
+
+.trace-char__check {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    background: var(--secondary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    box-shadow: var(--shadow-sm);
+    z-index: 3;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.trace-char.completed {
+    border: 3px solid var(--secondary);
+    background: linear-gradient(180deg, #f0fff5 0%, #e0f9ea 100%);
+    transform: scale(1.04);
+}
+
+.trace-char.completed .trace-char__bg {
+    color: var(--secondary-dark);
+    animation: char-complete-pop 0.5s;
+}
+
+.trace-char.completed .trace-char__check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@keyframes char-complete-pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.trace-win-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    padding: 30px 60px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    z-index: 100;
+    animation: win-banner-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.trace-win-banner__title {
+    font-size: 42px;
+    margin-bottom: 8px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.trace-win-banner__sub {
+    font-size: 24px;
+}
+
+@keyframes win-banner-pop {
+    0%   { transform: translate(-50%, -50%) scale(0.4) rotate(-10deg); opacity: 0; }
+    60%  { transform: translate(-50%, -50%) scale(1.15) rotate(3deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+}
+
 /* 게임 시작 시 이전 점수 안내 */
 .carry-over-banner {
     position: fixed;
@@ -1726,6 +1866,181 @@ body {
     transition: opacity 0.4s, transform 0.4s;
     animation: carry-over-in 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
+
+/* ============================================================
+   튜토리얼 모달 (게임 방법 팝업)
+   ============================================================ */
+.tutorial-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 14, 6, 0.65);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    padding: 20px;
+    animation: tut-modal-in 0.3s ease-out;
+}
+
+@keyframes tut-modal-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.tutorial-modal.fading-out {
+    animation: tut-modal-out 0.28s ease-in forwards;
+}
+
+@keyframes tut-modal-out {
+    to { opacity: 0; }
+}
+
+.tutorial-card {
+    background: linear-gradient(180deg, #fffdf3 0%, #fff8e8 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 28px 32px;
+    width: min(540px, 95vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: tut-card-pop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes tut-card-pop {
+    0%   { transform: scale(0.6) translateY(20px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.tutorial-card__header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 3px dashed rgba(74, 56, 38, 0.2);
+}
+
+.tutorial-card__icon {
+    font-size: 56px;
+    line-height: 1;
+}
+
+.tutorial-card__title-wrap {
+    flex: 1;
+}
+
+.tutorial-card__overtitle {
+    color: var(--primary);
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+.tutorial-card__title {
+    color: var(--text-dark);
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.tutorial-card__steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.tutorial-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 2px solid rgba(255, 210, 63, 0.5);
+}
+
+.tutorial-step__num {
+    width: 32px;
+    height: 32px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 900;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.tutorial-step__illu {
+    font-size: 28px;
+    min-width: 110px;
+    text-align: center;
+    white-space: pre-wrap;
+    line-height: 1.2;
+    color: var(--text-dark);
+    background: var(--bg-soft);
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 2px dashed rgba(74, 56, 38, 0.25);
+    flex-shrink: 0;
+}
+
+.tutorial-step__text {
+    font-size: 16px;
+    color: var(--text-dark);
+    flex: 1;
+    line-height: 1.4;
+}
+
+.tutorial-card__cta {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* 우측 하단 도움말 버튼 (텍스트 + 아이콘) — position: fixed 로 화면 기준 고정 */
+.help-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: var(--text-dark);
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Jua', sans-serif;
+    border: 3px solid var(--accent-dark);
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark), var(--shadow-md);
+    z-index: 150;                        /* HUD/풀-스크린 위에 확실히 */
+    transition: transform 0.1s, box-shadow 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--radius-pill);
+    pointer-events: auto;
+}
+
+.help-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--accent-dark), var(--shadow-md);
+}
+
+.help-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--accent-dark);
+}
+
+.help-btn__icon {
+    font-size: 20px;
+    color: var(--primary-dark);
+    font-weight: 900;
+}
+
+.help-btn__label { font-size: 15px; }
 
 .carry-over-banner__score {
     color: var(--accent);
