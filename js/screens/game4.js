@@ -240,13 +240,29 @@ SCREEN_RENDERERS.game4 = function (root, params) {
         if (targets.filter(t => t.alive).length >= cfg.maxTargets) return;
 
         const emoji = CANNON_TARGETS[Math.floor(Math.random() * CANNON_TARGETS.length)];
+        // 보너스 빈도 증가 (1/30 → 1/10, 고배수도 더 자주)
+        let bonusMultiplier = 0;
+        if (Math.random() < 1/10) {                  // 10% 보너스
+            const r = Math.random();
+            if (r < 0.05)      bonusMultiplier = 500;   // 5%  ← 신규 전설
+            else if (r < 0.20) bonusMultiplier = 100;   // 15%
+            else if (r < 0.45) bonusMultiplier = 50;    // 25%
+            else if (r < 0.70) bonusMultiplier = 30;    // 25%
+            else                bonusMultiplier = 10;   // 30%
+        }
+        const isBonus = bonusMultiplier > 0;
+        const bonusClass = isBonus ? ` cannon-target--bonus cannon-target--bonus${bonusMultiplier}` : "";
+
         const w = screen.clientWidth;
         const h = screen.clientHeight;
 
         const x = 120 + Math.random() * (w - 240);
         const y = 140 + Math.random() * (h * 0.5 - 60);
 
-        const tEl = el("div", { class: "cannon-target", text: emoji });
+        const tEl = el("div", {
+            class: "cannon-target" + bonusClass,
+            html: `${emoji}${isBonus ? `<span class="cannon-target-bonus-badge">×${bonusMultiplier}</span>` : ''}`,
+        });
         tEl.style.left = `${x}px`;
         tEl.style.top  = `${y}px`;
         playArea.appendChild(tEl);
@@ -258,6 +274,8 @@ SCREEN_RENDERERS.game4 = function (root, params) {
             vy: (Math.random() - 0.5) * 30,
             alive: true,
             emoji,
+            isBonus,
+            bonusMultiplier,
             deathTimer: null,
         };
         targets.push(tObj);
@@ -282,7 +300,9 @@ SCREEN_RENDERERS.game4 = function (root, params) {
         streak++;
         bestStreak = Math.max(bestStreak, streak);
         const streakBonus = Math.min(streak - 1, 8) * cfg.streakBonus;
-        const gain = cfg.hitPoints + streakBonus;
+        const baseGain = cfg.hitPoints + streakBonus;
+        const multiplier = target.bonusMultiplier || 1;
+        const gain = baseGain * multiplier;
         score += gain;
 
         updateScoreDisplay();
@@ -297,16 +317,17 @@ SCREEN_RENDERERS.game4 = function (root, params) {
         targets = targets.filter(t => t !== target);
 
         const pf = el("div", {
-            class: "points-float",
-            text: `+${gain}!`,
+            class: "points-float" + (target.isBonus ? " points-float--bonus" : ""),
+            text: target.isBonus ? `🎉 +${gain}!` : `+${gain}!`,
             style: { left: `${hitX}px`, top: `${hitY}px`, fontSize: "32px" },
         });
         fxLayer.appendChild(pf);
         setTimeout(() => pf.remove(), 1100);
 
-        emitParticles(hitX, hitY, 12, ["💥", "✨", "⭐", "🌟", "🎉", "🎊"]);
+        emitParticles(hitX, hitY, target.isBonus ? 20 : 12, ["💥", "✨", "⭐", "🌟", "🎉", "🎊"]);
 
-        if (streak >= 3) Audio.bigCorrect(Math.min(streak, 8));
+        if (target.isBonus) Audio.bigCorrect(8);
+        else if (streak >= 3) Audio.bigCorrect(Math.min(streak, 8));
         else Audio.correct();
     }
 
@@ -488,7 +509,7 @@ SCREEN_RENDERERS.game4 = function (root, params) {
             runCountdown(["3", "2", "1", "발사!"], 0, () => {
                 Audio.roundStart();
                 gameEndsAt = performance.now() + cfg.totalTime;
-                for (let i = 0; i < 4; i++) setTimeout(spawnTarget, i * 180);
+                for (let i = 0; i < 16; i++) setTimeout(spawnTarget, i * 100);
                 targetSpawnTimer = setInterval(spawnTarget, cfg.targetSpawnIntervalMs);
                 rafId = requestAnimationFrame(tick);
             });

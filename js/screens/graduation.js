@@ -35,13 +35,14 @@ SCREEN_RENDERERS.graduation = function (root) {
 
         el("div", { class: "diploma__header" },
             el("div", { class: "diploma__badge", text: "🎓" }),
+            el("div", { class: "diploma__org", text: "송양초등학교 디지털수업" }),
+            el("div", { class: "diploma__unit", text: "🖱️ 마우스편" }),
             el("h1", { class: "diploma__title", text: "졸 업 장" }),
-            el("div", { class: "diploma__subtitle", text: "컴퓨터 어드벤처" }),
         ),
 
         el("div", { class: "diploma__body" },
             el("div", { class: "diploma__intro",
-                text: "위 학생은 컴퓨터 어드벤처의 모든 단원을\n성실히 마치고 우수한 성적을 거두었으므로\n이에 졸업장을 수여합니다." }),
+                text: "위 학생은 마우스편의 모든 스텝을\n성실히 마치고 우수한 성적을 거두었으므로\n이에 졸업장을 수여합니다." }),
 
             el("div", { class: "diploma__avatar" },
                 el("div", { class: "diploma__char", text: emoji }),
@@ -68,7 +69,9 @@ SCREEN_RENDERERS.graduation = function (root) {
                 click: () => {
                     if (confirm("점수와 진행 상황을 모두 초기화하고 다시 도전할까요?")) {
                         resetState();
-                        Object.assign(state, DEFAULT_STATE);
+                        const f = freshState();
+                        for (const k of Object.keys(state)) delete state[k];
+                        Object.assign(state, f);
                         navigate("home");
                     }
                 },

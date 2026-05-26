@@ -40,9 +40,29 @@ SCREEN_RENDERERS.home = function (root) {
         ),
     );
 
+    // 단원 선택 칩 (프로필 패널 바깥 위쪽에 배치)
+    const unitSelector = el("div", { class: "unit-selector unit-selector--top" });
+    UNITS.forEach(u => {
+        const chip = el("button", {
+            class: `unit-chip ${u.active ? "unit-chip--active" : "unit-chip--locked"}`,
+            html: u.active
+                ? `<span class="unit-chip__icon">${u.icon}</span><span>${u.num}단원</span>`
+                : `<span class="unit-chip__num">${u.num}단원</span><span class="unit-chip__lock">🔒</span>`,
+            on: {
+                click: () => {
+                    if (!u.active) {
+                        Audio.wrong && Audio.wrong();
+                        showToast(`📚 ${u.num}단원은 준비 중이에요!\n곧 만나요 ✨`);
+                    }
+                },
+            },
+        });
+        unitSelector.appendChild(chip);
+    });
+
     const profileInfo = el("div", { class: "profile-info" },
         el("div", { class: "profile-info__name",
-            text: allPassed ? "🎓 모든 단원 통과! 졸업할 수 있어요!" : "오늘도 화이팅! 🌟" }),
+            text: allPassed ? "🎓 모든 스텝 통과! 졸업할 수 있어요!" : CURRENT_UNIT_TITLE }),
         stats,
         xpBar,
         xpLabel,
@@ -60,6 +80,52 @@ SCREEN_RENDERERS.home = function (root) {
             on: { click: () => navigate("graduation") },
         });
     }
+
+    // 명예의 전당 게시판 (인라인)
+    const hallList = el("div", { class: "hall-board__list" });
+    hallList.appendChild(el("div", { class: "hall-board__loading", text: "🔄 불러오는 중..." }));
+
+    const hallBoard = el("div", { class: "hall-board" },
+        el("div", { class: "hall-board__header" },
+            el("span", { class: "hall-board__icon", text: "🏆" }),
+            el("h2", { class: "hall-board__title", text: "명예의 전당" }),
+            el("span", { class: "hall-board__sub",
+                text: isSharedHallEnabled() ? "🌐 전체 공유 Top 10" : "Top 10 (로컬)" }),
+        ),
+        hallList,
+    );
+
+    // 비동기 로딩
+    fetchHallTop(10).then(list => {
+        hallList.innerHTML = "";
+        if (!list || list.length === 0) {
+            hallList.appendChild(el("div", {
+                class: "hall-board__empty",
+                text: "🌟 아직 기록이 없어요! 첫 명예의 전당 주인공이 되어보세요!",
+            }));
+            return;
+        }
+        list.forEach((entry, i) => {
+            const rank = i + 1;
+            const rankBadge = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
+            const row = el("div", { class: `hall-board__row ${rank <= 3 ? `hall-board__row--top${rank}` : ""}` },
+                el("div", { class: "hall-board__rank", text: rankBadge }),
+                el("div", { class: "hall-board__name", text: entry.name }),
+                el("div", { class: "hall-board__lvl",
+                    text: `Lv.${entry.level || "?"} · ${getLevelName(entry.level || 1)}` }),
+                el("div", { class: "hall-board__score",
+                    text: `${Number(entry.score).toLocaleString()}점` }),
+            );
+            hallList.appendChild(row);
+        });
+    }).catch(e => {
+        hallList.innerHTML = "";
+        hallList.appendChild(el("div", {
+            class: "hall-board__empty",
+            text: "😢 기록을 불러오지 못했어요.",
+        }));
+        console.warn(e);
+    });
 
     // 테스트 모드 안내
     if (BYPASS_LESSON_LOCKS) {
@@ -137,6 +203,10 @@ SCREEN_RENDERERS.home = function (root) {
                 showToast(`🔒 먼저 ${prevLesson.num}을(를) ${prevLesson.goalScore}점 이상으로 통과해야 해요!`);
             });
         }
+        // 잠금 상태 텍스트의 "N단원" → "스텝 N"로 (lesson.num 사용)
+        if (!isUnlocked && statusBadge) {
+            statusBadge.textContent = `🔒 ${prevLesson.num} 통과 후 열림`;
+        }
         grid.appendChild(card);
     });
 
@@ -149,15 +219,19 @@ SCREEN_RENDERERS.home = function (root) {
             click: () => {
                 if (confirm("점수와 진행 상황을 모두 초기화할까요?")) {
                     resetState();
-                    Object.assign(state, DEFAULT_STATE);
+                    const f = freshState();
+                    for (const k of Object.keys(state)) delete state[k];
+                    Object.assign(state, f);
                     navigate("home");
                 }
             },
         },
     });
 
+    screen.appendChild(unitSelector);
     screen.appendChild(top);
     if (graduateBtn) screen.appendChild(graduateBtn);
+    screen.appendChild(hallBoard);
     screen.appendChild(grid);
     screen.appendChild(resetBtn);
     root.appendChild(screen);

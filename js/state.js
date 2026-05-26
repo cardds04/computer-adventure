@@ -9,21 +9,30 @@ const STATE_KEY = "computer_adventure_session_v2";
 // 캐릭터는 하나로 고정 (10단계 진화 영웅)
 const FIXED_CHARACTER_ID = "hero";
 
-const DEFAULT_STATE = {
-    points: 0,
-    lessonsCompleted: [],
-    bestScores: {},                 // { lesson1: 2700, ... }
-};
+// freshState()는 호출할 때마다 새로운 객체/배열을 만들어 줌
+// (참조 공유 버그 방지 — 이전엔 DEFAULT_STATE.bestScores를 게임이 직접 수정해서
+//  나중에 초기화해도 이미 더럽혀진 객체를 참조하는 문제가 있었음)
+function freshState() {
+    return {
+        points: 0,
+        lessonsCompleted: [],
+        bestScores: {},                 // { lesson1: 2700, ... }
+        playerName: "",                  // 명예의 전당 이름
+    };
+}
+
+// 호환용 (기존 코드가 참조)
+const DEFAULT_STATE = freshState();
 
 function loadState() {
     try {
         const raw = sessionStorage.getItem(STATE_KEY);
-        if (!raw) return { ...DEFAULT_STATE };
+        if (!raw) return freshState();
         const parsed = JSON.parse(raw);
-        return { ...DEFAULT_STATE, ...parsed };
+        return Object.assign(freshState(), parsed);
     } catch (e) {
         console.warn("state load failed", e);
-        return { ...DEFAULT_STATE };
+        return freshState();
     }
 }
 
@@ -52,7 +61,10 @@ function scheduleGraduationReset(minutes = 10) {
         _gradResetTimer = null;
         _gradResetAt = null;
         sessionStorage.removeItem(STATE_KEY);
-        Object.assign(state, DEFAULT_STATE);
+        // freshState()로 깨끗한 새 객체 생성 (bestScores 등 nested 객체까지 모두 초기화)
+        const f = freshState();
+        for (const k of Object.keys(state)) delete state[k];
+        Object.assign(state, f);
         if (typeof navigate === "function") navigate("home");
         if (typeof showToast === "function") {
             showToast("🌟 새 수업이 시작돼요!\n진행이 초기화되었어요.");
@@ -119,6 +131,107 @@ function getEmojiForLevel(level) {
     const ch = getCharacter();
     if (!ch) return "🥚";
     return ch.evolved[Math.min(level - 1, ch.evolved.length - 1)];
+}
+
+// ============================================================
+// 명예의 전당 — Supabase 우선, localStorage 백업
+// ============================================================
+const HALL_KEY = "computer_adventure_hall_v1";
+
+// Supabase 클라이언트 (config.js의 값이 있을 때만 생성)
+let supabaseClient = null;
+try {
+    if (typeof SUPABASE_URL === "string" && SUPABASE_URL && typeof supabase !== "undefined") {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log("✓ Supabase 연결됨:", SUPABASE_URL);
+    } else {
+        console.log("ℹ️ Supabase 미설정 — localStorage로 동작 (이 기기 전용)");
+    }
+} catch (e) {
+    console.warn("Supabase init 실패", e);
+}
+
+function isSharedHallEnabled() {
+    return !!supabaseClient;
+}
+
+// --- 로컬 백업 ---
+function getLocalHall() {
+    try {
+        return JSON.parse(localStorage.getItem(HALL_KEY)) || [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveLocalHall(list) {
+    try {
+        localStorage.setItem(HALL_KEY, JSON.stringify(list));
+    } catch (e) {}
+}
+
+function addToLocalHall(name, score, level) {
+    if (!name || typeof score !== "number") return;
+    const list = getLocalHall();
+    const idx = list.findIndex(e => e.name === name);
+    const entry = { name, score, level, date: new Date().toISOString() };
+    if (idx >= 0) {
+        if (score > list[idx].score) list[idx] = entry;
+    } else {
+        list.push(entry);
+    }
+    list.sort((a, b) => b.score - a.score);
+    saveLocalHall(list.slice(0, 50));
+}
+
+// --- 통합 API (async, Supabase 우선) ---
+async function fetchHallTop(n = 10) {
+    if (supabaseClient) {
+        try {
+            const { data, error } = await supabaseClient
+                .from("hall_of_fame")
+                .select("name, score, level")
+                .order("score", { ascending: false })
+                .limit(n);
+            if (!error && data) return data;
+        } catch (e) {
+            console.warn("Supabase fetch 실패, 로컬로 폴백", e);
+        }
+    }
+    return getLocalHall().slice(0, n);
+}
+
+async function addToHall(name, score, level) {
+    if (!name || typeof score !== "number") return;
+    addToLocalHall(name, score, level);  // 항상 로컬 백업
+
+    if (supabaseClient) {
+        try {
+            // 기존 점수 확인
+            const { data: existing } = await supabaseClient
+                .from("hall_of_fame")
+                .select("score")
+                .eq("name", name)
+                .maybeSingle();
+            // 새 점수가 더 높을 때만 갱신/삽입
+            if (!existing || score > (existing.score || 0)) {
+                const { error } = await supabaseClient
+                    .from("hall_of_fame")
+                    .upsert(
+                        { name, score, level, updated_at: new Date().toISOString() },
+                        { onConflict: "name" }
+                    );
+                if (error) console.warn("Supabase upsert 에러", error);
+            }
+        } catch (e) {
+            console.warn("Supabase 저장 실패", e);
+        }
+    }
+}
+
+// 동기 (기존 코드 호환용 — 로컬만)
+function getTopHall(n = 10) {
+    return getLocalHall().slice(0, n);
 }
 
 // ----- 단원 통과 헬퍼 -----

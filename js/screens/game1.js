@@ -109,15 +109,16 @@ SCREEN_RENDERERS.game1 = function (root, params) {
         const key = correctKeys[Math.floor(Math.random() * correctKeys.length)];
         const isCorrect = true;
         const part = COMPUTER_PARTS[key];
-        // 이모지와 단어를 별도 줄로 표시해 세로 박스를 더 잘 활용
+        // 1/30 확률로 ×10 보너스 단어
+        const isBonus = Math.random() < (1 / 30);
         const displayHtml = part
-            ? `<span style="font-size: 32px; line-height: 1;">${part.emoji}</span><span>${part.word}</span>`
-            : `<span>${key}</span>`;
+            ? `<span style="font-size: 32px; line-height: 1;">${part.emoji}</span><span>${part.word}</span>${isBonus ? '<span class="word-bonus">×10</span>' : ''}`
+            : `<span>${key}</span>${isBonus ? '<span class="word-bonus">×10</span>' : ''}`;
 
         const areaWidth = screen.clientWidth;
         const speed = GAME_CONFIG.fallSpeedBase + roundIndex * GAME_CONFIG.fallSpeedPerRound;
 
-        const wEl = el("div", { class: "falling-word", html: displayHtml });
+        const wEl = el("div", { class: "falling-word" + (isBonus ? " falling-word--bonus" : ""), html: displayHtml });
         const startX = 60 + Math.random() * (areaWidth - 120);
         const startY = -60;
 
@@ -125,7 +126,7 @@ SCREEN_RENDERERS.game1 = function (root, params) {
         wEl.style.top = `${startY}px`;
         wEl.style.transform = "translateX(-50%)";
 
-        const wordObj = { el: wEl, vy: speed, x: startX, y: startY, isCorrect, key };
+        const wordObj = { el: wEl, vy: speed, x: startX, y: startY, isCorrect, key, isBonus };
         wEl.addEventListener("click", () => onWordClick(wordObj));
 
         fallingWords.push(wordObj);
@@ -144,7 +145,8 @@ SCREEN_RENDERERS.game1 = function (root, params) {
             wordObj.el.classList.add("correct");
             const comboBonus = Math.min(combo, GAME_CONFIG.comboMax) * GAME_CONFIG.comboBonus;
             const roundMultiplier = roundIndex + 1;          // R1=×1, R2=×2, R3=×3
-            const gain = GAME_CONFIG.correctPointsBase * roundMultiplier + comboBonus;
+            const baseGain = GAME_CONFIG.correctPointsBase * roundMultiplier + comboBonus;
+            const gain = wordObj.isBonus ? baseGain * 10 : baseGain;
             score += gain;
             combo++;
             bestCombo = Math.max(bestCombo, combo);
@@ -152,14 +154,15 @@ SCREEN_RENDERERS.game1 = function (root, params) {
             updateScoreDisplay();
             showCombo();
 
-            // 사운드
-            if (combo >= 3) Audio.bigCorrect(Math.min(combo, 8));
+            // 사운드 (보너스는 무조건 화려하게)
+            if (wordObj.isBonus) Audio.bigCorrect(8);
+            else if (combo >= 3) Audio.bigCorrect(Math.min(combo, 8));
             else Audio.correct();
 
-            // 점수 플로팅
+            // 점수 플로팅 (보너스는 더 크게)
             const pf = el("div", {
-                class: "points-float",
-                text: `+${gain}`,
+                class: "points-float" + (wordObj.isBonus ? " points-float--bonus" : ""),
+                text: wordObj.isBonus ? `🎉 +${gain}!` : `+${gain}`,
                 style: { left: `${cx}px`, top: `${cy}px` },
             });
             fxLayer.appendChild(pf);

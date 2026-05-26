@@ -243,7 +243,13 @@ SCREEN_RENDERERS.game5 = function (root, params) {
 
         if (correct) {
             const streakBonus = Math.min(streak, 5) * 50;
-            const gain = stage.pointsPerCorrect + streakBonus;
+            // progressivePoints 가 있으면 문제 번호별로 다른 점수 사용
+            let basePoints = stage.pointsPerCorrect;
+            if (Array.isArray(stage.progressivePoints) && stage.progressivePoints.length) {
+                const idx = Math.min(problemIndexInStage - 1, stage.progressivePoints.length - 1);
+                basePoints = stage.progressivePoints[idx];
+            }
+            const gain = basePoints + streakBonus;
             score += gain;
             correctTotal++;
             streak++;

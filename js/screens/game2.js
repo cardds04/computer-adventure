@@ -98,17 +98,17 @@ SCREEN_RENDERERS.game2 = function (root, params) {
         screen.appendChild(comboBadge);
     }
 
-    function addScore(gain, x, y) {
+    function addScore(gain, x, y, isBonus = false) {
         score += gain;
         updateScoreDisplay();
         const pf = el("div", {
-            class: "points-float",
-            text: `+${gain}`,
+            class: "points-float" + (isBonus ? " points-float--bonus" : ""),
+            text: isBonus ? `🎉 +${gain}!` : `+${gain}`,
             style: { left: `${x}px`, top: `${y}px` },
         });
         fxLayer.appendChild(pf);
         setTimeout(() => pf.remove(), 1100);
-        emitParticles(x, y, 6, ["✨", "⭐", "🌟", "💫"]);
+        emitParticles(x, y, isBonus ? 14 : 6, ["✨", "⭐", "🌟", "💫", "🎉"]);
     }
 
     function showMiss(x, y) {
@@ -125,14 +125,16 @@ SCREEN_RENDERERS.game2 = function (root, params) {
         if (!inRound) return;
         const type = round.types[Math.floor(Math.random() * round.types.length)];
         const info = MOUSE_TARGETS[type];
+        const isBonus = Math.random() < (1 / 30);
 
         const areaWidth = screen.clientWidth;
-        const areaHeight = screen.clientHeight - 200;  // hud + basket 공간 확보
+        const areaHeight = screen.clientHeight - 200;
 
         const x = 80 + Math.random() * (areaWidth - 160);
         const y = 140 + Math.random() * (areaHeight - 200);
 
         const wrapper = el("div", {
+            class: isBonus ? "mouse-target--bonus" : "",
             style: {
                 position: "absolute",
                 left: `${x}px`,
@@ -165,6 +167,10 @@ SCREEN_RENDERERS.game2 = function (root, params) {
         });
         wrapper.appendChild(emojiEl);
         wrapper.appendChild(hintEl);
+        if (isBonus) {
+            const bonusBadge = el("div", { class: "target-bonus-badge", text: "×10" });
+            wrapper.appendChild(bonusBadge);
+        }
 
         const target = {
             el: wrapper,
@@ -175,6 +181,7 @@ SCREEN_RENDERERS.game2 = function (root, params) {
             handled: false,
             isDragging: false,
             lifetimeTimer: null,
+            isBonus,
         };
 
         bindTargetEvents(target);
@@ -223,11 +230,13 @@ SCREEN_RENDERERS.game2 = function (root, params) {
         combo++;
         bestCombo = Math.max(bestCombo, combo);
         const comboBonus = Math.min(combo - 1, 10) * 30;
-        const gain = target.points + comboBonus;
-        addScore(gain, x, y);
+        const baseGain = target.points + comboBonus;
+        const gain = target.isBonus ? baseGain * 10 : baseGain;
+        addScore(gain, x, y, target.isBonus);
         showCombo();
 
-        if (combo >= 3) Audio.bigCorrect(Math.min(combo, 8));
+        if (target.isBonus) Audio.bigCorrect(8);
+        else if (combo >= 3) Audio.bigCorrect(Math.min(combo, 8));
         else Audio.correct();
     }
 

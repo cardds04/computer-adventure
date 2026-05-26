@@ -56,6 +56,17 @@ SCREEN_RENDERERS.results = function (root, params) {
     screen.appendChild(card);
     root.appendChild(screen);
 
+    // 레벨 10 이상 도달 시 명예의 전당 이름 입력 (한 이름이 이미 등록되어 있으면 자동 갱신)
+    if (progress.level >= 10) {
+        if (state.playerName) {
+            addToHall(state.playerName, state.points, progress.level).catch(() => {});
+        } else {
+            setTimeout(() => {
+                showHallNameEntry(state.points, progress.level, () => {});
+            }, 1200);
+        }
+    }
+
     // 레벨업 효과
     if (params.leveledUp) {
         Audio.levelUp();

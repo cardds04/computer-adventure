@@ -160,9 +160,10 @@ SCREEN_RENDERERS.game3 = function (root, params) {
             const cx = 100 + cellW * (col + 0.5) + (Math.random() - 0.5) * 16;
             const cy = startY + cellH * (row + 0.5) + (Math.random() - 0.5) * 12;
             const type = TRUCK_ITEMS[Math.floor(Math.random() * TRUCK_ITEMS.length)];
+            const isBonus = Math.random() < (1 / 30);
 
             const wrapper = el("div", {
-                class: "truck-item",
+                class: "truck-item" + (isBonus ? " truck-item--bonus" : ""),
                 attrs: { "data-type": type },
                 style: {
                     left: `${cx}px`,
@@ -172,9 +173,9 @@ SCREEN_RENDERERS.game3 = function (root, params) {
                     animationDelay: `${i * 0.06}s`,
                     animationFillMode: "both",
                 },
-                text: type,
+                html: `${type}${isBonus ? '<span class="truck-item-bonus-badge">×10</span>' : ''}`,
             });
-            const itemObj = { el: wrapper, type, originLeft: cx, originTop: cy, loaded: false };
+            const itemObj = { el: wrapper, type, originLeft: cx, originTop: cy, loaded: false, isBonus };
             bindDrag(itemObj);
             items.push(itemObj);
             playArea.appendChild(wrapper);
@@ -276,11 +277,22 @@ SCREEN_RENDERERS.game3 = function (root, params) {
 
         itemsLoaded++;
         const round = cfg.rounds[roundIndex];
-        score += round.perItem;
+        const gain = itemObj.isBonus ? round.perItem * 10 : round.perItem;
+        score += gain;
         updateScoreDisplay();
-        Audio.correct();
+        if (itemObj.isBonus) Audio.bigCorrect(8);
+        else Audio.correct();
 
-        emitParticles(cx, cy, 4, ["✨", "⭐", "🌟"]);
+        // 점수 플로팅
+        const pf = el("div", {
+            class: "points-float" + (itemObj.isBonus ? " points-float--bonus" : ""),
+            text: itemObj.isBonus ? `🎉 +${gain}!` : `+${gain}`,
+            style: { left: `${cx}px`, top: `${cy}px` },
+        });
+        fxLayer.appendChild(pf);
+        setTimeout(() => pf.remove(), 1100);
+
+        emitParticles(cx, cy, itemObj.isBonus ? 12 : 4, ["✨", "⭐", "🌟", "🎉"]);
 
         // 모든 슬롯이 찼는지 확인
         const allFilled = slots.every(s => s.dataset.filled);

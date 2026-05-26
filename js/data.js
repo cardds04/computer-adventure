@@ -2,7 +2,7 @@
    data.js — 캐릭터, 단원, 게임 콘텐츠 데이터
    ============================================================ */
 
-// 단일 진화 캐릭터: 알 → 우주 (10단계)
+// 단일 진화 캐릭터: 알 → 송양초마스터 (20단계)
 const CHARACTERS = [
     {
         id: "hero",
@@ -19,36 +19,66 @@ const CHARACTERS = [
             "⚡👑",   // L8: 제우스
             "☀️",     // L9: 태양
             "🌌",     // L10: 우주
+            "🕳️",     // L11: 블랙홀
+            "💥",     // L12: 빅뱅
+            "🔮",     // L13: 4차원
+            "🪽",     // L14: 천국
+            "🔥",     // L15: 지옥
+            "🌈",     // L16: 이세계
+            "🏛️",     // L17: 유토피아
+            "🌅",     // L18: 태초의 세계
+            "🌑",     // L19: 완벽한 어둠
+            "🏆👑",   // L20: 송양초마스터
         ],
     },
 ];
 
 // 각 레벨의 이름 (HUD/홈 화면에 표시)
 const LEVEL_NAMES = [
-    "알",         // L1
-    "병아리",      // L2
-    "닭",          // L3
-    "용",          // L4
-    "용의 전사",   // L5
-    "천사",        // L6
-    "악마",        // L7
-    "제우스",      // L8
-    "태양",        // L9
-    "우주",        // L10
+    "알",            // L1
+    "병아리",         // L2
+    "닭",            // L3
+    "용",            // L4
+    "용의 전사",      // L5
+    "천사",          // L6
+    "악마",          // L7
+    "제우스",         // L8
+    "태양",          // L9
+    "우주",          // L10
+    "블랙홀",         // L11
+    "빅뱅",          // L12
+    "4차원",         // L13
+    "천국",          // L14
+    "지옥",          // L15
+    "이세계",         // L16
+    "유토피아",       // L17
+    "태초의 세계",     // L18
+    "완벽한 어둠",     // L19
+    "송양초마스터",    // L20
 ];
 
-// 누적 점수가 얼마면 레벨 N이 되는지 (이전 값의 1.5배 — 더 도전적)
+// 누적 점수가 얼마면 레벨 N이 되는지 (L1~L20, 후반은 점점 가팔라짐)
 const LEVEL_THRESHOLDS = [
-    0,        // L1: 알
-    750,      // L2: 병아리
-    2250,     // L3: 닭
-    5250,     // L4: 용
-    10500,    // L5: 용의 전사
-    18750,    // L6: 천사
-    30000,    // L7: 악마
-    45000,    // L8: 제우스
-    67500,    // L9: 태양
-    97500,    // L10: 우주
+    0,         // L1: 알
+    750,       // L2: 병아리
+    2250,      // L3: 닭
+    5250,      // L4: 용
+    10500,     // L5: 용의 전사
+    18750,     // L6: 천사
+    30000,     // L7: 악마
+    45000,     // L8: 제우스
+    67500,     // L9: 태양
+    97500,     // L10: 우주
+    135000,    // L11: 블랙홀
+    180000,    // L12: 빅뱅
+    235000,    // L13: 4차원
+    300000,    // L14: 천국
+    380000,    // L15: 지옥
+    475000,    // L16: 이세계
+    590000,    // L17: 유토피아
+    730000,    // L18: 태초의 세계
+    900000,    // L19: 완벽한 어둠
+    1100000,   // L20: 송양초마스터 🏆
 ];
 
 const MAX_LEVEL = LEVEL_THRESHOLDS.length;
@@ -131,7 +161,7 @@ const GAME_CONFIG = {
 const LESSONS = [
     {
         id: "lesson1",
-        num: "1단원",
+        num: "스텝 1",
         title: "컴퓨터의 기초",
         desc: "컴퓨터 부품의 역할을 알아봐요!",
         icon: "💻",
@@ -140,7 +170,7 @@ const LESSONS = [
     },
     {
         id: "lesson2",
-        num: "2단원",
+        num: "스텝 2",
         title: "마우스 마스터",
         desc: "한 번 클릭과 더블클릭을 익혀요!",
         icon: "🖱️",
@@ -149,7 +179,7 @@ const LESSONS = [
     },
     {
         id: "lesson3",
-        num: "3단원",
+        num: "스텝 3",
         title: "택배 마스터",
         desc: "물건을 트럭에 실어요! 드래그 실력 UP",
         icon: "🚚",
@@ -158,7 +188,7 @@ const LESSONS = [
     },
     {
         id: "lesson4",
-        num: "4단원",
+        num: "스텝 4",
         title: "수학 마스터",
         desc: "덧셈과 곱셈! 정답을 만들어요",
         icon: "🔢",
@@ -167,7 +197,7 @@ const LESSONS = [
     },
     {
         id: "lesson5",
-        num: "5단원",
+        num: "스텝 5",
         title: "포트리스 챌린지",
         desc: "꾸욱 눌러 파워! 정확한 사격!",
         icon: "🎯",
@@ -175,6 +205,21 @@ const LESSONS = [
         goalScore: 10000,
     },
 ];
+
+// 상위 단원 정보 (현재 활성 단원 + 향후 추가될 단원들)
+const UNITS = [
+    { num: 1,  title: "마우스편",  icon: "🖱️", active: true  },
+    { num: 2,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 3,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 4,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 5,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 6,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 7,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 8,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 9,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 10, title: "준비 중",   icon: "🔒", active: false },
+];
+const CURRENT_UNIT_TITLE = "송양초등학교 디지털수업 : 마우스편";
 
 // ============================================================
 // 테스트 모드: 잠금 무시하고 모든 단원 클릭 가능
@@ -273,17 +318,17 @@ const WINDOWS_GAME_CONFIG = {
 const CANNON_TARGETS = ["🎈", "🎯", "👻", "⭐", "🍎", "🎁", "🪀", "🛸"];
 
 const CANNON_GAME_CONFIG = {
-    totalTime: 30000,             // 30초 (이전 90초)
+    totalTime: 30000,
     gravity: 600,
     minPower: 0.15,
     minSpeed: 500,
     maxSpeed: 1300,
     maxChargeMs: 1500,
-    targetSpawnIntervalMs: 1200,  // 더 짧은 시간 보상으로 스폰 빠르게
-    maxTargets: 6,
+    targetSpawnIntervalMs: 300,   // 1200 → 300 (4배 자주)
+    maxTargets: 24,                // 6 → 24 (4배 동시 등장)
     targetLifetimeMs: 14000,
     targetRadius: 50,
-    hitPoints: 800,                // 시간 줄어든 만큼 점수 상향
+    hitPoints: 800,
     streakBonus: 200,
 };
 
@@ -293,9 +338,10 @@ const CANNON_GAME_CONFIG = {
 
 const MATH_GAME_CONFIG = {
     stages: [
-        { op: "+", digits: 1, problemCount: 3, pointsPerCorrect: 400,  label: "1자리 덧셈" },
-        { op: "×", digits: 1, problemCount: 3, pointsPerCorrect: 700,  label: "구구단 곱셈" },
-        { op: "+", digits: 2, problemCount: 2, pointsPerCorrect: 2000, label: "2자리 덧셈" },
+        { op: "+", digits: 1, problemCount: 3, pointsPerCorrect: 400,   label: "1자리 덧셈" },
+        // 곱셈은 progressivePoints (문제마다 다른 점수): 1번 10k, 2번 40k(누적50k), 3번 50k(누적100k)
+        { op: "×", digits: 1, problemCount: 3, pointsPerCorrect: 700, progressivePoints: [10000, 40000, 50000], label: "구구단 곱셈" },
+        { op: "+", digits: 2, problemCount: 2, pointsPerCorrect: 10000, label: "2자리 덧셈" },
     ],
     wrongPenalty: 50,
 };
