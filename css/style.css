@@ -949,7 +949,7 @@ body {
     position: absolute;
     background: var(--panel);
     color: var(--text-dark);
-    padding: 12px 24px;
+    padding: 28px 20px;            /* 세로 길쭉하게 (12→28) */
     border-radius: var(--radius-md);
     font-size: 22px;
     font-weight: 700;
@@ -958,6 +958,12 @@ body {
     border: 3px solid var(--accent);
     transition: transform 0.1s;
     white-space: nowrap;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-height: 90px;
+    line-height: 1.2;
 }
 
 .falling-word:hover { transform: scale(1.06); }

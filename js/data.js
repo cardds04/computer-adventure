@@ -193,7 +193,7 @@ const MOUSE_TARGETS = {
 
 const MOUSE_GAME_CONFIG = {
     roundDuration: 15000,
-    spawnIntervalMs: 900,     // 타겟 간격
+    spawnIntervalMs: 300,     // 900 → 300 (3배 자주 생성)
     targetLifetime: 4500,
     rounds: [
         { types: ["balloon"],         label: "🎈 풍선을 한 번 클릭!" },
@@ -214,10 +214,9 @@ const TRUCK_GAME_CONFIG = {
     roundDuration: 20000,
     wrongPenalty: 0,
     rounds: [
-        { capacity: 3, perItem: 300, fullBonus: 600,  label: "🚚 작은 트럭! 물건 3개!" },
-        { capacity: 5, perItem: 400, fullBonus: 900,  label: "🚛 중간 트럭! 물건 5개!" },
-        { capacity: 7, perItem: 500, fullBonus: 1200, label: "🚚 큰 트럭! 물건 7개!" },
-        { capacity: 8, perItem: 700, fullBonus: 1600, label: "🚛 최종 도전! 물건 8개! 🔥" },
+        { capacity: 3, perItem: 700,  fullBonus: 1500, label: "🚚 작은 트럭! 물건 3개!" },
+        { capacity: 5, perItem: 900,  fullBonus: 2000, label: "🚛 중간 트럭! 물건 5개!" },
+        { capacity: 7, perItem: 1100, fullBonus: 2500, label: "🚚 큰 트럭! 물건 7개! 🔥" },
     ],
 };
 
@@ -294,9 +293,9 @@ const CANNON_GAME_CONFIG = {
 
 const MATH_GAME_CONFIG = {
     stages: [
-        { op: "+", digits: 1, problemCount: 5, pointsPerCorrect: 400,  label: "1자리 덧셈" },
-        { op: "×", digits: 1, problemCount: 5, pointsPerCorrect: 700,  label: "구구단 곱셈" },
-        { op: "+", digits: 2, problemCount: 5, pointsPerCorrect: 1200, label: "2자리 덧셈" },
+        { op: "+", digits: 1, problemCount: 3, pointsPerCorrect: 400,  label: "1자리 덧셈" },
+        { op: "×", digits: 1, problemCount: 3, pointsPerCorrect: 700,  label: "구구단 곱셈" },
+        { op: "+", digits: 2, problemCount: 2, pointsPerCorrect: 2000, label: "2자리 덧셈" },
     ],
     wrongPenalty: 50,
 };

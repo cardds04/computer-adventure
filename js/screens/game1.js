@@ -109,12 +109,15 @@ SCREEN_RENDERERS.game1 = function (root, params) {
         const key = correctKeys[Math.floor(Math.random() * correctKeys.length)];
         const isCorrect = true;
         const part = COMPUTER_PARTS[key];
-        const displayText = part ? `${part.emoji} ${part.word}` : key;
+        // 이모지와 단어를 별도 줄로 표시해 세로 박스를 더 잘 활용
+        const displayHtml = part
+            ? `<span style="font-size: 32px; line-height: 1;">${part.emoji}</span><span>${part.word}</span>`
+            : `<span>${key}</span>`;
 
         const areaWidth = screen.clientWidth;
         const speed = GAME_CONFIG.fallSpeedBase + roundIndex * GAME_CONFIG.fallSpeedPerRound;
 
-        const wEl = el("div", { class: "falling-word", text: displayText });
+        const wEl = el("div", { class: "falling-word", html: displayHtml });
         const startX = 60 + Math.random() * (areaWidth - 120);
         const startY = -60;
 
