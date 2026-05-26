@@ -76,8 +76,16 @@ SCREEN_RENDERERS.graduation = function (root) {
         }),
     );
 
+    // 10분 후 자동 초기화 예약 (다음 수업 시작 보호)
+    scheduleGraduationReset(10);
+
+    // 안내 메시지
+    const autoNote = el("div", { class: "diploma-auto-reset",
+        text: "⏰ 10분 후 다음 수업을 위해 자동으로 초기화돼요" });
+
     screen.appendChild(diploma);
     screen.appendChild(actions);
+    screen.appendChild(autoNote);
     root.appendChild(screen);
 
     // 축하 효과

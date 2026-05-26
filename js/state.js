@@ -37,6 +37,40 @@ function saveState(s) {
 
 function resetState() {
     sessionStorage.removeItem(STATE_KEY);
+    cancelGraduationReset();
+}
+
+// ----- 졸업 후 자동 초기화 (10분) -----
+// 한 수업이 끝난 후 다음 수업이 들어왔을 때 이전 기록이 이어지지 않도록
+let _gradResetTimer = null;
+let _gradResetAt = null;
+
+function scheduleGraduationReset(minutes = 10) {
+    if (_gradResetTimer) return;   // 이미 예약됨
+    _gradResetAt = Date.now() + minutes * 60 * 1000;
+    _gradResetTimer = setTimeout(() => {
+        _gradResetTimer = null;
+        _gradResetAt = null;
+        sessionStorage.removeItem(STATE_KEY);
+        Object.assign(state, DEFAULT_STATE);
+        if (typeof navigate === "function") navigate("home");
+        if (typeof showToast === "function") {
+            showToast("🌟 새 수업이 시작돼요!\n진행이 초기화되었어요.");
+        }
+    }, minutes * 60 * 1000);
+}
+
+function cancelGraduationReset() {
+    if (_gradResetTimer) {
+        clearTimeout(_gradResetTimer);
+        _gradResetTimer = null;
+        _gradResetAt = null;
+    }
+}
+
+function getGraduationResetRemaining() {
+    if (!_gradResetAt) return null;
+    return Math.max(0, _gradResetAt - Date.now());
 }
 
 // 전역 상태

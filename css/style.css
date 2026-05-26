@@ -1616,6 +1616,16 @@ body {
     flex-wrap: wrap;
 }
 
+.diploma-auto-reset {
+    margin-top: 16px;
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-mid);
+    padding: 8px 18px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    border: 1px dashed rgba(74, 56, 38, 0.3);
+}
+
 /* Confetti */
 .confetti {
     position: fixed;
