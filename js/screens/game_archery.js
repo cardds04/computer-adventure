@@ -438,7 +438,7 @@ SCREEN_RENDERERS.gameArchery = function (root, params) {
     const playerChar = el("div", { class: "player-character player-character--topleft", text: getCurrentEmoji() });
     screen.appendChild(playerChar);
     const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 ↑↓ 조준 · SPACE 길게 = 파워 충전 · 떼면 발사! 🌟 황금 표적 명중하면 점수 ×배수!" });
+        text: "💡 ↑↓ 조준 · SPACE 길게 = 파워 충전 · 떼면 발사! 🌟 황금 표적 명중하면 점수 ×10~×20!" });
     screen.appendChild(bottomHelp);
 
     // ----- 시작 -----
