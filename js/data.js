@@ -521,17 +521,18 @@ const JUMP_GAME_CONFIG = {
     groundRatio: 0.74,          // 바닥 26%
     playerXRatio: 0.18,
     fruits: [
-        { emoji: "🍎", value: 50,  height: "ground" },
-        { emoji: "🍌", value: 30,  height: "ground" },
-        { emoji: "🍇", value: 80,  height: "mid" },
-        { emoji: "🍊", value: 70,  height: "mid" },
-        { emoji: "🍓", value: 120, height: "high" },
-        { emoji: "🍑", value: 150, height: "high" },
+        { emoji: "🍎", value: 80,  height: "ground" },    // 50 → 80
+        { emoji: "🍌", value: 50,  height: "ground" },    // 30 → 50
+        { emoji: "🍇", value: 130, height: "mid" },        // 80 → 130
+        { emoji: "🍊", value: 110, height: "mid" },        // 70 → 110
+        { emoji: "🍓", value: 180, height: "high" },       // 120 → 180
+        { emoji: "🍑", value: 220, height: "high" },       // 150 → 220
     ],
     obstacles: ["🌵", "🪨", "🌲", "🚧"],
     bonusFruit: {
         emoji: "🎁",
-        multipliers: [10],
+        baseValue: 200,           // 100 → 200 (2배)
+        multipliers: [10],        // 보너스 = baseValue × multiplier → +2000
         weights:      [100],
     },
     bonusChance: 1 / 10,
@@ -597,24 +598,24 @@ const DELETE_GAME_CONFIG = {
             duration: 10000,
             cols: 10,
             rows: 10,         // 100개
-            pointPerDelete: 100,
-            clearBonus: 500,
+            pointPerDelete: 200,    // 100 → 200 (2배)
+            clearBonus: 1000,       // 500 → 1000 (2배)
         },
         {
             label: "2단계 — 다시 100개!",
             duration: 10000,
             cols: 10,
             rows: 10,
-            pointPerDelete: 120,
-            clearBonus: 700,
+            pointPerDelete: 240,    // 120 → 240 (2배)
+            clearBonus: 1400,       // 700 → 1400 (2배)
         },
         {
             label: "3단계 — 마지막 100개!",
             duration: 10000,
             cols: 10,
             rows: 10,
-            pointPerDelete: 150,
-            clearBonus: 1000,
+            pointPerDelete: 300,    // 150 → 300 (2배)
+            clearBonus: 2000,       // 1000 → 2000 (2배)
         },
     ],
 };
@@ -626,8 +627,8 @@ const HANGUL_GAME_CONFIG = {
             duration: 15000,
             chars: HANGUL_CONSONANTS,
             type: "jamo",
-            pointsPerCorrect: 200,
-            fallSpeed: 200,         // 100 → 200 (2배)
+            pointsPerCorrect: 400,  // 200 → 400 (2배)
+            fallSpeed: 200,
             spawnIntervalMs: 900,
         },
         {
@@ -635,8 +636,8 @@ const HANGUL_GAME_CONFIG = {
             duration: 15000,
             chars: HANGUL_VOWELS,
             type: "jamo",
-            pointsPerCorrect: 400,
-            fallSpeed: 230,         // 115 → 230 (2배)
+            pointsPerCorrect: 800,  // 400 → 800 (2배)
+            fallSpeed: 230,
             spawnIntervalMs: 900,
         },
         {
@@ -644,8 +645,8 @@ const HANGUL_GAME_CONFIG = {
             duration: 15000,
             chars: HANGUL_SYLLABLES,
             type: "syllable",
-            pointsPerCorrect: 800,
-            fallSpeed: 260,         // 130 → 260 (2배)
+            pointsPerCorrect: 1600, // 800 → 1600 (2배)
+            fallSpeed: 260,
             spawnIntervalMs: 1200,
         },
     ],
@@ -826,27 +827,27 @@ const ARCHERY_GAME_CONFIG = {
             duration: 20000,
             words: ARCHERY_WORDS_EASY,
             spawnIntervalMs: 1200,
-            wordSpeed: 300,        // 100 → 300 (3배)
+            wordSpeed: 300,
             maxOnScreen: 5,
-            pointsPerHit: 500,
+            pointsPerHit: 1000,    // 500 → 1000 (2배)
         },
         {
             label: "2단계 — 디지털 수업",
             duration: 20000,
             words: ARCHERY_WORDS_MID,
             spawnIntervalMs: 1300,
-            wordSpeed: 420,        // 140 → 420 (3배)
+            wordSpeed: 420,
             maxOnScreen: 5,
-            pointsPerHit: 800,
+            pointsPerHit: 1600,    // 800 → 1600 (2배)
         },
         {
             label: "3단계 — 송양초 챌린지!",
             duration: 20000,
             words: ARCHERY_WORDS_HARD,
             spawnIntervalMs: 1500,
-            wordSpeed: 510,        // 170 → 510 (3배)
+            wordSpeed: 510,
             maxOnScreen: 4,
-            pointsPerHit: 1200,
+            pointsPerHit: 2400,    // 1200 → 2400 (2배)
         },
     ],
     // 화살 물리
@@ -988,21 +989,21 @@ const TYPE_GAME_CONFIG = {
             label: "1단계 — 짧은 한글 단어",
             duration: 25000,
             words: TYPE_WORDS_EASY,
-            pointsPerWord: 500,
+            pointsPerWord: 1000,        // 500 → 1000 (2배)
         },
         {
             type: "words",
             label: "2단계 — 긴 한글 단어",
             duration: 25000,
             words: TYPE_WORDS_HARD,
-            pointsPerWord: 800,
+            pointsPerWord: 1600,        // 800 → 1600 (2배)
         },
         {
             type: "phrase",
             label: "3단계 — 송양초 수업 챌린지!",
             phrase: TYPE_PHRASE,
-            baseScore: 5000,
-            speedBonusPerSec: 300,
+            baseScore: 10000,           // 5000 → 10000 (2배)
+            speedBonusPerSec: 600,      // 300 → 600 (2배)
             slowestTimeSec: 60,
         },
     ],

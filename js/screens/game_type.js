@@ -175,7 +175,7 @@ SCREEN_RENDERERS.gameType = function (root, params) {
 
     function completeWord() {
         const stage = cfg.stages[stageIndex];
-        const lengthBonus = Math.floor(currentWord.replace(/\s/g, "").length / 2) * 100;
+        const lengthBonus = Math.floor(currentWord.replace(/\s/g, "").length / 2) * 200;
         const gain = stage.pointsPerWord + lengthBonus;
         score += gain;
         wordsCompleted++;

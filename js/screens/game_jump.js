@@ -217,11 +217,13 @@ SCREEN_RENDERERS.gameJump = function (root, params) {
             showFloat(fx, fy, `+${obj.value}`, "good");
             emitParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 6, ["✨", "⭐"]);
         } else if (obj.type === "bonus") {
-            const newScore = Math.max(0, Math.floor(score * obj.multiplier));
-            score = newScore;
+            // 보너스 = 기준값 × 배수 (일반 과일 점수의 배수)
+            const base = cfg.bonusFruit.baseValue || 100;
+            const gain = base * obj.multiplier;
+            score = Math.max(0, score + gain);
             updateScoreDisplay();
             Audio.bigCorrect(8);
-            showFloat(fx, fy, `🎉 ×${obj.multiplier}!`, "rainbow");
+            showFloat(fx, fy, `🎉 +${gain} (×${obj.multiplier})`, "rainbow");
             emitParticles(rect.left + rect.width / 2, rect.top + rect.height / 2, 16, ["✨", "⭐", "🌟", "💫", "🎉"]);
         } else if (obj.type === "obstacle") {
             score = Math.max(0, score + cfg.obstaclePenalty);
