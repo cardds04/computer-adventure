@@ -1092,7 +1092,7 @@ const RENAME_GAME_CONFIG = {
         },
         {
             label: "2단계 — 폴더 여러 개 바꾸기",
-            folderCount: 5,
+            folderCount: 3,
             duration: 30000,
             pointsPerCorrect: 2000,
             wrongPenalty: 100,
@@ -1150,32 +1150,24 @@ const DELETE_UNDO_GAME_CONFIG = {
     ],
 };
 
-// 스텝 4: Ctrl+A 전체 선택 마법
+// 스텝 4: Ctrl+A 전체 선택 마법 (2단계, 드래그+휴지통 가능)
 const SELECT_ALL_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 폴더 50개",
-            folderCount: 50,
-            duration: 25000,
-            pointPerSingleDelete: 100,
-            selectAllMultiplier: 5,   // Ctrl+A → DELETE 시 ×5
-            comboBonus: 5000,
-        },
-        {
-            label: "2단계 — 폴더 80개",
-            folderCount: 80,
-            duration: 30000,
-            pointPerSingleDelete: 120,
-            selectAllMultiplier: 5,
+            label: "1단계 — 폴더 30개 (Ctrl+A로 한 방에!)",
+            folderCount: 30,
+            duration: 10000,
+            pointPerSingleDelete: 200,
+            selectAllMultiplier: 5,    // Ctrl+A → DELETE 시 ×5
             comboBonus: 8000,
         },
         {
-            label: "3단계 — 폴더 100개 폭주!",
-            folderCount: 100,
-            duration: 35000,
-            pointPerSingleDelete: 150,
+            label: "2단계 — 폴더 60개 폭주!",
+            folderCount: 60,
+            duration: 15000,
+            pointPerSingleDelete: 250,
             selectAllMultiplier: 5,
-            comboBonus: 12000,
+            comboBonus: 15000,
         },
     ],
 };

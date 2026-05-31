@@ -29,7 +29,7 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
     // HUD
     const goalScore = LESSONS_UNIT3.find(l => l.id === params.lessonId)?.goalScore || 0;
     const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
-    const stageEl = el("span", { text: "1 / 3" });
+    const stageEl = el("span", { text: "1 / 2" });
     const timerEl = el("span", { class: "hud-chip__big", text: "25.0", style: { color: "var(--secondary-dark)" } });
     const remainEl = el("span", { class: "hud-chip__big", text: "0" });
     const lvlChip = makeLevelChip();
