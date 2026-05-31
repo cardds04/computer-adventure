@@ -4031,16 +4031,16 @@ body {
 /* 가짜 바탕화면 */
 .fake-desktop {
     position: absolute;
-    inset: 70px 16px 200px 16px;
+    inset: 150px 16px 200px 16px;     /* HUD + 안내배너 아래로 충분히 내림 */
     background: rgba(0, 0, 0, 0.15);
     border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 10px;
-    padding: 20px;
+    padding: 24px;
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 28px;
     align-content: flex-start;
-    overflow: hidden;
+    overflow: auto;
 }
 
 /* 폴더/파일 아이콘 */
@@ -4286,20 +4286,22 @@ body {
    ============================================================ */
 .rename-hint {
     position: absolute;
-    top: 80px;
+    top: 84px;
     left: 50%;
     transform: translateX(-50%);
     background: rgba(255, 255, 255, 0.95);
     color: var(--text-dark);
-    padding: 12px 28px;
+    padding: 10px 24px;
     border-radius: var(--radius-pill);
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     box-shadow: var(--shadow-md);
     z-index: 8;
     display: flex;
     align-items: center;
     gap: 10px;
+    max-width: 92vw;
+    text-align: center;
 }
 
 .rename-hint__target {
@@ -4309,8 +4311,40 @@ body {
 }
 
 .game--rename .fake-desktop {
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    padding-top: 40px;       /* 폴더 위 힌트 태그 공간 확보 */
+}
+
+/* 각 폴더 위에 표시되는 목표 이름 태그 */
+.fd-target-hint {
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 999px;
+    margin-bottom: 4px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    max-width: 140px;
+    text-align: center;
+    word-break: keep-all;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fd-target-hint--done {
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.fd-icon--correct-fixed {
+    background: rgba(76, 175, 80, 0.4);
+    outline: 3px solid #4caf50;
 }
 
 /* ============================================================
@@ -4511,6 +4545,284 @@ body {
     box-shadow: 0 3px 0 rgba(0, 0, 0, 0.4);
 }
 
+/* ============================================================
+   스텝 3 추가: 작은 그리드 (10셀) + 부활 애니메이션
+   ============================================================ */
+.delete-grid--small {
+    width: min(720px, 90%);
+    height: auto;
+    aspect-ratio: 5 / 2;
+    max-height: 60vh;
+}
+
+.delete-cell--reviving {
+    animation: cell-revive 0.42s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+@keyframes cell-revive {
+    0%   { transform: scale(0) rotate(-180deg); opacity: 0; filter: brightness(2); }
+    60%  { transform: scale(1.2) rotate(0); opacity: 1; filter: brightness(1.4); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* ============================================================
+   스텝 2 추가: 휴지통 + 드래그 라소
+   ============================================================ */
+.copy-trash {
+    position: absolute;
+    bottom: 150px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 8;
+    pointer-events: none;
+}
+
+.copy-trash__icon {
+    font-size: 56px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+    transition: transform 0.2s;
+}
+
+.copy-trash__label {
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    margin-top: 4px;
+}
+
+.copy-trash--shake {
+    animation: trash-shake 0.4s ease;
+}
+
+@keyframes trash-shake {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-15deg) scale(1.1); }
+    50% { transform: rotate(15deg) scale(1.1); }
+    75% { transform: rotate(-8deg); }
+}
+
+.copy-trash-fly {
+    position: fixed;
+    font-size: 32px;
+    z-index: 999;
+    pointer-events: none;
+    animation: fly-to-trash 0.7s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+
+@keyframes fly-to-trash {
+    0%   { transform: translate(0, 0) scale(1) rotate(0); opacity: 1; }
+    70%  { transform: translate(var(--dx), var(--dy)) scale(0.6) rotate(360deg); opacity: 0.8; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0.1) rotate(540deg); opacity: 0; }
+}
+
+.copy-lasso {
+    position: fixed;
+    background: rgba(0, 120, 215, 0.25);
+    border: 1px dashed #0078d7;
+    z-index: 50;
+    pointer-events: none;
+}
+
+/* ============================================================
+   스텝 5: BBQ 캠핑장 (단일 화로)
+   ============================================================ */
+.game--bbq {
+    background: linear-gradient(180deg, #0d1e3a 0%, #1a2e4c 40%, #2c1810 100%); /* 밤하늘→땅 */
+    overflow: hidden;
+}
+
+.bbq-sky {
+    position: absolute;
+    inset: 60px 0 50% 0;
+    pointer-events: none;
+}
+
+.bbq-moon {
+    position: absolute;
+    top: 30px;
+    right: 80px;
+    font-size: 72px;
+    filter: drop-shadow(0 0 30px rgba(255, 235, 150, 0.6));
+    animation: moon-float 6s ease-in-out infinite;
+}
+
+@keyframes moon-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.bbq-stars { position: absolute; inset: 0; }
+
+.bbq-star {
+    position: absolute;
+    font-size: 18px;
+    animation: star-twinkle 2.5s ease-in-out infinite;
+}
+.bbq-star.s1 { top: 18%; left: 10%; animation-delay: 0s; }
+.bbq-star.s2 { top: 25%; left: 30%; animation-delay: 0.7s; font-size: 14px; }
+.bbq-star.s3 { top: 12%; left: 55%; animation-delay: 1.4s; }
+.bbq-star.s4 { top: 35%; left: 70%; animation-delay: 0.3s; font-size: 22px; }
+.bbq-star.s5 { top: 8%;  left: 85%; animation-delay: 1.8s; font-size: 16px; }
+.bbq-star.s6 { top: 40%; left: 18%; animation-delay: 1.1s; font-size: 14px; }
+
+@keyframes star-twinkle {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+}
+
+.bbq-camp {
+    position: absolute;
+    bottom: 280px;
+    left: 0;
+    right: 0;
+    height: 120px;
+    pointer-events: none;
+}
+
+.bbq-tent {
+    position: absolute;
+    font-size: 96px;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+}
+.bbq-tent--left { left: 6%; bottom: 0; }
+.bbq-tent--right { right: 8%; bottom: 10px; }
+
+.bbq-tree {
+    position: absolute;
+    font-size: 88px;
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
+}
+.bbq-tree--left { left: 22%; bottom: 0; }
+.bbq-tree--right { right: 25%; bottom: 0; }
+
+/* 화로 */
+.bbq-grill {
+    position: absolute;
+    bottom: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.bbq-grill__flames {
+    position: relative;
+    height: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.bbq-flame {
+    position: absolute;
+    font-size: 48px;
+    bottom: 0;
+    animation: bbq-flame-dance 0.8s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 12px rgba(255, 120, 30, 0.85));
+}
+.bbq-flame.f1 { left: 25%; animation-delay: 0s; }
+.bbq-flame.f2 { left: 45%; animation-delay: 0.3s; font-size: 56px; }
+.bbq-flame.f3 { left: 65%; animation-delay: 0.15s; }
+
+@keyframes bbq-flame-dance {
+    0%   { transform: translateY(0) scale(1); }
+    100% { transform: translateY(-8px) scale(1.1); }
+}
+
+.bbq-grill__meat {
+    font-size: 96px;
+    line-height: 1;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+    transition: filter 0.2s, transform 0.2s;
+    position: relative;
+    z-index: 6;
+}
+
+.bbq-grill__meat--raw     { filter: hue-rotate(0deg) brightness(0.95); }
+.bbq-grill__meat--cooking { filter: hue-rotate(-12deg) brightness(1); }
+.bbq-grill__meat--perfect {
+    filter: drop-shadow(0 0 28px gold) brightness(1.3) hue-rotate(20deg);
+    animation: bbq-perfect-pulse 0.5s ease-in-out infinite alternate;
+}
+.bbq-grill__meat--overcook { filter: brightness(0.7) sepia(0.6); }
+.bbq-grill__meat--burnt {
+    filter: brightness(0.3) grayscale(0.8);
+    transform: rotate(8deg);
+}
+.bbq-grill__meat--golden {
+    text-shadow: 0 0 32px gold;
+}
+
+@keyframes bbq-perfect-pulse {
+    0%   { transform: scale(1);   filter: drop-shadow(0 0 22px gold) brightness(1.3); }
+    100% { transform: scale(1.15); filter: drop-shadow(0 0 40px gold) brightness(1.5); }
+}
+
+.bbq-grill__gauge {
+    position: relative;
+    width: 240px;
+    height: 14px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    margin-top: 6px;
+}
+
+.bbq-grill__gauge-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4caf50 0%, #ffeb3b 50%, #f44336 100%);
+    transition: width 0.05s linear;
+}
+
+.bbq-grill__gauge-perfect {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    background: gold;
+    opacity: 0.55;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #fff;
+    pointer-events: none;
+    box-shadow: 0 0 8px gold;
+}
+
+.bbq-grill__base {
+    margin-top: 4px;
+    font-size: 24px;
+    color: #5a3a20;
+    letter-spacing: -3px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+.bbq-smoke {
+    position: fixed;
+    font-size: 36px;
+    z-index: 100;
+    pointer-events: none;
+    animation: smoke-rise 1.5s ease-out forwards;
+    opacity: 0;
+}
+
+@keyframes smoke-rise {
+    0%   { opacity: 0.9; transform: translateY(0) scale(0.6); }
+    50%  { opacity: 0.7; }
+    100% { opacity: 0; transform: translateY(-160px) scale(1.6); }
+}
+
 /* 모바일/태블릿: 단축키 카드를 더 작게 */
 @media (max-width: 900px) {
     .shortcut-cards { gap: 8px; bottom: 50px; }
@@ -4521,12 +4833,16 @@ body {
     .fd-icon { width: 80px; }
     .fd-icon__emoji { font-size: 44px; }
     .fd-icon__label { font-size: 12px; }
+    .bbq-grill { width: 220px; bottom: 100px; }
+    .bbq-grill__meat { font-size: 76px; height: 90px; }
+    .bbq-tent, .bbq-tree { font-size: 64px; }
+    .bbq-camp { bottom: 220px; }
 }
 
 @media (max-width: 640px) {
     .shortcut-cards { bottom: 50px; flex-wrap: wrap; }
     .copy-split { inset: 70px 8px 180px 8px; }
-    .bbq-spot { padding: 12px; }
-    .bbq-spot__meat { font-size: 56px; }
-    .bbq-spot__key { width: 28px; height: 28px; font-size: 14px; }
+    .copy-trash { bottom: 130px; right: 12px; }
+    .copy-trash__icon { font-size: 44px; }
+    .bbq-grill__meat { font-size: 60px; height: 76px; }
 }

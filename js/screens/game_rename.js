@@ -15,8 +15,7 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
     let finished = false;
     let rafId = null;
 
-    let currentFolderEl = null;
-    let currentTargetName = "";   // 현재 폴더에 새로 붙여야 할 이름
+    let folders = [];          // { el, targetName, done }
     let isEditing = false;
     let foldersDone = 0;
 
@@ -59,10 +58,10 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
     const playerChar = el("div", { class: "player-character player-character--topleft", text: getCurrentEmoji() });
     screen.appendChild(playerChar);
 
-    // ----- 미션 안내 -----
+    // ----- 미션 안내 (전체 폴더 공통 안내) -----
     const hint = el("div", { class: "rename-hint" },
-        el("span", { class: "rename-hint__label", text: "🎯 이 폴더의 이름을: " }),
-        el("span", { class: "rename-hint__target", text: "—" }),
+        el("span", { class: "rename-hint__label",
+            text: "🎯 각 폴더 위에 적힌 이름으로 바꾸세요! (우클릭 → 이름 바꾸기)" }),
     );
     screen.appendChild(hint);
 
@@ -88,51 +87,67 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
         lvlChip.update(state.points + (score - startingScore));
     }
 
-    // ----- 폴더 생성 -----
-    function spawnFolder() {
+    function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // ----- 한 단계 폴더 한꺼번에 스폰 -----
+    function spawnAllFolders() {
+        // 기존 폴더 정리
+        folders.forEach(f => f.el.remove());
+        folders = [];
+        foldersDone = 0;
+
         const stage = cfg.stages[stageIndex];
-        currentTargetName = stage.names[Math.floor(Math.random() * stage.names.length)];
-        hint.querySelector(".rename-hint__target").textContent = `"${currentTargetName}"`;
+        const names = shuffle(stage.names).slice(0, stage.folderCount);
+        names.forEach(targetName => {
+            // 폴더 + 위에 표시되는 목표 이름 힌트
+            const folderEl = makeFolderIcon("새 폴더");
+            const targetTag = el("div", { class: "fd-target-hint", text: `→ ${targetName}` });
+            folderEl.insertBefore(targetTag, folderEl.firstChild);
 
-        // 이전 폴더 제거
-        if (currentFolderEl) currentFolderEl.remove();
+            const obj = { el: folderEl, targetName, done: false, targetTag };
+            wireFolder(obj);
+            desktop.appendChild(folderEl);
+            folders.push(obj);
+        });
+    }
 
-        const folder = makeFolderIcon("새 폴더");
-        folder.classList.add("fd-icon--center");
-        desktop.appendChild(folder);
-        currentFolderEl = folder;
-        folder._selected = false;
-
-        // 폴더 클릭 → 선택
+    function wireFolder(obj) {
+        const folder = obj.el;
         folder.addEventListener("click", (e) => {
-            if (!inStage || isEditing) return;
+            if (!inStage || isEditing || obj.done) return;
             e.stopPropagation();
+            // 다른 폴더 선택 해제
+            folders.forEach(f => f.el.classList.remove("fd-icon--selected"));
             folder.classList.add("fd-icon--selected");
-            folder._selected = true;
         });
 
-        // 폴더 우클릭 → 메뉴
         folder.addEventListener("contextmenu", (e) => {
             e.preventDefault();
-            if (!inStage || isEditing) return;
-            // 선택 안되어있으면 자동 선택
+            if (!inStage || isEditing || obj.done) return;
+            folders.forEach(f => f.el.classList.remove("fd-icon--selected"));
             folder.classList.add("fd-icon--selected");
-            folder._selected = true;
             showContextMenu(e.clientX, e.clientY, [
                 { icon: "📂", label: "열기", disabled: true },
                 { icon: "📋", label: "복사", disabled: true },
                 { icon: "✂️", label: "잘라내기", disabled: true },
-                { icon: "✏️", label: "이름 바꾸기", onClick: () => startEditing(folder) },
+                { icon: "✏️", label: "이름 바꾸기", onClick: () => startEditing(obj) },
                 { icon: "🗑️", label: "삭제", disabled: true },
             ], screen);
         });
     }
 
-    function startEditing(folder) {
+    function startEditing(obj) {
         isEditing = true;
         cards.setActive("Enter", true);
 
-        // 라벨을 input으로 교체
+        const folder = obj.el;
         const labelEl = folder.querySelector(".fd-icon__label");
         const input = el("input", {
             class: "fd-icon__input",
@@ -151,10 +166,12 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
             isEditing = false;
             cards.setActive("Enter", false);
 
-            if (v === currentTargetName) {
-                // 정답!
+            if (v === obj.targetName) {
                 labelEl.textContent = v;
-                folder.classList.add("fd-icon--correct");
+                obj.done = true;
+                if (obj.targetTag) obj.targetTag.classList.add("fd-target-hint--done");
+                folder.classList.remove("fd-icon--selected");
+                folder.classList.add("fd-icon--correct-fixed");
                 const stage = cfg.stages[stageIndex];
                 const gain = stage.pointsPerCorrect;
                 score += gain;
@@ -166,16 +183,11 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
                 emitParticles(r.left + r.width / 2, r.top + r.height / 2, 8, ["✨","⭐","🌟"]);
                 Audio.bigCorrect(4);
 
-                setTimeout(() => {
-                    if (!inStage || finished) return;
-                    if (foldersDone >= stage.folderCount) {
-                        endStage();
-                    } else {
-                        spawnFolder();
-                    }
-                }, 600);
+                // 모두 끝났으면 다음 단계
+                if (foldersDone >= folders.length) {
+                    setTimeout(() => { if (inStage && !finished) endStage(); }, 700);
+                }
             } else {
-                // 오답
                 folder.classList.remove("fd-icon--selected");
                 labelEl.textContent = "새 폴더";
                 folder.classList.add("fd-icon--wrong");
@@ -201,7 +213,6 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
         });
 
         input.addEventListener("blur", () => {
-            // blur 시에도 commit 시도
             if (input.value.trim()) commit();
             else {
                 input.remove();
@@ -225,7 +236,7 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
         setTimeout(() => {
             inStage = true;
             stageEndsAt = performance.now() + stage.duration;
-            spawnFolder();
+            spawnAllFolders();
         }, 1100);
     }
 
@@ -242,7 +253,8 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
 
     function endStage() {
         inStage = false;
-        if (currentFolderEl) { currentFolderEl.remove(); currentFolderEl = null; }
+        folders.forEach(f => f.el.remove());
+        folders = [];
         stageIndex++;
         if (stageIndex >= cfg.stages.length) {
             setTimeout(finishGame, 800);

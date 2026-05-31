@@ -109,9 +109,80 @@ const Audio = (() => {
         notes.forEach((f, i) => setTimeout(() => tone(f, 0.12, "triangle", 0.003, 0.6), i * 70));
     }
 
+    // ---- 고기 굽는 지글지글 사운드 (필터된 노이즈) ----
+    let sizzleSource = null;
+    let sizzleGain = null;
+    function sizzleStart(volume = 0.18) {
+        if (!enabled) return;
+        init();
+        if (!ctx) return;
+        if (sizzleSource) return;   // 이미 재생 중
+        const bufferSize = ctx.sampleRate * 2;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.loop = true;
+        // 고주파 필터로 지글지글한 느낌
+        const hp = ctx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.value = 2800;
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 7000;
+        const g = ctx.createGain();
+        g.gain.value = 0;
+        g.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.15);
+        source.connect(hp).connect(lp).connect(g).connect(masterGain);
+        source.start();
+        sizzleSource = source;
+        sizzleGain = g;
+    }
+    function sizzleStop() {
+        if (!sizzleSource || !ctx) return;
+        const g = sizzleGain;
+        const s = sizzleSource;
+        sizzleSource = null;
+        sizzleGain = null;
+        try {
+            g.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15);
+            setTimeout(() => { try { s.stop(); } catch (e) {} }, 180);
+        } catch (e) {}
+    }
+
+    // 완벽 타이밍 종 소리
+    function perfectBell() {
+        tone(1568, 0.1, "sine", 0.003, 0.8);
+        setTimeout(() => tone(2093, 0.18, "sine", 0.003, 0.8), 60);
+    }
+
+    // 탔을 때 칙~ 하는 노이즈 (짧게)
+    function burnt() {
+        if (!enabled) return;
+        init();
+        if (!ctx) return;
+        const bufferSize = ctx.sampleRate * 0.4;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        const lp = ctx.createBiquadFilter();
+        lp.type = "lowpass";
+        lp.frequency.value = 800;
+        const g = ctx.createGain();
+        g.gain.value = 0.35;
+        source.connect(lp).connect(g).connect(masterGain);
+        source.start();
+    }
+
     return {
         resume, correct, bigCorrect, wrong, tick, tickGo,
         roundStart, gameOver, levelUp,
+        sizzleStart, sizzleStop, perfectBell, burnt,
         get enabled() { return enabled; },
         setEnabled(v) { enabled = v; },
     };

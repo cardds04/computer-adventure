@@ -1,6 +1,10 @@
 /* ============================================================
-   3단원 스텝 5: 송양초 BBQ 보너스 게임
-   3~4개 그릴, 고기가 생→익는중→완벽→탐. 키 1·2·3·4로 완벽 타이밍 잡기
+   3단원 스텝 5: 송양초 BBQ 보너스 — 캠핑장 단일 화로
+   - 화면 하단 중앙에 하나의 화로
+   - 고기 한 마리씩 등장
+   - 생→익는중→완벽(황금)→탐
+   - SPACE 키로 완벽 타이밍에 서빙
+   - 캠핑 분위기 (밤하늘, 별, 텐트) + 지글지글 사운드
    ============================================================ */
 
 SCREEN_RENDERERS.gameBbq = function (root, params) {
@@ -15,9 +19,10 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
     let finished = false;
     let rafId = null;
 
-    let spots = [];        // [{ el, meatEl, gaugeEl, state, meat }]
+    let currentMeat = null;    // { startedAt, state, meatType, isGolden, served }
     let perfectCombo = 0;
     let totalServed = 0;
+    let spawnTimer = null;
 
     // HUD
     const goalScore = LESSONS_UNIT3.find(l => l.id === params.lessonId)?.goalScore || 0;
@@ -36,7 +41,7 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
     const hud = el("div", { class: "game__hud" },
         exitBtn,
         el("span", { class: "hud-chip" },
-            el("span", { text: "🥩" }),
+            el("span", { text: "🏕️" }),
             el("span", { class: "stat-chip__label", text: "단계" }),
             stageEl,
         ),
@@ -62,14 +67,57 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
     const playerChar = el("div", { class: "player-character player-character--topleft", text: getCurrentEmoji() });
     screen.appendChild(playerChar);
 
-    // 그릴 영역
-    const grillArea = el("div", { class: "bbq-area" });
-    const grillRow = el("div", { class: "bbq-row" });
-    grillArea.appendChild(grillRow);
-    screen.appendChild(grillArea);
+    // 캠핑 배경 (별, 달, 텐트, 나무)
+    const sky = el("div", { class: "bbq-sky" },
+        el("div", { class: "bbq-moon", text: "🌙" }),
+        el("div", { class: "bbq-stars" },
+            el("span", { class: "bbq-star s1", text: "✨" }),
+            el("span", { class: "bbq-star s2", text: "⭐" }),
+            el("span", { class: "bbq-star s3", text: "✨" }),
+            el("span", { class: "bbq-star s4", text: "💫" }),
+            el("span", { class: "bbq-star s5", text: "⭐" }),
+            el("span", { class: "bbq-star s6", text: "✨" }),
+        ),
+    );
+    screen.appendChild(sky);
+
+    const camp = el("div", { class: "bbq-camp" },
+        el("div", { class: "bbq-tent bbq-tent--left", text: "⛺" }),
+        el("div", { class: "bbq-tree bbq-tree--left", text: "🌲" }),
+        el("div", { class: "bbq-tree bbq-tree--right", text: "🌲" }),
+        el("div", { class: "bbq-tent bbq-tent--right", text: "🏕️" }),
+    );
+    screen.appendChild(camp);
+
+    // 화로 + 게이지 + 고기 자리
+    const grill = el("div", { class: "bbq-grill" },
+        el("div", { class: "bbq-grill__flames" },
+            el("span", { class: "bbq-flame f1", text: "🔥" }),
+            el("span", { class: "bbq-flame f2", text: "🔥" }),
+            el("span", { class: "bbq-flame f3", text: "🔥" }),
+        ),
+    );
+    const meatEl = el("div", { class: "bbq-grill__meat", text: "" });
+    grill.appendChild(meatEl);
+    const gauge = el("div", { class: "bbq-grill__gauge" },
+        el("div", { class: "bbq-grill__gauge-fill" }),
+        el("div", { class: "bbq-grill__gauge-perfect" }),
+    );
+    grill.appendChild(gauge);
+    const grillBase = el("div", { class: "bbq-grill__base", text: "▰▰▰▰▰▰▰▰▰" });
+    grill.appendChild(grillBase);
+    screen.appendChild(grill);
+
+    const gaugeFillEl = gauge.querySelector(".bbq-grill__gauge-fill");
+    const perfectZoneEl = gauge.querySelector(".bbq-grill__gauge-perfect");
+
+    const cards = makeShortcutCards([
+        { combo: "SPACE", label: "서빙", icon: "🥢", active: true },
+    ]);
+    screen.appendChild(cards.el);
 
     const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 고기가 황금색(🥓)일 때 자리 숫자키(1·2·3·4) 누르세요! 너무 늦으면 탐!" });
+        text: "💡 지글지글~ 고기가 황금색일 때 SPACE! 너무 늦으면 타요 🔥" });
     screen.appendChild(bottomHelp);
 
     function updateScoreDisplay() {
@@ -80,152 +128,141 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
         comboEl.style.color = perfectCombo >= 3 ? "#d63031" : "var(--text-dark)";
     }
 
-    // ----- 그릴 자리 만들기 -----
-    function buildGrill() {
-        grillRow.innerHTML = "";
-        spots = [];
-        const stage = cfg.stages[stageIndex];
-        for (let i = 0; i < stage.grillSpots; i++) {
-            const spot = el("div", { class: "bbq-spot" });
-            const flame = el("div", { class: "bbq-spot__flame", text: "🔥" });
-            const meatEl = el("div", { class: "bbq-spot__meat", text: "" });
-            const gauge = el("div", { class: "bbq-spot__gauge" },
-                el("div", { class: "bbq-spot__gauge-fill" }),
-                el("div", { class: "bbq-spot__gauge-perfect" }),
-            );
-            const keyHint = el("div", { class: "bbq-spot__key", text: `${i + 1}` });
-            spot.appendChild(flame);
-            spot.appendChild(meatEl);
-            spot.appendChild(gauge);
-            spot.appendChild(keyHint);
-            grillRow.appendChild(spot);
-            spots.push({
-                el: spot,
-                meatEl,
-                gaugeEl: gauge.querySelector(".bbq-spot__gauge-fill"),
-                perfectZoneEl: gauge.querySelector(".bbq-spot__gauge-perfect"),
-                state: "empty",
-                meat: null,
-                startedAt: 0,
-                isGolden: false,
-            });
-        }
-        renderPerfectZone();
-    }
-
     function renderPerfectZone() {
-        // 완벽 윈도우의 위치 표시: cookTimeMs ~ cookTimeMs+perfectWindowMs
         const stage = cfg.stages[stageIndex];
         const totalMs = stage.burnAfterMs;
         const startPct = (stage.cookTimeMs / totalMs) * 100;
         const widthPct = (stage.perfectWindowMs / totalMs) * 100;
-        spots.forEach(s => {
-            s.perfectZoneEl.style.left = `${startPct}%`;
-            s.perfectZoneEl.style.width = `${widthPct}%`;
-        });
+        perfectZoneEl.style.left = `${startPct}%`;
+        perfectZoneEl.style.width = `${widthPct}%`;
     }
 
-    // ----- 고기 스폰 -----
-    function spawnMeat(spot) {
-        if (spot.state !== "empty") return;
-        const stage = cfg.stages[stageIndex];
+    function spawnMeat() {
+        if (!inStage || finished) return;
+        if (currentMeat) return;
         const meatType = cfg.meatTypes[Math.floor(Math.random() * cfg.meatTypes.length)];
         const isGolden = Math.random() < cfg.goldenChance;
-        spot.meat = meatType;
-        spot.isGolden = isGolden;
-        spot.state = "raw";
-        spot.startedAt = performance.now();
-        spot.meatEl.textContent = isGolden ? "🥩" : meatType.emoji;
-        spot.meatEl.className = "bbq-spot__meat bbq-spot__meat--raw" + (isGolden ? " bbq-spot__meat--golden" : "");
-        spot.el.classList.add("bbq-spot--has-meat");
-        spot.gaugeEl.style.width = "0%";
+        currentMeat = {
+            startedAt: performance.now(),
+            state: "raw",
+            meatType,
+            isGolden,
+            served: false,
+            burnt: false,
+        };
+        meatEl.textContent = isGolden ? "🥩" : meatType.emoji;
+        meatEl.className = "bbq-grill__meat bbq-grill__meat--raw" + (isGolden ? " bbq-grill__meat--golden" : "");
+        gaugeFillEl.style.width = "0%";
+        // 지글지글 사운드 시작
+        Audio.sizzleStart && Audio.sizzleStart(0.15);
     }
 
-    // ----- 키 누름 = 고기 제출 -----
-    function serveMeat(spotIdx) {
+    function serveMeat() {
         if (!inStage || finished) return;
-        const spot = spots[spotIdx];
-        if (!spot || spot.state === "empty" || spot.state === "burnt") return;
-
+        if (!currentMeat || currentMeat.served || currentMeat.burnt) return;
         const stage = cfg.stages[stageIndex];
-        const elapsed = performance.now() - spot.startedAt;
+        const elapsed = performance.now() - currentMeat.startedAt;
         let gain = 0;
-        let isPerfect = false;
         let label = "";
         let cls = "good";
+        let isPerfect = false;
 
         if (elapsed < stage.cookTimeMs * 0.5) {
             gain = cfg.points.raw;
-            label = `생고기 +${gain}`;
+            label = `🩸 생고기 +${gain}`;
             cls = "bad";
             perfectCombo = 0;
         } else if (elapsed < stage.cookTimeMs) {
             gain = cfg.points.cooking;
-            label = `+${gain}`;
+            label = `덜 익음 +${gain}`;
             cls = "good";
             perfectCombo = 0;
         } else if (elapsed < stage.cookTimeMs + stage.perfectWindowMs) {
-            // 완벽!
             isPerfect = true;
             perfectCombo++;
             const comboMult = 1 + (perfectCombo - 1) * 0.5;
             gain = Math.floor(cfg.points.perfect * comboMult);
-            if (spot.isGolden) gain *= cfg.goldenMultiplier;
+            if (currentMeat.isGolden) gain *= cfg.goldenMultiplier;
             gain += cfg.comboBonus * (perfectCombo - 1);
-            label = spot.isGolden ? `🌟 황금 완벽! +${gain.toLocaleString()}` : `🎉 완벽! +${gain.toLocaleString()}`;
+            label = currentMeat.isGolden ? `🌟 황금 완벽! +${gain.toLocaleString()}` : `🎉 완벽! +${gain.toLocaleString()}`;
             cls = "rainbow";
+            Audio.perfectBell && Audio.perfectBell();
         } else {
-            // 너무 늦었지만 아직 안 탐 → 약한 점수
             gain = cfg.points.cooking;
             label = `좀 익음 +${gain}`;
             cls = "good";
             perfectCombo = 0;
         }
 
+        currentMeat.served = true;
         score += gain;
         totalServed++;
         updateScoreDisplay();
 
-        const r = spot.el.getBoundingClientRect();
-        showScoreFloat(r.left + r.width / 2, r.top + 20, label, cls);
+        const r = grill.getBoundingClientRect();
+        showScoreFloat(r.left + r.width / 2, r.top - 10, label, cls);
         if (isPerfect) {
             emitParticles(r.left + r.width / 2, r.top + r.height / 2,
-                spot.isGolden ? 20 : 12, ["✨","⭐","🌟","💫","🎉","🎊"]);
-            Audio.bigCorrect(spot.isGolden ? 8 : 6);
+                currentMeat.isGolden ? 24 : 14, ["✨","⭐","🌟","💫","🎉","🎊"]);
+            Audio.bigCorrect(currentMeat.isGolden ? 8 : 6);
         } else {
             Audio.correct();
         }
 
-        // 자리 비우기
-        clearSpot(spot);
+        // 지글지글 멈추고 곧 다음 고기
+        Audio.sizzleStop && Audio.sizzleStop();
+        clearGrill();
+        scheduleNextSpawn();
     }
 
-    function clearSpot(spot) {
-        spot.state = "empty";
-        spot.meat = null;
-        spot.isGolden = false;
-        spot.meatEl.textContent = "";
-        spot.meatEl.className = "bbq-spot__meat";
-        spot.el.classList.remove("bbq-spot--has-meat");
-        spot.gaugeEl.style.width = "0%";
-    }
-
-    function burnMeat(spot) {
-        spot.state = "burnt";
-        spot.meatEl.textContent = "🌶️";
-        spot.meatEl.className = "bbq-spot__meat bbq-spot__meat--burnt";
+    function burnMeat() {
+        if (!currentMeat || currentMeat.served || currentMeat.burnt) return;
+        currentMeat.burnt = true;
+        meatEl.textContent = "🌶️";
+        meatEl.className = "bbq-grill__meat bbq-grill__meat--burnt";
         score = Math.max(0, score + cfg.points.burnt);
         perfectCombo = 0;
         updateScoreDisplay();
-        const r = spot.el.getBoundingClientRect();
-        showScoreFloat(r.left + r.width / 2, r.top + 20, `🔥 탔어 ${cfg.points.burnt}`, "bad");
-        Audio.wrong();
+        const r = grill.getBoundingClientRect();
+        showScoreFloat(r.left + r.width / 2, r.top - 10, `🔥 탔어 ${cfg.points.burnt}`, "bad");
+        Audio.burnt && Audio.burnt();
+        Audio.sizzleStop && Audio.sizzleStop();
+        // 연기 이펙트
+        spawnSmoke();
         // 잠시 후 정리
-        setTimeout(() => clearSpot(spot), 800);
+        setTimeout(() => {
+            clearGrill();
+            scheduleNextSpawn();
+        }, 900);
     }
 
-    // ----- 루프 -----
-    let lastSpawnAt = 0;
+    function spawnSmoke() {
+        const r = grill.getBoundingClientRect();
+        for (let i = 0; i < 5; i++) {
+            const puff = el("div", { class: "bbq-smoke", text: "💨" });
+            puff.style.left = `${r.left + r.width / 2 + (Math.random() - 0.5) * 40}px`;
+            puff.style.top = `${r.top + 10}px`;
+            puff.style.animationDelay = `${i * 0.1}s`;
+            document.body.appendChild(puff);
+            setTimeout(() => puff.remove(), 1500);
+        }
+    }
+
+    function clearGrill() {
+        currentMeat = null;
+        meatEl.textContent = "";
+        meatEl.className = "bbq-grill__meat";
+        gaugeFillEl.style.width = "0%";
+    }
+
+    function scheduleNextSpawn() {
+        if (spawnTimer) clearTimeout(spawnTimer);
+        const stage = cfg.stages[stageIndex];
+        spawnTimer = setTimeout(() => {
+            if (inStage && !finished) spawnMeat();
+        }, stage.spawnDelayMs);
+    }
+
     function tick() {
         if (finished) { rafId = requestAnimationFrame(tick); return; }
         const now = performance.now();
@@ -239,48 +276,32 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
                 rafId = requestAnimationFrame(tick);
                 return;
             }
-
-            // 빈 자리에 고기 스폰
-            if (now - lastSpawnAt > stage.spawnIntervalMs) {
-                const emptySpots = spots.filter(s => s.state === "empty");
-                if (emptySpots.length > 0) {
-                    const spot = emptySpots[Math.floor(Math.random() * emptySpots.length)];
-                    spawnMeat(spot);
-                    lastSpawnAt = now;
-                }
-            }
-
-            // 각 자리 상태 업데이트
-            spots.forEach(spot => {
-                if (spot.state === "empty" || spot.state === "burnt") return;
-                const elapsed = now - spot.startedAt;
+            if (currentMeat && !currentMeat.served && !currentMeat.burnt) {
+                const elapsed = now - currentMeat.startedAt;
                 const ratio = Math.min(1, elapsed / stage.burnAfterMs);
-                spot.gaugeEl.style.width = `${ratio * 100}%`;
+                gaugeFillEl.style.width = `${ratio * 100}%`;
 
                 if (elapsed >= stage.burnAfterMs) {
-                    burnMeat(spot);
-                    return;
-                }
-                // 상태 변화
-                let newState = spot.state;
-                if (elapsed < stage.cookTimeMs * 0.5) newState = "raw";
-                else if (elapsed < stage.cookTimeMs) newState = "cooking";
-                else if (elapsed < stage.cookTimeMs + stage.perfectWindowMs) newState = "perfect";
-                else newState = "overcook";
-                if (newState !== spot.state) {
-                    spot.state = newState;
-                    spot.meatEl.className = "bbq-spot__meat bbq-spot__meat--" + newState
-                        + (spot.isGolden ? " bbq-spot__meat--golden" : "");
-                    if (newState === "perfect") {
-                        spot.meatEl.textContent = spot.isGolden ? "🥓" : "🥓";
+                    burnMeat();
+                } else {
+                    // 상태 변화
+                    let newState = currentMeat.state;
+                    if (elapsed < stage.cookTimeMs * 0.5) newState = "raw";
+                    else if (elapsed < stage.cookTimeMs) newState = "cooking";
+                    else if (elapsed < stage.cookTimeMs + stage.perfectWindowMs) newState = "perfect";
+                    else newState = "overcook";
+                    if (newState !== currentMeat.state) {
+                        currentMeat.state = newState;
+                        meatEl.className = "bbq-grill__meat bbq-grill__meat--" + newState
+                            + (currentMeat.isGolden ? " bbq-grill__meat--golden" : "");
+                        if (newState === "perfect") meatEl.textContent = "🥓";
                     }
                 }
-            });
+            }
         }
         rafId = requestAnimationFrame(tick);
     }
 
-    // ----- 스테이지 -----
     function startStage(idx) {
         stageIndex = idx;
         const stage = cfg.stages[idx];
@@ -289,12 +310,13 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
         showStageBanner(stage.label);
         Audio.roundStart();
         perfectCombo = 0;
-        buildGrill();
+        clearGrill();
+        renderPerfectZone();
 
         setTimeout(() => {
             inStage = true;
             stageEndsAt = performance.now() + stage.duration;
-            lastSpawnAt = performance.now() - stage.spawnIntervalMs;
+            spawnMeat();
         }, 1100);
     }
 
@@ -312,7 +334,9 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
     function endStage() {
         if (!inStage) return;
         inStage = false;
-        spots.forEach(clearSpot);
+        Audio.sizzleStop && Audio.sizzleStop();
+        if (spawnTimer) { clearTimeout(spawnTimer); spawnTimer = null; }
+        clearGrill();
         stageIndex++;
         if (stageIndex >= cfg.stages.length) {
             setTimeout(finishGame, 1000);
@@ -324,6 +348,8 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
     function cleanup() {
         finished = true;
         if (rafId) cancelAnimationFrame(rafId);
+        if (spawnTimer) clearTimeout(spawnTimer);
+        Audio.sizzleStop && Audio.sizzleStop();
         document.removeEventListener("keydown", keyHandler);
     }
 
@@ -346,13 +372,10 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
 
     function keyHandler(e) {
         if (!inStage || finished) return;
-        const num = parseInt(e.key, 10);
-        if (num >= 1 && num <= 9) {
-            const idx = num - 1;
-            if (idx < spots.length) {
-                e.preventDefault();
-                serveMeat(idx);
-            }
+        if (e.code === "Space" || e.key === " ") {
+            e.preventDefault();
+            cards.flash("SPACE");
+            serveMeat();
         }
     }
     document.addEventListener("keydown", keyHandler);
@@ -363,7 +386,7 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
 
     const startGame = () => {
         showCarryOverBanner(startingScore);
-        showIntroInstruction(screen, "고기 완벽 굽기! 숫자키 1·2·3·4 로 타이밍 잡기!");
+        showIntroInstruction(screen, "지글지글~ 완벽한 순간에 SPACE!");
         startStage(0);
     };
     if (!hasSeenTutorial("gameBbq")) {

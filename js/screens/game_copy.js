@@ -1,6 +1,8 @@
 /* ============================================================
    3단원 스텝 2: Ctrl+C / Ctrl+V 복사 마법
-   좌측 폴더에서 파일 선택 → Ctrl+C → 우측 폴더 클릭 → Ctrl+V
+   1단계: 파일 1개 (10초) / 2단계: 파일 여러 개 — 드래그 선택 (30초)
+   복사+붙여넣은 파일은 왼쪽에서 휴지통으로 사라짐
+   다 끝내면 남은시간 × 보너스
    ============================================================ */
 
 SCREEN_RENDERERS.gameCopy = function (root, params) {
@@ -17,16 +19,20 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
 
     let leftFiles = [];        // [{el, name, copied}]
     let copiedCount = 0;
-    let selectedFileEl = null; // 현재 선택된 파일
-    let rightFolderEl = null;
+    let totalNeeded = 0;
+    let clipboard = [];         // 복사된 파일 객체 배열
     let rightFolderSelected = false;
-    let clipboard = null;       // { name }
+    // 드래그 선택
+    let isDragging = false;
+    let dragStart = null;
+    let dragRect = null;
+    let lassoEl = null;
 
     // HUD
     const goalScore = LESSONS_UNIT3.find(l => l.id === params.lessonId)?.goalScore || 0;
     const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
-    const stageEl = el("span", { text: "1 / 3" });
-    const timerEl = el("span", { class: "hud-chip__big", text: "60.0", style: { color: "var(--secondary-dark)" } });
+    const stageEl = el("span", { text: "1 / 2" });
+    const timerEl = el("span", { class: "hud-chip__big", text: "10.0", style: { color: "var(--secondary-dark)" } });
     const lvlChip = makeLevelChip();
     lvlChip.update(state.points);
     const exitBtn = el("button", {
@@ -62,27 +68,25 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
     // 좌우 분할 영역
     const splitArea = el("div", { class: "copy-split" });
     const leftPane = el("div", { class: "copy-pane copy-pane--left" },
-        el("div", { class: "copy-pane__title", text: "📁 원본 폴더" }),
+        el("div", { class: "copy-pane__title", text: "📁 원본 폴더 (여기서 복사)" }),
     );
     const leftGrid = el("div", { class: "copy-pane__grid" });
     leftPane.appendChild(leftGrid);
 
     const rightPane = el("div", { class: "copy-pane copy-pane--right" },
-        el("div", { class: "copy-pane__title", text: "📁 복사본 폴더" }),
+        el("div", { class: "copy-pane__title", text: "📁 복사본 폴더 (여기로 붙임)" }),
     );
     const rightGrid = el("div", { class: "copy-pane__grid" });
     rightPane.appendChild(rightGrid);
 
-    rightFolderEl = rightPane;
+    // 오른쪽 폴더 클릭 = 선택
     rightPane.addEventListener("click", (e) => {
         if (!inStage) return;
+        if (e.target.closest(".fd-icon")) return;
         rightFolderSelected = true;
         rightPane.classList.add("copy-pane--selected");
-        // 좌측 선택 해제
-        if (selectedFileEl) {
-            selectedFileEl.classList.remove("fd-icon--selected");
-            selectedFileEl = null;
-        }
+        // 왼쪽 파일 선택 해제
+        leftFiles.forEach(f => f.el.classList.remove("fd-icon--selected"));
         e.stopPropagation();
     });
 
@@ -90,15 +94,23 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
     splitArea.appendChild(rightPane);
     screen.appendChild(splitArea);
 
+    // 휴지통
+    const trash = el("div", { class: "copy-trash" },
+        el("div", { class: "copy-trash__icon", text: "🗑️" }),
+        el("div", { class: "copy-trash__label", text: "휴지통" }),
+    );
+    screen.appendChild(trash);
+
     // 단축키 카드
     const cards = makeShortcutCards([
+        { combo: "드래그", label: "다중선택", icon: "🖱️" },
         { combo: "Ctrl+C", label: "복사", icon: "📋" },
         { combo: "Ctrl+V", label: "붙임", icon: "🖌️" },
     ]);
     screen.appendChild(cards.el);
 
     const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 왼쪽 파일 클릭 → Ctrl+C → 오른쪽 폴더 클릭 → Ctrl+V 로 복사!" });
+        text: "💡 파일 클릭/드래그로 선택 → Ctrl+C → 오른쪽 폴더 클릭 → Ctrl+V! 다 복사하면 보너스!" });
     screen.appendChild(bottomHelp);
 
     function updateScoreDisplay() {
@@ -122,9 +134,9 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
         rightGrid.innerHTML = "";
         leftFiles = [];
         copiedCount = 0;
-        selectedFileEl = null;
+        totalNeeded = stage.fileCount;
+        clipboard = [];
         rightFolderSelected = false;
-        clipboard = null;
         rightPane.classList.remove("copy-pane--selected");
 
         const names = shuffle(cfg.fileNames).slice(0, stage.fileCount);
@@ -133,17 +145,60 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
             fileEl.addEventListener("click", (e) => {
                 if (!inStage) return;
                 e.stopPropagation();
-                // 다른 선택 해제
-                if (selectedFileEl) selectedFileEl.classList.remove("fd-icon--selected");
                 rightPane.classList.remove("copy-pane--selected");
                 rightFolderSelected = false;
-                fileEl.classList.add("fd-icon--selected");
-                selectedFileEl = fileEl;
+                const fileObj = leftFiles.find(f => f.el === fileEl);
+                if (!fileObj || fileObj.copied) return;
+                // Ctrl 또는 Shift = 추가 선택, 아니면 단일 선택
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                    leftFiles.forEach(f => f.el.classList.remove("fd-icon--selected"));
+                }
+                fileEl.classList.toggle("fd-icon--selected");
             });
             leftGrid.appendChild(fileEl);
             leftFiles.push({ el: fileEl, name, copied: false });
         });
     }
+
+    // ----- 드래그 선택 (lasso) -----
+    leftGrid.addEventListener("pointerdown", (e) => {
+        if (!inStage) return;
+        if (e.target.closest(".fd-icon")) return;   // 아이콘 위 클릭은 무시
+        isDragging = true;
+        const rect = leftGrid.getBoundingClientRect();
+        dragStart = { x: e.clientX, y: e.clientY };
+        lassoEl = el("div", { class: "copy-lasso" });
+        document.body.appendChild(lassoEl);
+        // 단일 클릭처럼 보이면 선택 해제
+        leftFiles.forEach(f => f.el.classList.remove("fd-icon--selected"));
+        e.preventDefault();
+    });
+
+    document.addEventListener("pointermove", (e) => {
+        if (!isDragging) return;
+        const x1 = Math.min(dragStart.x, e.clientX);
+        const y1 = Math.min(dragStart.y, e.clientY);
+        const x2 = Math.max(dragStart.x, e.clientX);
+        const y2 = Math.max(dragStart.y, e.clientY);
+        lassoEl.style.left = `${x1}px`;
+        lassoEl.style.top = `${y1}px`;
+        lassoEl.style.width = `${x2 - x1}px`;
+        lassoEl.style.height = `${y2 - y1}px`;
+        // 라소와 겹치는 파일 선택
+        leftFiles.forEach(f => {
+            if (f.copied) return;
+            const r = f.el.getBoundingClientRect();
+            const overlap = r.left < x2 && r.right > x1 && r.top < y2 && r.bottom > y1;
+            f.el.classList.toggle("fd-icon--selected", overlap);
+        });
+    });
+
+    document.addEventListener("pointerup", () => {
+        if (isDragging) {
+            isDragging = false;
+            if (lassoEl) { lassoEl.remove(); lassoEl = null; }
+        }
+    });
 
     // ----- 키 입력 -----
     function onKey(e) {
@@ -152,66 +207,111 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
         const k = e.key.toLowerCase();
         if (k === "c") {
             e.preventDefault();
-            // 선택된 파일이 있어야 복사 가능
-            if (!selectedFileEl) return;
-            const fileObj = leftFiles.find(f => f.el === selectedFileEl);
-            if (!fileObj) return;
-            clipboard = { name: fileObj.name, sourceObj: fileObj };
+            const selected = leftFiles.filter(f => f.el.classList.contains("fd-icon--selected") && !f.copied);
+            if (selected.length === 0) return;
+            clipboard = selected.map(f => ({ name: f.name, sourceObj: f }));
             cards.flash("Ctrl+C");
-            // 파일에 복사됨 표시
-            selectedFileEl.classList.add("fd-icon--copied");
+            selected.forEach(f => f.el.classList.add("fd-icon--copied"));
             Audio.tick();
-            const r = selectedFileEl.getBoundingClientRect();
-            showScoreFloat(r.left + r.width / 2, r.top, "📋 복사!", "good");
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 3;
+            showScoreFloat(cx, cy, `📋 ${selected.length}개 복사!`, "good");
         } else if (k === "v") {
             e.preventDefault();
-            if (!clipboard) return;
+            if (clipboard.length === 0) return;
             if (!rightFolderSelected) return;
-            // 이미 복사한 파일인지 체크
-            if (clipboard.sourceObj.copied) return;
-            clipboard.sourceObj.copied = true;
-            copiedCount++;
-
-            // 오른쪽에 복사본 추가
-            const newFile = makeFileIcon(clipboard.name);
-            newFile.classList.add("fd-icon--just-pasted");
-            rightGrid.appendChild(newFile);
-            setTimeout(() => newFile.classList.remove("fd-icon--just-pasted"), 500);
-
-            cards.flash("Ctrl+V");
             const stage = cfg.stages[stageIndex];
-            const gain = stage.pointsPerCopy;
-            score += gain;
+            let totalGain = 0;
+            clipboard.forEach(item => {
+                if (item.sourceObj.copied) return;
+                item.sourceObj.copied = true;
+                copiedCount++;
+                totalGain += stage.pointsPerCopy;
+
+                // 오른쪽에 복사본
+                const newFile = makeFileIcon(item.name);
+                newFile.classList.add("fd-icon--just-pasted");
+                rightGrid.appendChild(newFile);
+                setTimeout(() => newFile.classList.remove("fd-icon--just-pasted"), 500);
+
+                // 원본 → 휴지통 애니메이션
+                animateToTrash(item.sourceObj.el);
+            });
+            score += totalGain;
             updateScoreDisplay();
-            Audio.bigCorrect(4);
+            cards.flash("Ctrl+V");
+            Audio.bigCorrect(Math.min(8, 2 + clipboard.length));
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 3;
+            showScoreFloat(cx, cy, `🖌 +${totalGain.toLocaleString()}`, "good");
 
-            const r = newFile.getBoundingClientRect();
-            showScoreFloat(r.left + r.width / 2, r.top, `+${gain}`, "good");
+            clipboard = [];
 
-            // 클립보드 비우기
-            clipboard = null;
-
-            // 완료 체크
-            if (copiedCount >= stage.targetCopies) {
-                endStage();
+            if (copiedCount >= totalNeeded) {
+                // 시간 보너스
+                const remainSec = Math.max(0, (stageEndsAt - performance.now()) / 1000);
+                const bonus = Math.floor(remainSec) * stage.timeBonusPerSec;
+                if (bonus > 0) {
+                    score += bonus;
+                    updateScoreDisplay();
+                    showTimeBonus(remainSec, bonus);
+                }
+                setTimeout(() => endStage(), 1200);
             }
         }
     }
     document.addEventListener("keydown", onKey);
 
-    // 빈공간 클릭 시 선택 해제
+    function animateToTrash(fileEl) {
+        const r = fileEl.getBoundingClientRect();
+        const tr = trash.getBoundingClientRect();
+        const startX = r.left + r.width / 2;
+        const startY = r.top + r.height / 2;
+        const endX = tr.left + tr.width / 2;
+        const endY = tr.top + tr.height / 2;
+
+        // 원본 자리 비우기
+        fileEl.style.visibility = "hidden";
+
+        // 떠다니는 클론
+        const clone = el("div", { class: "copy-trash-fly", text: "📄" });
+        clone.style.left = `${startX}px`;
+        clone.style.top = `${startY}px`;
+        clone.style.setProperty("--dx", `${endX - startX}px`);
+        clone.style.setProperty("--dy", `${endY - startY}px`);
+        document.body.appendChild(clone);
+
+        setTimeout(() => {
+            clone.remove();
+            // 휴지통 흔들기
+            trash.classList.add("copy-trash--shake");
+            setTimeout(() => trash.classList.remove("copy-trash--shake"), 400);
+        }, 700);
+    }
+
+    function showTimeBonus(secLeft, bonus) {
+        const banner = el("div", { class: "cycle-banner",
+            text: `⚡ ${Math.floor(secLeft)}초 남음! 시간 보너스 +${bonus.toLocaleString()}점!` });
+        screen.appendChild(banner);
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        emitParticles(cx, cy, 24, ["✨","⭐","🌟","💫","🎉","🎊"]);
+        setTimeout(() => {
+            banner.style.transition = "opacity 0.4s, transform 0.4s";
+            banner.style.opacity = "0";
+            banner.style.transform = "translateX(-50%) translateY(-20px)";
+            setTimeout(() => banner.remove(), 420);
+        }, 1500);
+    }
+
     screen.addEventListener("click", (e) => {
         if (e.target === screen || e.target === splitArea) {
-            if (selectedFileEl) {
-                selectedFileEl.classList.remove("fd-icon--selected");
-                selectedFileEl = null;
-            }
+            leftFiles.forEach(f => f.el.classList.remove("fd-icon--selected"));
             rightPane.classList.remove("copy-pane--selected");
             rightFolderSelected = false;
         }
     });
 
-    // ----- 스테이지 -----
     function startStage(idx) {
         stageIndex = idx;
         const stage = cfg.stages[idx];
@@ -254,7 +354,7 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
         if (inStage) {
             const remain = Math.max(0, (stageEndsAt - performance.now()) / 1000);
             timerEl.textContent = remain.toFixed(1);
-            timerEl.style.color = remain < 5 ? "#d63031" : "var(--secondary-dark)";
+            timerEl.style.color = remain < 3 ? "#d63031" : "var(--secondary-dark)";
             if (remain <= 0) endStage();
         }
         rafId = requestAnimationFrame(tick);
@@ -289,7 +389,7 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
 
     const startGame = () => {
         showCarryOverBanner(startingScore);
-        showIntroInstruction(screen, "Ctrl+C 로 복사! Ctrl+V 로 붙여넣기!");
+        showIntroInstruction(screen, "드래그로 선택! Ctrl+C → Ctrl+V! 빨리 끝내면 보너스!");
         startStage(0);
     };
     if (!hasSeenTutorial("gameCopy")) {

@@ -1064,98 +1064,90 @@ const TYPE_GAME_CONFIG = {
 // 3단원 단축키편 — 게임 설정들
 // ============================================================
 
-// 스텝 1: 폴더 이름 변경 마법
+// 스텝 1: 폴더 이름 변경 마법 (2단계, 2글자 한정)
+const RENAME_NAMES_2CHAR = [
+    "사진", "음악", "문서", "게임", "숙제", "일기", "학교", "친구",
+    "가족", "사랑", "우정", "신발", "가방", "모자", "시계", "안경",
+    "노트", "공책", "필통", "수첩", "그림", "글씨", "공원", "산책",
+    "여행", "추억", "기록", "행복", "보물",
+];
 const RENAME_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 쉬운 폴더 이름",
-            folderCount: 5,
-            duration: 60000,
-            pointsPerCorrect: 1000,
-            wrongPenalty: 100,
-            names: ["사진", "음악", "동영상", "문서", "게임", "숙제", "다운로드", "내문서"],
-        },
-        {
-            label: "2단계 — 중간 길이 이름",
-            folderCount: 5,
-            duration: 60000,
+            label: "1단계 — 폴더 1개 바꾸기",
+            folderCount: 1,
+            duration: 10000,
             pointsPerCorrect: 1500,
             wrongPenalty: 100,
-            names: ["내사진", "수업자료", "여행사진", "디지털수업", "타자연습", "코딩공부", "송양초자료"],
+            names: RENAME_NAMES_2CHAR,
         },
         {
-            label: "3단계 — 송양초 폴더",
+            label: "2단계 — 폴더 여러 개 바꾸기",
             folderCount: 5,
-            duration: 60000,
-            pointsPerCorrect: 2500,
+            duration: 30000,
+            pointsPerCorrect: 2000,
             wrongPenalty: 100,
-            names: ["송양초사진", "송양초숙제", "송양초친구들", "송양초선생님",
-                    "송양초졸업식", "송양초운동회", "송양초디지털수업"],
+            names: RENAME_NAMES_2CHAR,
         },
     ],
 };
 
-// 스텝 2: Ctrl+C / Ctrl+V 복사 마법
+// 스텝 2: Ctrl+C / Ctrl+V 복사 마법 (2단계, 다중 선택 + 휴지통)
 const COPY_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 파일 1개씩 복사",
-            fileCount: 5,
-            targetCopies: 5,
-            duration: 60000,
-            pointsPerCopy: 1500,
-            wrongPenalty: 100,
-        },
-        {
-            label: "2단계 — 더 많은 파일",
-            fileCount: 8,
-            targetCopies: 8,
-            duration: 60000,
+            label: "1단계 — 파일 1개 복사",
+            fileCount: 1,
+            duration: 10000,
             pointsPerCopy: 2000,
             wrongPenalty: 100,
+            timeBonusPerSec: 500,    // 빨리 끝낼수록 보너스
         },
         {
-            label: "3단계 — 모두 복사!",
-            fileCount: 10,
-            targetCopies: 10,
-            duration: 60000,
-            pointsPerCopy: 3000,
+            label: "2단계 — 여러 개 한꺼번에! (드래그 선택)",
+            fileCount: 8,
+            duration: 30000,
+            pointsPerCopy: 2500,
             wrongPenalty: 100,
+            timeBonusPerSec: 1000,
         },
     ],
-    fileNames: ["숙제", "일기", "사진", "음악", "동영상", "수업자료", "그림", "독서록",
-                 "송양초사진", "송양초숙제", "친구목록", "타자연습"],
+    fileNames: ["숙제", "일기", "사진", "음악", "동영상", "그림", "독서록",
+                 "친구", "타자", "공책", "노트", "수첩", "메모"],
 };
 
-// 스텝 3: DELETE + Ctrl+Z 부활 마법
+// 스텝 3: DELETE + Ctrl+Z 부활 마법 (10셀, Ctrl+Z 순차 부활)
 const DELETE_UNDO_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — DELETE & 되살리기",
-            duration: 20000,
-            cols: 10,
-            rows: 10,
-            pointPerDelete: 300,
-            undoBonus: 2000,        // Ctrl+Z 한 번 누르면 +
-            clearBonus: 3000,
-        },
-        {
-            label: "2단계 — 반복 챌린지",
+            label: "1단계 — DELETE & Ctrl+Z 부활",
             duration: 25000,
-            cols: 10,
-            rows: 10,
-            pointPerDelete: 350,
-            undoBonus: 2500,
-            clearBonus: 4000,
+            cols: 5,
+            rows: 2,            // 5×2 = 10셀
+            pointPerDelete: 600,
+            undoPerCell: 400,    // 부활 한 칸당 점수
+            clearBonus: 3000,
+            undoStaggerMs: 180,  // 한 칸씩 등장하는 간격
         },
         {
-            label: "3단계 — 부활 폭주!",
-            duration: 30000,
-            cols: 10,
-            rows: 10,
-            pointPerDelete: 400,
-            undoBonus: 3000,
+            label: "2단계 — 반복 폭주!",
+            duration: 35000,
+            cols: 5,
+            rows: 2,
+            pointPerDelete: 800,
+            undoPerCell: 500,
+            clearBonus: 4000,
+            undoStaggerMs: 150,
+        },
+        {
+            label: "3단계 — 최종 챌린지!",
+            duration: 40000,
+            cols: 5,
+            rows: 2,
+            pointPerDelete: 1000,
+            undoPerCell: 600,
             clearBonus: 5000,
+            undoStaggerMs: 120,
         },
     ],
 };
@@ -1190,46 +1182,43 @@ const SELECT_ALL_GAME_CONFIG = {
     ],
 };
 
-// 스텝 5: 송양초 BBQ 보너스
+// 스텝 5: 송양초 BBQ 보너스 (단일 화로 + 캠핑 분위기)
 const BBQ_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 한적한 점심",
+            label: "1단계 — 캠핑 시작!",
             duration: 30000,
-            grillSpots: 3,
-            cookTimeMs: 8000,          // 생→완벽 까지 걸리는 시간
-            perfectWindowMs: 2000,      // 완벽 타이밍 윈도우
-            burnAfterMs: 11000,         // 이 시간 지나면 탐
-            spawnIntervalMs: 1500,
+            cookTimeMs: 4500,           // 생 → 완벽 까지
+            perfectWindowMs: 1600,       // 완벽 타이밍 윈도우
+            burnAfterMs: 7000,           // 이 시간 지나면 탐
+            spawnDelayMs: 800,           // 다음 고기 등장 딜레이
         },
         {
-            label: "2단계 — 저녁 손님",
+            label: "2단계 — 친구들 도착!",
             duration: 30000,
-            grillSpots: 4,
-            cookTimeMs: 6000,
-            perfectWindowMs: 1500,
-            burnAfterMs: 8500,
-            spawnIntervalMs: 1200,
+            cookTimeMs: 3500,
+            perfectWindowMs: 1300,
+            burnAfterMs: 5500,
+            spawnDelayMs: 700,
         },
         {
             label: "3단계 — 회식 폭주!",
             duration: 30000,
-            grillSpots: 4,
-            cookTimeMs: 4500,
-            perfectWindowMs: 1200,
-            burnAfterMs: 6500,
-            spawnIntervalMs: 900,
+            cookTimeMs: 2800,
+            perfectWindowMs: 1000,
+            burnAfterMs: 4500,
+            spawnDelayMs: 600,
         },
     ],
     points: {
-        raw: 300,            // 생고기에 키 누름
-        cooking: 800,        // 익는중
-        perfect: 3000,       // 완벽!
-        burnt: -500,         // 탐
+        raw: 500,             // 생고기에 키 누름
+        cooking: 1500,        // 익는중
+        perfect: 5000,        // 완벽!
+        burnt: -800,          // 탐
     },
-    comboBonus: 500,         // 완벽 연속 시 추가 (콤보 ×N)
-    goldenChance: 1 / 8,     // 황금 고기 확률
-    goldenMultiplier: 5,     // 황금 완벽 시 ×5
+    comboBonus: 1000,         // 완벽 연속 시 추가 (콤보 ×N)
+    goldenChance: 1 / 6,
+    goldenMultiplier: 5,
     meatTypes: [
         { emoji: "🥩", name: "소고기" },
         { emoji: "🍖", name: "닭다리" },
@@ -1370,8 +1359,9 @@ const TUTORIALS = {
         icon: "📋",
         steps: [
             { illu: "📄 클릭 → Ctrl+C", text: "왼쪽 파일을 클릭한 뒤 Ctrl+C 로 복사" },
-            { illu: "📁 클릭 → Ctrl+V", text: "오른쪽 폴더 클릭한 뒤 Ctrl+V 로 붙여넣기" },
-            { illu: "5개 → 8개 → 10개", text: "단계마다 더 많이 복사해야 해요!" },
+            { illu: "🖱️ 드래그", text: "2단계는 마우스 드래그로 여러 개 한꺼번에!" },
+            { illu: "📁 클릭 → Ctrl+V", text: "오른쪽 폴더 클릭 → Ctrl+V → 원본은 🗑️ 휴지통으로!" },
+            { illu: "⚡ 빨리 = 보너스", text: "다 끝내면 남은 시간 × 보너스 점수!" },
         ],
     },
     gameDeleteUndo: {
@@ -1396,9 +1386,9 @@ const TUTORIALS = {
         title: "스텝 5 — 송양초 BBQ 보너스",
         icon: "🥩",
         steps: [
-            { illu: "🥩 → 🍖 → 🥓", text: "그릴 위 고기가 생→익는중→완벽 으로 변해요" },
-            { illu: "1·2·3·4 키", text: "고기 자리 숫자키를 완벽한 순간에 누르세요!" },
-            { illu: "🌶️ 탔어 -500", text: "너무 늦으면 타요. 완벽 타이밍 = 3000점! 콤보 보너스도!" },
+            { illu: "🏕️🔥", text: "캠핑장 화로 위에 고기가 한 개씩 올라와요" },
+            { illu: "🥩 → 🍖 → 🥓", text: "고기가 생→익는중→완벽 으로 변해요. 지글지글~" },
+            { illu: "SPACE 완벽!", text: "완벽한 순간 SPACE! 너무 늦으면 타요 (-800점)" },
         ],
     },
 };

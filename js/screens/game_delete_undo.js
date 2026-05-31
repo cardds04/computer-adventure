@@ -1,6 +1,10 @@
 /* ============================================================
-   3단원 스텝 3: DELETE + Ctrl+Z 부활 마법
-   100개 그리드 DELETE 로 다 지움 → Ctrl+Z 로 한꺼번에 부활 → 반복!
+   3단원 스텝 3: DELETE + Ctrl+Z 부활 마법 (10셀, 순차 부활)
+   - 5×2 = 10셀
+   - DELETE 로 1번부터 하나씩 지움
+   - 다 지운 뒤 Ctrl+Z → 한 개씩 차례로 부활 (애니메이션)
+   - 부활 중에는 DELETE 비활성
+   - 전부 부활하면 다시 DELETE 가능
    ============================================================ */
 
 SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
@@ -13,19 +17,19 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
     let stageEndsAt = 0;
     let inStage = false;
     let finished = false;
-    let stageDeletes = 0;
     let totalDeletes = 0;
     let totalUndos = 0;
-    let cycleCount = 0;       // 한 단계 내 사이클 횟수
     let rafId = null;
     let buttons = [];
     let nextIdx = 0;
+    let undoing = false;       // 부활 진행 중 (DELETE 막힘)
+    let undoTimer = null;
 
     // HUD
     const goalScore = LESSONS_UNIT3.find(l => l.id === params.lessonId)?.goalScore || 0;
     const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
     const stageEl = el("span", { text: "1 / 3" });
-    const timerEl = el("span", { class: "hud-chip__big", text: "20.0", style: { color: "var(--secondary-dark)" } });
+    const timerEl = el("span", { class: "hud-chip__big", text: "25.0", style: { color: "var(--secondary-dark)" } });
     const deletesEl = el("span", { class: "hud-chip__big", text: "0" });
     const lvlChip = makeLevelChip();
     lvlChip.update(state.points);
@@ -65,7 +69,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
     screen.appendChild(playerChar);
 
     const playArea = el("div", { class: "delete-grid-area" });
-    const grid = el("div", { class: "delete-grid" });
+    const grid = el("div", { class: "delete-grid delete-grid--small" });
     playArea.appendChild(grid);
     screen.appendChild(playArea);
 
@@ -76,7 +80,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
     screen.appendChild(cards.el);
 
     const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 DELETE로 차근차근 지우고, Ctrl+Z로 한꺼번에 부활! 반복할수록 점수 UP!" });
+        text: "💡 DELETE 10번 → Ctrl+Z → 차례로 부활 → 전부 살아나면 다시 지우기! 반복!" });
     screen.appendChild(bottomHelp);
 
     function updateScoreDisplay() {
@@ -89,7 +93,6 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
         grid.innerHTML = "";
         buttons = [];
         nextIdx = 0;
-        stageDeletes = 0;
         const stage = cfg.stages[stageIndex];
         grid.style.gridTemplateColumns = `repeat(${stage.cols}, 1fr)`;
         const total = stage.cols * stage.rows;
@@ -111,7 +114,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
     }
 
     function deleteOne() {
-        if (!inStage || finished) return;
+        if (!inStage || finished || undoing) return;
         if (nextIdx >= buttons.length) return;
         const stage = cfg.stages[stageIndex];
 
@@ -121,7 +124,6 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
         setTimeout(() => { btn.style.visibility = "hidden"; }, 220);
 
         nextIdx++;
-        stageDeletes++;
         totalDeletes++;
         score += stage.pointPerDelete;
         deletesEl.textContent = totalDeletes.toLocaleString();
@@ -132,40 +134,61 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
         if (nextIdx < buttons.length) {
             highlightNext();
         } else {
-            // 100개 다 지움 → 보너스 + Ctrl+Z 권유
             score += stage.clearBonus;
             updateScoreDisplay();
-            cycleCount++;
-            showCycleBanner(`✨ 모두 지움! +${stage.clearBonus.toLocaleString()} | Ctrl+Z 로 되살리기!`);
+            showCycleBanner(`✨ 10개 다 지움! +${stage.clearBonus.toLocaleString()} | Ctrl+Z 로 부활!`);
             Audio.bigCorrect(6);
         }
     }
 
-    function undoAll() {
-        if (!inStage || finished) return;
-        if (nextIdx === 0) return;       // 지운 게 없으면 무시
+    function undoSequential() {
+        if (!inStage || finished || undoing) return;
+        if (nextIdx === 0) return;
         const stage = cfg.stages[stageIndex];
 
-        // 모든 셀 되살리기
-        buttons.forEach(btn => {
-            btn.classList.remove("delete-cell--gone");
-            btn.style.visibility = "";
-            btn.classList.remove("delete-cell--next");
-        });
-        nextIdx = 0;
-        stageDeletes = 0;
-        highlightNext();
-
-        score += stage.undoBonus;
-        totalUndos++;
-        updateScoreDisplay();
+        undoing = true;
+        cards.setActive("DELETE", false);
+        cards.setActive("Ctrl+Z", true);
         cards.flash("Ctrl+Z");
-        Audio.bigCorrect(8);
-        showCycleBanner(`⏪ 부활! +${stage.undoBonus.toLocaleString()} | 다시 DELETE!`);
+        totalUndos++;
 
+        showCycleBanner(`⏪ 부활 중... 잠깐만요!`);
+
+        // 셀을 하나씩 차례대로 부활 (역순? 정순? — 정순으로)
+        // 부활할 셀들은 0..nextIdx-1
+        let revivedCount = 0;
+        const toRevive = nextIdx;
+
+        function reviveStep(i) {
+            if (i >= toRevive) {
+                // 모두 부활 완료
+                undoing = false;
+                nextIdx = 0;
+                buttons.forEach(b => b.classList.remove("delete-cell--gone"));
+                highlightNext();
+                cards.setActive("DELETE", true);
+                cards.setActive("Ctrl+Z", false);
+                Audio.bigCorrect(8);
+                showCycleBanner(`✨ 부활 완료! 다시 DELETE!`);
+                return;
+            }
+            const btn = buttons[i];
+            btn.style.visibility = "";
+            btn.classList.add("delete-cell--reviving");
+            setTimeout(() => btn.classList.remove("delete-cell--reviving"), 400);
+            score += stage.undoPerCell;
+            updateScoreDisplay();
+            revivedCount++;
+            // 작은 효과음
+            Audio.tick();
+            undoTimer = setTimeout(() => reviveStep(i + 1), stage.undoStaggerMs);
+        }
+        reviveStep(0);
+
+        // 화려한 효과
         const cx = window.innerWidth / 2;
         const cy = window.innerHeight / 2;
-        emitParticles(cx, cy, 20, ["✨","⭐","🌟","💫","⏪"]);
+        emitParticles(cx, cy, 16, ["✨","⭐","🌟","💫","⏪"]);
     }
 
     function showCycleBanner(text) {
@@ -176,7 +199,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
             banner.style.opacity = "0";
             banner.style.transform = "translateX(-50%) translateY(-20px)";
             setTimeout(() => banner.remove(), 420);
-        }, 1100);
+        }, 1200);
     }
 
     function startStage(idx) {
@@ -186,8 +209,10 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
         timerEl.textContent = (stage.duration / 1000).toFixed(1);
         showStageBanner(stage.label);
         Audio.roundStart();
-        cycleCount = 0;
         buildGrid();
+        undoing = false;
+        cards.setActive("DELETE", true);
+        cards.setActive("Ctrl+Z", false);
 
         setTimeout(() => {
             inStage = true;
@@ -208,6 +233,8 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
 
     function endStage() {
         inStage = false;
+        if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
+        undoing = false;
         stageIndex++;
         if (stageIndex >= cfg.stages.length) {
             setTimeout(finishGame, 1000);
@@ -230,6 +257,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
     function cleanup() {
         finished = true;
         if (rafId) cancelAnimationFrame(rafId);
+        if (undoTimer) clearTimeout(undoTimer);
         document.removeEventListener("keydown", keyHandler);
     }
 
@@ -254,7 +282,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
         if (!inStage || finished) return;
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
             e.preventDefault();
-            undoAll();
+            undoSequential();
         } else if (e.key === "Delete" || e.key === "Backspace") {
             e.preventDefault();
             deleteOne();
@@ -268,7 +296,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
 
     const startGame = () => {
         showCarryOverBanner(startingScore);
-        showIntroInstruction(screen, "DELETE 로 지우고 Ctrl+Z 로 되살리기 반복!");
+        showIntroInstruction(screen, "DELETE 10번 → Ctrl+Z → 차례로 부활!");
         startStage(0);
     };
     if (!hasSeenTutorial("gameDeleteUndo")) {
