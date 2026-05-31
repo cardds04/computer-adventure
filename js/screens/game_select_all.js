@@ -109,10 +109,19 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
         const cols = Math.ceil(Math.sqrt(count * 1.6));
         playArea.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
+        const goldenChance = stage.goldenChance || 0;
+        const goldenMult = cfg.goldenMultiplier || 10;
         for (let i = 0; i < count; i++) {
-            const fEl = makeFolderIcon(`폴더${i + 1}`);
+            const isGolden = Math.random() < goldenChance;
+            const fEl = makeFolderIcon(isGolden ? `★${i + 1}★` : `폴더${i + 1}`);
+            if (isGolden) {
+                fEl.classList.add("fd-icon--golden");
+                // 폴더 아이콘 이모지 교체: ⭐ 표시
+                const emojiEl = fEl.querySelector(".fd-icon__emoji");
+                if (emojiEl) emojiEl.textContent = "⭐";
+            }
             fEl.style.userSelect = "none";
-            const obj = { el: fEl, selected: false, deleted: false };
+            const obj = { el: fEl, selected: false, deleted: false, isGolden, goldenMult };
             fEl.addEventListener("click", (e) => {
                 if (!inStage || obj.deleted) return;
                 if (suppressNextClick) {
@@ -178,12 +187,14 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
         const multiplier = isComboDelete ? stage.selectAllMultiplier : 1;
 
         let gained = 0;
+        let goldenCount = 0;
         selected.forEach(f => {
             f.deleted = true;
             f.el.classList.add("fd-icon--gone");
-            const g = stage.pointPerSingleDelete * multiplier;
+            const folderMult = f.isGolden ? f.goldenMult : 1;
+            const g = stage.pointPerSingleDelete * multiplier * folderMult;
             gained += g;
-            const r = f.el.getBoundingClientRect();
+            if (f.isGolden) goldenCount++;
             setTimeout(() => { f.el.style.visibility = "hidden"; }, 400);
         });
         foldersAlive -= selected.length;
@@ -195,15 +206,16 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
         Audio.bigCorrect(isComboDelete ? 8 : 4);
         allSelected = false;
 
+        const goldenNote = goldenCount > 0 ? ` (⭐×${goldenCount})` : "";
         if (isComboDelete) {
-            showCycleBanner(`💥 한 방에 ${selected.length}개! +${gained.toLocaleString()} (×${multiplier}) + 콤보 +${stage.comboBonus.toLocaleString()}!`);
+            showCycleBanner(`💥 한 방에 ${selected.length}개${goldenNote}! +${gained.toLocaleString()} (×${multiplier}) + 콤보 +${stage.comboBonus.toLocaleString()}!`);
             const cx = window.innerWidth / 2;
             const cy = window.innerHeight / 2;
-            emitParticles(cx, cy, 32, ["✨","⭐","🌟","💫","🎉","🎊","🔥"]);
+            emitParticles(cx, cy, 32 + goldenCount * 4, ["✨","⭐","🌟","💫","🎉","🎊","🔥"]);
         } else {
             const cx = (selected[0].el.getBoundingClientRect().left + selected[0].el.getBoundingClientRect().right) / 2;
             const cy = selected[0].el.getBoundingClientRect().top;
-            showScoreFloat(cx, cy, `+${gained.toLocaleString()}`, "good");
+            showScoreFloat(cx, cy, `+${gained.toLocaleString()}${goldenNote}`, "good");
         }
 
         // 모두 지워졌으면 즉시 다음 단계

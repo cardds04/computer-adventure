@@ -4563,6 +4563,29 @@ body {
     font-size: 11px;
 }
 
+/* 황금 ×10 폴더 */
+.fd-icon--golden {
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.6), rgba(255, 165, 0, 0.5));
+    border-radius: 8px;
+    box-shadow: 0 0 14px gold, inset 0 0 8px rgba(255, 215, 0, 0.6);
+    animation: golden-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.fd-icon--golden .fd-icon__emoji {
+    filter: drop-shadow(0 0 8px gold);
+}
+
+.fd-icon--golden .fd-icon__label {
+    color: #6b4400 !important;
+    text-shadow: 1px 1px 0 rgba(255, 215, 0, 0.7) !important;
+    font-weight: 900;
+}
+
+@keyframes golden-pulse {
+    0%   { box-shadow: 0 0 10px gold, inset 0 0 6px rgba(255, 215, 0, 0.5); }
+    100% { box-shadow: 0 0 24px gold, inset 0 0 14px rgba(255, 215, 0, 0.8); }
+}
+
 /* ============================================================
    스텝 5: BBQ 보너스 게임
    ============================================================ */

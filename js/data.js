@@ -1150,7 +1150,7 @@ const DELETE_UNDO_GAME_CONFIG = {
     ],
 };
 
-// 스텝 4: Ctrl+A 전체 선택 마법 (2단계, 드래그+휴지통 가능)
+// 스텝 4: Ctrl+A 전체 선택 마법 (2단계, 드래그+휴지통 + 황금×10 폴더)
 const SELECT_ALL_GAME_CONFIG = {
     stages: [
         {
@@ -1160,6 +1160,7 @@ const SELECT_ALL_GAME_CONFIG = {
             pointPerSingleDelete: 200,
             selectAllMultiplier: 5,    // Ctrl+A → DELETE 시 ×5
             comboBonus: 8000,
+            goldenChance: 1 / 8,       // 약 1/8 폴더는 황금 ×10
         },
         {
             label: "2단계 — 폴더 60개 폭주!",
@@ -1168,8 +1169,10 @@ const SELECT_ALL_GAME_CONFIG = {
             pointPerSingleDelete: 250,
             selectAllMultiplier: 5,
             comboBonus: 15000,
+            goldenChance: 1 / 8,
         },
     ],
+    goldenMultiplier: 10,              // 황금 폴더 1개당 ×10
 };
 
 // 스텝 5: 송양초 BBQ 보너스 (드래그 앤 드롭 — 트레이→화로→접시)
@@ -1246,15 +1249,15 @@ const BBQ_GAME_CONFIG = {
         },
     ],
     points: {
-        raw: 300,
-        cooking: 1500,
-        perfect: 5000,
-        overcook: 800,
-        burnt: -800,
+        raw: 600,            // 300 → 600 (×2)
+        cooking: 3000,        // 1500 → 3000 (×2)
+        perfect: 10000,       // 5000 → 10000 (×2)
+        overcook: 1600,       // 800 → 1600 (×2)
+        burnt: -1600,         // -800 → -1600 (×2)
     },
-    comboBonus: 1000,
+    comboBonus: 2000,         // 1000 → 2000 (×2)
     goldenChance: 1 / 6,
-    goldenMultiplier: 5,
+    goldenMultiplier: 10,     // ×5 → ×10 황금 고기
     meatTypes: [
         { emoji: "🥩", name: "소고기" },
         { emoji: "🍖", name: "닭다리" },
@@ -1412,9 +1415,9 @@ const TUTORIALS = {
         title: "스텝 4 — 전체 선택 폭주",
         icon: "⬛",
         steps: [
-            { illu: "📁📁📁 50개+", text: "엄청 많은 폴더가 나와요" },
+            { illu: "📁📁⭐📁⭐", text: "수많은 폴더 중 가끔 ⭐ 황금 폴더(×10)가 섞여있어요!" },
             { illu: "🖱️ 클릭/드래그", text: "클릭 또는 드래그로 선택 → DELETE 또는 🗑️로!" },
-            { illu: "💡 Ctrl+A → DELETE", text: "Ctrl+A 로 전부 선택 → 한 방에 ×5 보너스!" },
+            { illu: "💡 Ctrl+A → DELETE", text: "Ctrl+A 전체선택 → 한 방에 ×5 + 황금까지 한꺼번에 ×50!" },
         ],
     },
     gameSort: {
@@ -1431,8 +1434,8 @@ const TUTORIALS = {
         icon: "🥩",
         steps: [
             { illu: "🥩 → 🔥", text: "왼쪽 트레이의 고기를 화로 위로 드래그!" },
-            { illu: "🔥 지글지글~", text: "고기가 생→익는중→완벽 으로 변해요" },
-            { illu: "🥓 → 🍽️", text: "완벽한 순간 화로에서 접시로 드래그! +5,000점" },
+            { illu: "🔥 지글지글~", text: "고기 변화: 생→익는중→완벽! 가끔 황금×10 고기!" },
+            { illu: "🥓 → 🍽️", text: "완벽한 순간 접시로 드래그! +10,000점 (황금 = +100,000!)" },
         ],
     },
 };
