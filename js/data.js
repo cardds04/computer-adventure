@@ -1092,28 +1092,29 @@ const RENAME_GAME_CONFIG = {
     ],
 };
 
-// 스텝 2: Ctrl+C / Ctrl+V 복사 마법 (2단계, 다중 선택 + 휴지통)
+// 스텝 2: Ctrl+C / Ctrl+V (한 폴더 안에서 복사 증식, 화면 꽉채우면 보너스)
 const COPY_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 파일 1개 복사",
-            fileCount: 1,
-            duration: 10000,
-            pointsPerCopy: 2000,
-            wrongPenalty: 100,
-            timeBonusPerSec: 500,    // 빨리 끝낼수록 보너스
+            label: "1단계 — 폴더 가득 채우기 (작게)",
+            startCount: 1,
+            targetCount: 30,
+            duration: 15000,
+            pointsPerPaste: 200,
+            fillBonus: 5000,
+            timeBonusPerSec: 500,
         },
         {
-            label: "2단계 — 여러 개 한꺼번에! (드래그 선택)",
-            fileCount: 8,
+            label: "2단계 — 화면 꽉 채우기!",
+            startCount: 1,
+            targetCount: 80,
             duration: 30000,
-            pointsPerCopy: 2500,
-            wrongPenalty: 100,
+            pointsPerPaste: 200,
+            fillBonus: 20000,
             timeBonusPerSec: 1000,
         },
     ],
-    fileNames: ["숙제", "일기", "사진", "음악", "동영상", "그림", "독서록",
-                 "친구", "타자", "공책", "노트", "수첩", "메모"],
+    fileNames: ["숙제", "사진", "음악", "그림", "공책", "메모"],
 };
 
 // 스텝 3: DELETE + Ctrl+Z 부활 마법 (10셀, Ctrl+Z 순차 부활)
@@ -1187,41 +1188,44 @@ const BBQ_GAME_CONFIG = {
     stages: [
         {
             label: "1단계 — 캠핑 시작!",
-            duration: 45000,
-            trayCount: 6,              // 한 단계에 진열되는 고기 수
-            grillSlots: 3,             // 화로 자리 개수
-            cookTimeMs: 5000,           // 생 → 완벽 까지 (개별 고기)
-            perfectWindowMs: 2200,
-            burnAfterMs: 8500,
-            timeBonusPerSec: 300,
-        },
-        {
-            label: "2단계 — 친구들 도착!",
-            duration: 50000,
+            duration: 15000,            // 15초
             trayCount: 10,
-            grillSlots: 3,
+            grillSlots: 5,              // 화로 5자리
             cookTimeMs: 4200,
             perfectWindowMs: 1800,
             burnAfterMs: 7000,
-            timeBonusPerSec: 500,
+            timeBonusPerSec: 400,
+            scoreMult: 1.0,
+        },
+        {
+            label: "2단계 — 친구들 도착!",
+            duration: 20000,            // 20초
+            trayCount: 16,
+            grillSlots: 5,
+            cookTimeMs: 3000,           // 더 빨라짐
+            perfectWindowMs: 1300,
+            burnAfterMs: 5000,
+            timeBonusPerSec: 700,
+            scoreMult: 1.5,             // 점수 1.5배
         },
         {
             label: "3단계 — 회식 폭주!",
-            duration: 60000,
-            trayCount: 14,
-            grillSlots: 3,
-            cookTimeMs: 3500,
-            perfectWindowMs: 1500,
-            burnAfterMs: 5800,
-            timeBonusPerSec: 800,
+            duration: 30000,            // 30초
+            trayCount: 24,
+            grillSlots: 5,
+            cookTimeMs: 2200,           // 매우 빠름
+            perfectWindowMs: 1000,
+            burnAfterMs: 3800,
+            timeBonusPerSec: 1200,
+            scoreMult: 2.0,             // 점수 2배
         },
     ],
     points: {
-        raw: 300,             // 너무 일찍 빼면
-        cooking: 1500,        // 덜 익었지만 먹을만
-        perfect: 5000,        // 완벽!
-        overcook: 800,        // 좀 탄듯
-        burnt: -800,          // 완전 탐
+        raw: 300,
+        cooking: 1500,
+        perfect: 5000,
+        overcook: 800,
+        burnt: -800,
     },
     comboBonus: 1000,
     goldenChance: 1 / 6,
@@ -1362,22 +1366,21 @@ const TUTORIALS = {
         ],
     },
     gameCopy: {
-        title: "스텝 2 — 복사 붙여넣기",
+        title: "스텝 2 — 복사로 채우기",
         icon: "📋",
         steps: [
-            { illu: "📄 클릭 → Ctrl+C", text: "왼쪽 파일을 클릭한 뒤 Ctrl+C 로 복사" },
-            { illu: "🖱️ 드래그", text: "2단계는 마우스 드래그로 여러 개 한꺼번에!" },
-            { illu: "📁 클릭 → Ctrl+V", text: "오른쪽 폴더 클릭 → Ctrl+V → 원본은 🗑️ 휴지통으로!" },
-            { illu: "⚡ 빨리 = 보너스", text: "다 끝내면 남은 시간 × 보너스 점수!" },
+            { illu: "📄 클릭/드래그", text: "파일을 클릭하거나 드래그해서 선택" },
+            { illu: "Ctrl+C → Ctrl+V", text: "Ctrl+C 복사 → Ctrl+V 누르면 파일이 늘어나요!" },
+            { illu: "📦 꽉 채우면 +보너스", text: "선택을 늘려가며 폴더를 가득 채우세요. 빨리 채우면 보너스!" },
         ],
     },
     gameDeleteUndo: {
         title: "스텝 3 — 되돌리기 부활",
         icon: "⏪",
         steps: [
-            { illu: "⌫ 100개 지워!", text: "DELETE/BACKSPACE 로 한 개씩 지우기" },
-            { illu: "Ctrl+Z ⏪", text: "Ctrl+Z 누르면 한꺼번에 모두 되살아나요!" },
-            { illu: "지우기 → 살리기 반복", text: "반복할수록 점수가 쌓여요. 마무리는 다 지운 상태로!" },
+            { illu: "⌫ 한번 = 1개 지움", text: "DELETE/BACKSPACE 한 번 = 한 칸 지우기" },
+            { illu: "Ctrl+Z = 1개 부활", text: "Ctrl+Z 한 번 = 마지막으로 지운 칸 한 개 되살리기" },
+            { illu: "지우기 ↔ 살리기 반복", text: "두 키를 자유롭게 반복! 누를수록 점수가 쌓여요" },
         ],
     },
     gameSelectAll: {
@@ -1385,8 +1388,8 @@ const TUTORIALS = {
         icon: "⬛",
         steps: [
             { illu: "📁📁📁 50개+", text: "엄청 많은 폴더가 나와요" },
-            { illu: "1개 클릭 → DELETE", text: "한 개씩 지울 수도 있지만... 너무 느려요!" },
-            { illu: "💡 Ctrl+A → DELETE", text: "Ctrl+A 로 전부 선택해서 한 방에! 점수 ×5 보너스!" },
+            { illu: "🖱️ 클릭/드래그", text: "클릭 또는 드래그로 선택 → DELETE 또는 🗑️로!" },
+            { illu: "💡 Ctrl+A → DELETE", text: "Ctrl+A 로 전부 선택 → 한 방에 ×5 보너스!" },
         ],
     },
     gameBbq: {

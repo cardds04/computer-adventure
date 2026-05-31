@@ -278,13 +278,14 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
         // 트레이에서 빼고 슬롯에 넣기
         const trayIdx = trayMeats.indexOf(meat);
         if (trayIdx >= 0) trayMeats.splice(trayIdx, 1);
-        // 트레이에서 사라지는 페이드
-        meat.el.classList.add("bbq-meat--leaving-tray");
-        setTimeout(() => meat.el.remove(), 220);
+        // 트레이의 옛 element를 별도 참조로 잡아둠 (setTimeout 닫힘 함수가 meat.el을 늦게 읽지 못하도록)
+        const oldTrayEl = meat.el;
+        oldTrayEl.classList.add("bbq-meat--leaving-tray");
+        setTimeout(() => oldTrayEl.remove(), 220);
 
-        // 새 element를 slot에 만들기 (드래그 핸들 다시 와이어링 필요)
+        // 새 element를 slot에 만들기 (시작은 raw)
         const newEl = el("div", {
-            class: "bbq-meat bbq-meat--cooking" + (meat.isGolden ? " bbq-meat--golden" : ""),
+            class: "bbq-meat bbq-meat--raw" + (meat.isGolden ? " bbq-meat--golden" : ""),
             text: meat.meatType.emoji,
         });
         // 이전 hint 가리기
@@ -328,6 +329,7 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
         if (!slot) return;
 
         const stage = cfg.stages[stageIndex];
+        const sm = stage.scoreMult || 1;
         const elapsed = performance.now() - slot.startedAt;
         let gain = 0;
         let label = "";
@@ -336,33 +338,33 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
         let burntFlag = false;
 
         if (elapsed < stage.cookTimeMs * 0.5) {
-            gain = cfg.points.raw;
+            gain = Math.floor(cfg.points.raw * sm);
             label = `🩸 생고기 +${gain}`;
             cls = "bad";
             perfectCombo = 0;
         } else if (elapsed < stage.cookTimeMs) {
-            gain = cfg.points.cooking;
-            label = `덜 익음 +${gain}`;
+            gain = Math.floor(cfg.points.cooking * sm);
+            label = `덜 익음 +${gain.toLocaleString()}`;
             cls = "good";
             perfectCombo = 0;
         } else if (elapsed < stage.cookTimeMs + stage.perfectWindowMs) {
             isPerfect = true;
             perfectCombo++;
             const comboMult = 1 + (perfectCombo - 1) * 0.5;
-            gain = Math.floor(cfg.points.perfect * comboMult);
+            gain = Math.floor(cfg.points.perfect * comboMult * sm);
             if (meat.isGolden) gain *= cfg.goldenMultiplier;
-            gain += cfg.comboBonus * (perfectCombo - 1);
+            gain += Math.floor(cfg.comboBonus * (perfectCombo - 1) * sm);
             label = meat.isGolden ? `🌟 황금 완벽! +${gain.toLocaleString()}` : `🎉 완벽! +${gain.toLocaleString()}`;
             cls = "rainbow";
             Audio.perfectBell && Audio.perfectBell();
         } else if (elapsed < stage.burnAfterMs) {
-            gain = cfg.points.overcook;
-            label = `좀 탔어 +${gain}`;
+            gain = Math.floor(cfg.points.overcook * sm);
+            label = `좀 탔어 +${gain.toLocaleString()}`;
             cls = "good";
             perfectCombo = 0;
         } else {
-            gain = cfg.points.burnt;
-            label = `🔥 탔어 ${gain}`;
+            gain = Math.floor(cfg.points.burnt * sm);
+            label = `🔥 탔어 ${gain.toLocaleString()}`;
             cls = "bad";
             perfectCombo = 0;
             burntFlag = true;

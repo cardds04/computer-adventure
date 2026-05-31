@@ -18,6 +18,13 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
     let rafId = null;
     let foldersAlive = 0;
     let hintShown = false;
+    // 드래그 / 라소 / 휴지통 드롭
+    let pdStart = null;        // 라소 시작 위치
+    let lassoEl = null;
+    let suppressNextClick = false;
+    let dragFolder = null;     // 휴지통으로 끌고 가는 폴더
+    let dragGhost = null;
+    let trashHover = false;
 
     // HUD
     const goalScore = LESSONS_UNIT3.find(l => l.id === params.lessonId)?.goalScore || 0;
@@ -65,15 +72,23 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
     const playArea = el("div", { class: "select-all-area" });
     screen.appendChild(playArea);
 
+    // 휴지통 (드래그해서 폴더 버리기)
+    const trash = el("div", { class: "copy-trash sa-trash" },
+        el("div", { class: "copy-trash__icon", text: "🗑️" }),
+        el("div", { class: "copy-trash__label", text: "휴지통" }),
+    );
+    screen.appendChild(trash);
+
     const cards = makeShortcutCards([
-        { combo: "클릭", label: "선택", icon: "🖱️" },
+        { combo: "클릭/드래그", label: "선택", icon: "🖱️" },
         { combo: "Ctrl+A", label: "전체선택", icon: "⬛" },
         { combo: "DELETE", label: "지우기", icon: "⌫" },
+        { combo: "🗑️ 드래그", label: "휴지통", icon: "📁→🗑️" },
     ]);
     screen.appendChild(cards.el);
 
     const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 한 개씩? 너무 느려요. Ctrl+A → DELETE 로 한 방에! 점수 ×5 보너스!" });
+        text: "💡 클릭/드래그 선택 → DELETE 또는 🗑️로 끌어다 버리기! Ctrl+A → DELETE = ×5!" });
     screen.appendChild(bottomHelp);
 
     function updateScoreDisplay() {
@@ -96,11 +111,16 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
 
         for (let i = 0; i < count; i++) {
             const fEl = makeFolderIcon(`폴더${i + 1}`);
+            fEl.style.userSelect = "none";
             const obj = { el: fEl, selected: false, deleted: false };
             fEl.addEventListener("click", (e) => {
                 if (!inStage || obj.deleted) return;
+                if (suppressNextClick) {
+                    suppressNextClick = false;
+                    e.stopPropagation();
+                    return;
+                }
                 e.stopPropagation();
-                // 전체 선택 상태 해제
                 if (allSelected) {
                     folders.forEach(f => {
                         f.selected = false;
@@ -108,8 +128,25 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
                     });
                     allSelected = false;
                 }
+                if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                    // 단일 선택이면 다른 모두 해제
+                    folders.forEach(f => {
+                        if (f !== obj) {
+                            f.selected = false;
+                            f.el.classList.remove("fd-icon--selected");
+                        }
+                    });
+                }
                 obj.selected = !obj.selected;
                 fEl.classList.toggle("fd-icon--selected", obj.selected);
+            });
+            // 휴지통으로 드래그
+            fEl.addEventListener("pointerdown", (e) => {
+                if (!inStage || obj.deleted) return;
+                if (e.button !== 0) return;
+                // 라소가 시작되면 pdStart를 통해 처리됨. 폴더 위 pointerdown은 일단 후보로만 기록
+                pdStart = { x: e.clientX, y: e.clientY, ctrl: e.ctrlKey || e.metaKey || e.shiftKey,
+                            onFolder: obj };
             });
             playArea.appendChild(fEl);
             folders.push(obj);
@@ -275,6 +312,111 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
         }
     }
     document.addEventListener("keydown", keyHandler);
+
+    // ----- 빈 공간 pointerdown 으로도 라소 시작 가능 -----
+    playArea.addEventListener("pointerdown", (e) => {
+        if (!inStage) return;
+        if (e.button !== 0) return;
+        if (e.target.closest(".fd-icon")) return; // 폴더 위는 폴더 핸들러가 처리
+        pdStart = { x: e.clientX, y: e.clientY, ctrl: e.ctrlKey || e.metaKey || e.shiftKey };
+    });
+
+    document.addEventListener("pointermove", (e) => {
+        if (!pdStart || dragGhost) {
+            // 드래그 모드 진행 중 처리
+            if (dragGhost) {
+                dragGhost.style.left = `${e.clientX}px`;
+                dragGhost.style.top = `${e.clientY}px`;
+                // 휴지통 호버 체크
+                const tr = trash.getBoundingClientRect();
+                const inTrash = e.clientX >= tr.left && e.clientX <= tr.right
+                    && e.clientY >= tr.top && e.clientY <= tr.bottom;
+                if (inTrash !== trashHover) {
+                    trashHover = inTrash;
+                    trash.classList.toggle("copy-trash--hover", inTrash);
+                }
+            }
+            return;
+        }
+        const dx = e.clientX - pdStart.x;
+        const dy = e.clientY - pdStart.y;
+        if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+
+        // 폴더 위에서 시작된 경우 → 드래그 (휴지통으로 이동)
+        if (pdStart.onFolder && !lassoEl) {
+            const folder = pdStart.onFolder;
+            // 만약 선택 안된 폴더라면, 그 폴더만 선택
+            if (!folder.selected) {
+                folders.forEach(f => {
+                    f.selected = false;
+                    f.el.classList.remove("fd-icon--selected");
+                });
+                folder.selected = true;
+                folder.el.classList.add("fd-icon--selected");
+                allSelected = false;
+            }
+            const draggingCount = folders.filter(f => f.selected && !f.deleted).length;
+            dragGhost = el("div", { class: "sa-drag-ghost",
+                html: `<span class="sa-drag-ghost__icon">📁</span><span class="sa-drag-ghost__count">${draggingCount}</span>` });
+            document.body.appendChild(dragGhost);
+            dragGhost.style.left = `${e.clientX}px`;
+            dragGhost.style.top = `${e.clientY}px`;
+            dragFolder = folder;
+            suppressNextClick = true;
+            return;
+        }
+
+        // 빈 공간 / 폴더 라소 모드
+        if (!lassoEl) {
+            if (!pdStart.ctrl) {
+                folders.forEach(f => {
+                    f.selected = false;
+                    f.el.classList.remove("fd-icon--selected");
+                });
+                allSelected = false;
+            }
+            lassoEl = el("div", { class: "copy-lasso" });
+            document.body.appendChild(lassoEl);
+            suppressNextClick = true;
+            document.body.style.userSelect = "none";
+        }
+        const x1 = Math.min(pdStart.x, e.clientX);
+        const y1 = Math.min(pdStart.y, e.clientY);
+        const x2 = Math.max(pdStart.x, e.clientX);
+        const y2 = Math.max(pdStart.y, e.clientY);
+        lassoEl.style.left = `${x1}px`;
+        lassoEl.style.top = `${y1}px`;
+        lassoEl.style.width = `${x2 - x1}px`;
+        lassoEl.style.height = `${y2 - y1}px`;
+        folders.forEach(f => {
+            if (f.deleted) return;
+            const r = f.el.getBoundingClientRect();
+            const overlap = r.left < x2 && r.right > x1 && r.top < y2 && r.bottom > y1;
+            f.selected = overlap;
+            f.el.classList.toggle("fd-icon--selected", overlap);
+        });
+    });
+
+    document.addEventListener("pointerup", (e) => {
+        // 드래그 → 휴지통 처리
+        if (dragGhost) {
+            dragGhost.remove();
+            dragGhost = null;
+            if (trashHover) {
+                deleteSelected();   // 휴지통에 드롭하면 선택된 거 다 지우기
+            }
+            trash.classList.remove("copy-trash--hover");
+            trashHover = false;
+            dragFolder = null;
+        }
+        // 라소 정리
+        if (lassoEl) {
+            lassoEl.remove();
+            lassoEl = null;
+            document.body.style.userSelect = "";
+        }
+        pdStart = null;
+    });
 
     root.appendChild(screen);
     updateScoreDisplay();

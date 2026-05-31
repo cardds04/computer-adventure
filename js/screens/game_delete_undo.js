@@ -114,7 +114,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
     }
 
     function deleteOne() {
-        if (!inStage || finished || undoing) return;
+        if (!inStage || finished) return;
         if (nextIdx >= buttons.length) return;
         const stage = cfg.stages[stageIndex];
 
@@ -141,49 +141,29 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
         }
     }
 
-    function undoSequential() {
-        if (!inStage || finished || undoing) return;
-        if (nextIdx === 0) return;
+    function undoOne() {
+        if (!inStage || finished) return;
+        if (nextIdx === 0) return;          // 지운 게 없음
         const stage = cfg.stages[stageIndex];
 
-        undoing = true;
-        cards.setActive("DELETE", false);
-        cards.setActive("Ctrl+Z", true);
-        cards.flash("Ctrl+Z");
-        totalUndos++;
-
-        showCycleBanner(`⏪ 부활 중... 잠깐만요!`);
-
-        // 부활은 역순 (Undo): 마지막에 지운 것부터 거꾸로
-        const toRevive = nextIdx;
-
-        function reviveStep(i) {
-            if (i < 0) {
-                undoing = false;
-                nextIdx = 0;
-                buttons.forEach(b => b.classList.remove("delete-cell--gone"));
-                highlightNext();
-                cards.setActive("DELETE", true);
-                cards.setActive("Ctrl+Z", false);
-                Audio.bigCorrect(8);
-                showCycleBanner(`✨ 부활 완료! 다시 DELETE!`);
-                return;
-            }
-            const btn = buttons[i];
-            btn.style.visibility = "";
-            btn.classList.add("delete-cell--reviving");
-            setTimeout(() => btn.classList.remove("delete-cell--reviving"), 400);
-            score += stage.undoPerCell;
-            updateScoreDisplay();
-            Audio.tick();
-            undoTimer = setTimeout(() => reviveStep(i - 1), stage.undoStaggerMs);
+        // 현재 next 표시 제거 (있다면)
+        if (nextIdx < buttons.length) {
+            buttons[nextIdx].classList.remove("delete-cell--next");
         }
-        reviveStep(toRevive - 1);
+        // 한 칸 부활 — 마지막에 지운 것부터 거꾸로
+        nextIdx--;
+        const btn = buttons[nextIdx];
+        btn.style.visibility = "";
+        btn.classList.remove("delete-cell--gone");
+        btn.classList.add("delete-cell--reviving");
+        btn.classList.add("delete-cell--next");   // 다시 next 표시
+        setTimeout(() => btn.classList.remove("delete-cell--reviving"), 400);
 
-        // 화려한 효과
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        emitParticles(cx, cy, 16, ["✨","⭐","🌟","💫","⏪"]);
+        score += stage.undoPerCell;
+        totalUndos++;
+        updateScoreDisplay();
+        cards.flash("Ctrl+Z");
+        Audio.tick();
     }
 
     function showCycleBanner(text) {
@@ -277,7 +257,7 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
         if (!inStage || finished) return;
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
             e.preventDefault();
-            undoSequential();
+            undoOne();
         } else if (e.key === "Delete" || e.key === "Backspace") {
             e.preventDefault();
             deleteOne();
