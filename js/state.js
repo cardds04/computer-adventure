@@ -241,15 +241,15 @@ function getTopHall(n = 10) {
     return getLocalHall().slice(0, n);
 }
 
-// 주어진 점수가 Top 10에 들어가는지
+// 주어진 점수가 Top 30에 들어가는지
 async function wouldQualifyForTop10(score) {
-    const list = await fetchHallTop(10);
-    if (list.length < 10) return true;
+    const list = await fetchHallTop(30);
+    if (list.length < 30) return true;
     const lowest = list[list.length - 1].score || 0;
     return score > lowest;
 }
 
-// 주어진 점수가 몇 위인지 (1-based, 11 이상이면 11 반환)
+// 주어진 점수가 몇 위인지 (1-based, 31 이상이면 31 반환)
 async function getRankForScore(score) {
     const list = await fetchHallTop(50);
     let rank = 1;

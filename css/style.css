@@ -1987,6 +1987,65 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+/* 3열 그리드 — Top 30을 한 화면에 압축해서 보여줌 */
+.hall-board__list--3col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-flow: row;          /* 1·2·3 → 4·5·6 → ... */
+    gap: 4px 14px;
+}
+
+.hall-board__list--3col .hall-board__row {
+    grid-template-columns: 36px 1fr auto;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-left-width: 3px;
+}
+
+/* 3열 모드에서는 레벨 정보 숨김 (공간 절약) */
+.hall-board__list--3col .hall-board__lvl {
+    display: none;
+}
+
+.hall-board__list--3col .hall-board__rank {
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.hall-board__list--3col .hall-board__name {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hall-board__list--3col .hall-board__score {
+    font-weight: 800;
+    color: var(--primary-dark);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.hall-board__list--3col .hall-board__loading,
+.hall-board__list--3col .hall-board__empty {
+    grid-column: 1 / -1;
+}
+
+/* 좁은 화면 — 2열로 줄임 */
+@media (max-width: 760px) {
+    .hall-board__list--3col {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 매우 좁은 화면 — 1열 */
+@media (max-width: 480px) {
+    .hall-board__list--3col {
+        grid-template-columns: 1fr;
+    }
+}
+
 .hall-board__rank {
     font-size: 24px;
     text-align: center;

@@ -95,8 +95,8 @@ SCREEN_RENDERERS.home = function (root) {
         });
     }
 
-    // ----- 명예의 전당 게시판 (인라인) -----
-    const hallList = el("div", { class: "hall-board__list" });
+    // ----- 명예의 전당 게시판 (인라인, Top 30 — 3열) -----
+    const hallList = el("div", { class: "hall-board__list hall-board__list--3col" });
     hallList.appendChild(el("div", { class: "hall-board__loading", text: "🔄 불러오는 중..." }));
 
     const hallBoard = el("div", { class: "hall-board" },
@@ -104,12 +104,12 @@ SCREEN_RENDERERS.home = function (root) {
             el("span", { class: "hall-board__icon", text: "🏆" }),
             el("h2", { class: "hall-board__title", text: "명예의 전당" }),
             el("span", { class: "hall-board__sub",
-                text: isSharedHallEnabled() ? "🌐 전체 공유 Top 10" : "Top 10 (로컬)" }),
+                text: isSharedHallEnabled() ? "🌐 전체 공유 Top 30" : "Top 30 (로컬)" }),
         ),
         hallList,
     );
 
-    fetchHallTop(10).then(list => {
+    fetchHallTop(30).then(list => {
         hallList.innerHTML = "";
         if (!list || list.length === 0) {
             hallList.appendChild(el("div", {

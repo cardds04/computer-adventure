@@ -32,8 +32,8 @@ SCREEN_RENDERERS.hall = function (root) {
     screen.appendChild(backBtn);
     root.appendChild(screen);
 
-    // 비동기로 데이터 가져오기
-    fetchHallTop(10).then(list => {
+    // 비동기로 데이터 가져오기 (Top 30)
+    fetchHallTop(30).then(list => {
         tableWrap.innerHTML = "";
         if (!list || list.length === 0) {
             tableWrap.appendChild(el("div", {
@@ -155,7 +155,7 @@ function showRankInfoModal(totalScore, qualifies) {
             style: { color: "var(--text-mid)", fontSize: "16px", margin: "16px 0", lineHeight: "1.5" },
             html: qualifies
                 ? `현재 점수 <b>${totalScore.toLocaleString()}점</b>으로<br>명예의 전당이 갱신되었어요!`
-                : `현재 점수 <b>${totalScore.toLocaleString()}점</b>은<br>아직 Top 10에 들지 못해요.<br>더 도전해보세요!`,
+                : `현재 점수 <b>${totalScore.toLocaleString()}점</b>은<br>아직 Top 30에 들지 못해요.<br>더 도전해보세요!`,
         }),
         el("button", {
             class: "btn btn--big tutorial-card__cta",
