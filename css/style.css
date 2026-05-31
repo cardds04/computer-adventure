@@ -4768,12 +4768,12 @@ body {
     top: 70px;
     left: 16px;
     right: 16px;
-    height: 150px;
+    height: 170px;                  /* 폴더 탭 공간 + body 들어가게 */
     display: flex;
     justify-content: space-around;
     align-items: center;
     gap: 14px;
-    padding: 14px;
+    padding: 18px 14px 10px;        /* 위 여백 더 줘서 탭이 잘리지 않게 */
     background: rgba(0, 0, 0, 0.3);
     border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 14px;
@@ -4781,31 +4781,61 @@ body {
 }
 
 .sort-folder {
+    position: relative;
     flex: 1;
-    max-width: 200px;
-    background: linear-gradient(180deg, #f4d68a 0%, #d8a648 100%);
+    max-width: 220px;
+    background: linear-gradient(180deg, #ffd76e 0%, #d89a30 100%);
     border: 4px solid #8b5a00;
-    border-radius: 14px;
-    padding: 12px;
+    border-radius: 4px 12px 12px 12px;   /* 좌상단만 직각 — 폴더 탭이 붙어있음 */
+    padding: 24px 16px 14px;              /* 상단 탭 공간 확보 */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 -4px 0 rgba(0, 0, 0, 0.2);
+    gap: 6px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 -6px 0 rgba(0, 0, 0, 0.18);
     transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    margin-top: 16px;                     /* 폴더 탭이 위로 튀어나오니까 */
+}
+
+/* 폴더 상단 탭 (가짜 폴더 모양) */
+.sort-folder::before {
+    content: '';
+    position: absolute;
+    top: -16px;
+    left: -4px;
+    width: 80px;
+    height: 22px;
+    background: linear-gradient(180deg, #ffd76e 0%, #e2a73a 100%);
+    border: 4px solid #8b5a00;
+    border-bottom: none;
+    border-radius: 8px 14px 0 0;
+}
+
+/* 폴더 안쪽 종이 (살짝 보이는 흰 부분) */
+.sort-folder::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    width: 24px;
+    height: 8px;
+    background: white;
+    border-radius: 2px;
+    opacity: 0.5;
 }
 
 .sort-folder__icon {
     font-size: 56px;
     line-height: 1;
     filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+    margin-top: 4px;
 }
 
 .sort-folder__label {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 900;
     color: #4a2c00;
-    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .sort-folder--hover {
@@ -4834,7 +4864,7 @@ body {
 
 .sort-play-area {
     position: absolute;
-    top: 240px;
+    top: 260px;
     left: 16px;
     right: 16px;
     bottom: 180px;
@@ -4887,6 +4917,7 @@ body {
     cursor: grabbing;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
     filter: brightness(1.15);
+    pointer-events: none;       /* 드래그 중 자기 자신이 elementFromPoint를 가리지 않도록 */
 }
 
 .sort-file--sucked {
