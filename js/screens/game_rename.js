@@ -296,6 +296,18 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
         });
     }
 
+    // F2 키로도 이름 바꾸기 가능
+    function f2Handler(e) {
+        if (!inStage || finished || isEditing) return;
+        if (e.key !== "F2") return;
+        const selected = folders.find(f => f.el.classList.contains("fd-icon--selected") && !f.done);
+        if (selected) {
+            e.preventDefault();
+            startEditing(selected);
+        }
+    }
+    document.addEventListener("keydown", f2Handler);
+
     // 시작
     root.appendChild(screen);
     updateScoreDisplay();
@@ -303,7 +315,7 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
 
     const startGame = () => {
         showCarryOverBanner(startingScore);
-        showIntroInstruction(screen, "폴더 우클릭 → 이름 바꾸기 → 입력 → Enter!");
+        showIntroInstruction(screen, "폴더 클릭 → 우클릭 메뉴 또는 F2 키로 이름 바꾸기!");
         startStage(0);
     };
     if (!hasSeenTutorial("gameRename")) {
