@@ -1987,11 +1987,12 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-/* 3열 그리드 — Top 30을 한 화면에 압축해서 보여줌 */
+/* 3열 그리드 — 좌:1~10, 중:11~20, 우:21~30 (각 열을 위→아래로 채움) */
 .hall-board__list--3col {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-auto-flow: row;          /* 1·2·3 → 4·5·6 → ... */
+    grid-template-rows: repeat(10, auto);
+    grid-auto-flow: column;        /* 1~10 한 열 → 11~20 → 21~30 */
     gap: 4px 14px;
 }
 
@@ -2032,17 +2033,20 @@ body {
     grid-column: 1 / -1;
 }
 
-/* 좁은 화면 — 2열로 줄임 */
+/* 좁은 화면 — 2열로 줄임 (좌:1~15, 우:16~30) */
 @media (max-width: 760px) {
     .hall-board__list--3col {
         grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(15, auto);
     }
 }
 
-/* 매우 좁은 화면 — 1열 */
+/* 매우 좁은 화면 — 1열 (자연 순서) */
 @media (max-width: 480px) {
     .hall-board__list--3col {
         grid-template-columns: 1fr;
+        grid-template-rows: none;
+        grid-auto-flow: row;
     }
 }
 
