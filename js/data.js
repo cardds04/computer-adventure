@@ -240,7 +240,7 @@ const LESSONS = [
 const UNITS = [
     { num: 1,  title: "마우스편",  icon: "🖱️", active: true  },
     { num: 2,  title: "키보드편",  icon: "⌨️", active: true  },
-    { num: 3,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 3,  title: "단축키편",  icon: "🪄", active: true  },
     { num: 4,  title: "준비 중",   icon: "🔒", active: false },
     { num: 5,  title: "준비 중",   icon: "🔒", active: false },
     { num: 6,  title: "준비 중",   icon: "🔒", active: false },
@@ -317,9 +317,59 @@ const LESSONS_UNIT2 = [
     },
 ];
 
+// 3단원 단축키편 스텝들 (레벨 30 도달 가능하도록 점수 풍부)
+const LESSONS_UNIT3 = [
+    {
+        id: "u3_lesson1",
+        num: "스텝 1",
+        title: "폴더 이름 변경 마법",
+        desc: "폴더 우클릭 → 이름 바꾸기 → 새 이름 입력 📁",
+        icon: "📁",
+        game: "gameRename",
+        goalScore: 5000,
+    },
+    {
+        id: "u3_lesson2",
+        num: "스텝 2",
+        title: "복사 붙여넣기 마법",
+        desc: "Ctrl+C로 복사, Ctrl+V로 붙여넣기! 📋",
+        icon: "📋",
+        game: "gameCopy",
+        goalScore: 15000,
+    },
+    {
+        id: "u3_lesson3",
+        num: "스텝 3",
+        title: "되돌리기 부활 마법",
+        desc: "DELETE로 지우고, Ctrl+Z로 되살리기! ⏪",
+        icon: "⏪",
+        game: "gameDeleteUndo",
+        goalScore: 30000,
+    },
+    {
+        id: "u3_lesson4",
+        num: "스텝 4",
+        title: "전체 선택 폭주 마법",
+        desc: "Ctrl+A로 전부 선택! DELETE로 한 방에 지워요! ⬛",
+        icon: "⬛",
+        game: "gameSelectAll",
+        goalScore: 60000,
+    },
+    {
+        id: "u3_lesson5",
+        num: "스텝 5",
+        title: "송양초 BBQ 보너스!",
+        desc: "고기 완벽 굽기! 타이밍 맞춰 키 누르기 🥩🔥",
+        icon: "🥩",
+        game: "gameBbq",
+        goalScore: 100000,
+    },
+];
+
 const LESSONS_BY_UNIT = {
     1: LESSONS_UNIT1,
     2: LESSONS_UNIT2,
+    3: LESSONS_UNIT3,
 };
 
 function getLessonsForUnit(unitNum) {
@@ -1010,6 +1060,184 @@ const TYPE_GAME_CONFIG = {
     wrongPenalty: 20,
 };
 
+// ============================================================
+// 3단원 단축키편 — 게임 설정들
+// ============================================================
+
+// 스텝 1: 폴더 이름 변경 마법
+const RENAME_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 쉬운 폴더 이름",
+            folderCount: 5,
+            duration: 60000,
+            pointsPerCorrect: 1000,
+            wrongPenalty: 100,
+            names: ["사진", "음악", "동영상", "문서", "게임", "숙제", "다운로드", "내문서"],
+        },
+        {
+            label: "2단계 — 중간 길이 이름",
+            folderCount: 5,
+            duration: 60000,
+            pointsPerCorrect: 1500,
+            wrongPenalty: 100,
+            names: ["내사진", "수업자료", "여행사진", "디지털수업", "타자연습", "코딩공부", "송양초자료"],
+        },
+        {
+            label: "3단계 — 송양초 폴더",
+            folderCount: 5,
+            duration: 60000,
+            pointsPerCorrect: 2500,
+            wrongPenalty: 100,
+            names: ["송양초사진", "송양초숙제", "송양초친구들", "송양초선생님",
+                    "송양초졸업식", "송양초운동회", "송양초디지털수업"],
+        },
+    ],
+};
+
+// 스텝 2: Ctrl+C / Ctrl+V 복사 마법
+const COPY_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 파일 1개씩 복사",
+            fileCount: 5,
+            targetCopies: 5,
+            duration: 60000,
+            pointsPerCopy: 1500,
+            wrongPenalty: 100,
+        },
+        {
+            label: "2단계 — 더 많은 파일",
+            fileCount: 8,
+            targetCopies: 8,
+            duration: 60000,
+            pointsPerCopy: 2000,
+            wrongPenalty: 100,
+        },
+        {
+            label: "3단계 — 모두 복사!",
+            fileCount: 10,
+            targetCopies: 10,
+            duration: 60000,
+            pointsPerCopy: 3000,
+            wrongPenalty: 100,
+        },
+    ],
+    fileNames: ["숙제", "일기", "사진", "음악", "동영상", "수업자료", "그림", "독서록",
+                 "송양초사진", "송양초숙제", "친구목록", "타자연습"],
+};
+
+// 스텝 3: DELETE + Ctrl+Z 부활 마법
+const DELETE_UNDO_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — DELETE & 되살리기",
+            duration: 20000,
+            cols: 10,
+            rows: 10,
+            pointPerDelete: 300,
+            undoBonus: 2000,        // Ctrl+Z 한 번 누르면 +
+            clearBonus: 3000,
+        },
+        {
+            label: "2단계 — 반복 챌린지",
+            duration: 25000,
+            cols: 10,
+            rows: 10,
+            pointPerDelete: 350,
+            undoBonus: 2500,
+            clearBonus: 4000,
+        },
+        {
+            label: "3단계 — 부활 폭주!",
+            duration: 30000,
+            cols: 10,
+            rows: 10,
+            pointPerDelete: 400,
+            undoBonus: 3000,
+            clearBonus: 5000,
+        },
+    ],
+};
+
+// 스텝 4: Ctrl+A 전체 선택 마법
+const SELECT_ALL_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 폴더 50개",
+            folderCount: 50,
+            duration: 25000,
+            pointPerSingleDelete: 100,
+            selectAllMultiplier: 5,   // Ctrl+A → DELETE 시 ×5
+            comboBonus: 5000,
+        },
+        {
+            label: "2단계 — 폴더 80개",
+            folderCount: 80,
+            duration: 30000,
+            pointPerSingleDelete: 120,
+            selectAllMultiplier: 5,
+            comboBonus: 8000,
+        },
+        {
+            label: "3단계 — 폴더 100개 폭주!",
+            folderCount: 100,
+            duration: 35000,
+            pointPerSingleDelete: 150,
+            selectAllMultiplier: 5,
+            comboBonus: 12000,
+        },
+    ],
+};
+
+// 스텝 5: 송양초 BBQ 보너스
+const BBQ_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 한적한 점심",
+            duration: 30000,
+            grillSpots: 3,
+            cookTimeMs: 8000,          // 생→완벽 까지 걸리는 시간
+            perfectWindowMs: 2000,      // 완벽 타이밍 윈도우
+            burnAfterMs: 11000,         // 이 시간 지나면 탐
+            spawnIntervalMs: 1500,
+        },
+        {
+            label: "2단계 — 저녁 손님",
+            duration: 30000,
+            grillSpots: 4,
+            cookTimeMs: 6000,
+            perfectWindowMs: 1500,
+            burnAfterMs: 8500,
+            spawnIntervalMs: 1200,
+        },
+        {
+            label: "3단계 — 회식 폭주!",
+            duration: 30000,
+            grillSpots: 4,
+            cookTimeMs: 4500,
+            perfectWindowMs: 1200,
+            burnAfterMs: 6500,
+            spawnIntervalMs: 900,
+        },
+    ],
+    points: {
+        raw: 300,            // 생고기에 키 누름
+        cooking: 800,        // 익는중
+        perfect: 3000,       // 완벽!
+        burnt: -500,         // 탐
+    },
+    comboBonus: 500,         // 완벽 연속 시 추가 (콤보 ×N)
+    goldenChance: 1 / 8,     // 황금 고기 확률
+    goldenMultiplier: 5,     // 황금 완벽 시 ×5
+    meatTypes: [
+        { emoji: "🥩", name: "소고기" },
+        { emoji: "🍖", name: "닭다리" },
+        { emoji: "🥓", name: "베이컨" },
+        { emoji: "🍗", name: "치킨" },
+    ],
+};
+
 const TUTORIALS = {
     game1: {
         title: "1단원 — 컴퓨터의 기초",
@@ -1125,6 +1353,52 @@ const TUTORIALS = {
             { illu: "사과", text: "화면 가운데 한글 단어가 나와요" },
             { illu: "키 입력 → 사 ✓", text: "한 글자씩 입력하면 위에서 초록색으로 완성!" },
             { illu: "⚡ 송양초~", text: "마지막 단계는 송양초 챌린지! 빨리 칠수록 점수 UP!" },
+        ],
+    },
+    // 3단원 단축키편 튜토리얼들
+    gameRename: {
+        title: "스텝 1 — 폴더 이름 변경",
+        icon: "📁",
+        steps: [
+            { illu: "📁 클릭", text: "폴더를 클릭해서 선택해요" },
+            { illu: "🖱️ 우클릭", text: "마우스 오른쪽 클릭 → '이름 바꾸기' 선택" },
+            { illu: "입력 → Enter", text: "힌트에 적힌 이름을 입력하고 Enter!" },
+        ],
+    },
+    gameCopy: {
+        title: "스텝 2 — 복사 붙여넣기",
+        icon: "📋",
+        steps: [
+            { illu: "📄 클릭 → Ctrl+C", text: "왼쪽 파일을 클릭한 뒤 Ctrl+C 로 복사" },
+            { illu: "📁 클릭 → Ctrl+V", text: "오른쪽 폴더 클릭한 뒤 Ctrl+V 로 붙여넣기" },
+            { illu: "5개 → 8개 → 10개", text: "단계마다 더 많이 복사해야 해요!" },
+        ],
+    },
+    gameDeleteUndo: {
+        title: "스텝 3 — 되돌리기 부활",
+        icon: "⏪",
+        steps: [
+            { illu: "⌫ 100개 지워!", text: "DELETE/BACKSPACE 로 한 개씩 지우기" },
+            { illu: "Ctrl+Z ⏪", text: "Ctrl+Z 누르면 한꺼번에 모두 되살아나요!" },
+            { illu: "지우기 → 살리기 반복", text: "반복할수록 점수가 쌓여요. 마무리는 다 지운 상태로!" },
+        ],
+    },
+    gameSelectAll: {
+        title: "스텝 4 — 전체 선택 폭주",
+        icon: "⬛",
+        steps: [
+            { illu: "📁📁📁 50개+", text: "엄청 많은 폴더가 나와요" },
+            { illu: "1개 클릭 → DELETE", text: "한 개씩 지울 수도 있지만... 너무 느려요!" },
+            { illu: "💡 Ctrl+A → DELETE", text: "Ctrl+A 로 전부 선택해서 한 방에! 점수 ×5 보너스!" },
+        ],
+    },
+    gameBbq: {
+        title: "스텝 5 — 송양초 BBQ 보너스",
+        icon: "🥩",
+        steps: [
+            { illu: "🥩 → 🍖 → 🥓", text: "그릴 위 고기가 생→익는중→완벽 으로 변해요" },
+            { illu: "1·2·3·4 키", text: "고기 자리 숫자키를 완벽한 순간에 누르세요!" },
+            { illu: "🌶️ 탔어 -500", text: "너무 늦으면 타요. 완벽 타이밍 = 3000점! 콤보 보너스도!" },
         ],
     },
 };
