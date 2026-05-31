@@ -1182,47 +1182,54 @@ const SELECT_ALL_GAME_CONFIG = {
     ],
 };
 
-// 스텝 5: 송양초 BBQ 보너스 (단일 화로 + 캠핑 분위기)
+// 스텝 5: 송양초 BBQ 보너스 (드래그 앤 드롭 — 트레이→화로→접시)
 const BBQ_GAME_CONFIG = {
     stages: [
         {
             label: "1단계 — 캠핑 시작!",
-            duration: 30000,
-            cookTimeMs: 4500,           // 생 → 완벽 까지
-            perfectWindowMs: 1600,       // 완벽 타이밍 윈도우
-            burnAfterMs: 7000,           // 이 시간 지나면 탐
-            spawnDelayMs: 800,           // 다음 고기 등장 딜레이
+            duration: 45000,
+            trayCount: 6,              // 한 단계에 진열되는 고기 수
+            grillSlots: 3,             // 화로 자리 개수
+            cookTimeMs: 5000,           // 생 → 완벽 까지 (개별 고기)
+            perfectWindowMs: 2200,
+            burnAfterMs: 8500,
+            timeBonusPerSec: 300,
         },
         {
             label: "2단계 — 친구들 도착!",
-            duration: 30000,
-            cookTimeMs: 3500,
-            perfectWindowMs: 1300,
-            burnAfterMs: 5500,
-            spawnDelayMs: 700,
+            duration: 50000,
+            trayCount: 10,
+            grillSlots: 3,
+            cookTimeMs: 4200,
+            perfectWindowMs: 1800,
+            burnAfterMs: 7000,
+            timeBonusPerSec: 500,
         },
         {
             label: "3단계 — 회식 폭주!",
-            duration: 30000,
-            cookTimeMs: 2800,
-            perfectWindowMs: 1000,
-            burnAfterMs: 4500,
-            spawnDelayMs: 600,
+            duration: 60000,
+            trayCount: 14,
+            grillSlots: 3,
+            cookTimeMs: 3500,
+            perfectWindowMs: 1500,
+            burnAfterMs: 5800,
+            timeBonusPerSec: 800,
         },
     ],
     points: {
-        raw: 500,             // 생고기에 키 누름
-        cooking: 1500,        // 익는중
+        raw: 300,             // 너무 일찍 빼면
+        cooking: 1500,        // 덜 익었지만 먹을만
         perfect: 5000,        // 완벽!
-        burnt: -800,          // 탐
+        overcook: 800,        // 좀 탄듯
+        burnt: -800,          // 완전 탐
     },
-    comboBonus: 1000,         // 완벽 연속 시 추가 (콤보 ×N)
+    comboBonus: 1000,
     goldenChance: 1 / 6,
     goldenMultiplier: 5,
     meatTypes: [
         { emoji: "🥩", name: "소고기" },
         { emoji: "🍖", name: "닭다리" },
-        { emoji: "🥓", name: "베이컨" },
+        { emoji: "🥓", name: "삼겹살" },
         { emoji: "🍗", name: "치킨" },
     ],
 };
@@ -1386,9 +1393,9 @@ const TUTORIALS = {
         title: "스텝 5 — 송양초 BBQ 보너스",
         icon: "🥩",
         steps: [
-            { illu: "🏕️🔥", text: "캠핑장 화로 위에 고기가 한 개씩 올라와요" },
-            { illu: "🥩 → 🍖 → 🥓", text: "고기가 생→익는중→완벽 으로 변해요. 지글지글~" },
-            { illu: "SPACE 완벽!", text: "완벽한 순간 SPACE! 너무 늦으면 타요 (-800점)" },
+            { illu: "🥩 → 🔥", text: "왼쪽 트레이의 고기를 화로 위로 드래그!" },
+            { illu: "🔥 지글지글~", text: "고기가 생→익는중→완벽 으로 변해요" },
+            { illu: "🥓 → 🍽️", text: "완벽한 순간 화로에서 접시로 드래그! +5,000점" },
         ],
     },
 };

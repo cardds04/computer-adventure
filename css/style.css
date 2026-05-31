@@ -4699,8 +4699,278 @@ body {
 .bbq-tree--left { left: 22%; bottom: 0; }
 .bbq-tree--right { right: 25%; bottom: 0; }
 
+/* ===== 트레이/화로/접시 레이아웃 ===== */
+.bbq-layout {
+    position: absolute;
+    inset: 80px 16px 180px 16px;
+    display: grid;
+    grid-template-columns: 1fr 1.6fr 1fr;
+    gap: 16px;
+    z-index: 5;
+}
+
+.bbq-tray-panel,
+.bbq-grill-panel,
+.bbq-plate-panel {
+    background: rgba(0, 0, 0, 0.35);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: inset 0 -4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.bbq-panel__title {
+    color: white;
+    font-size: 18px;
+    font-weight: 900;
+    text-align: center;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+/* 트레이 */
+.bbq-tray {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+    gap: 10px;
+    align-content: flex-start;
+    padding: 8px;
+    background: linear-gradient(135deg, #6d4220, #4a2c10);
+    border-radius: 10px;
+    border: 2px solid #3a2410;
+    overflow-y: auto;
+}
+
+/* 고기 개별 — 트레이 / 슬롯 / 드래그 공통 */
+.bbq-meat {
+    font-size: 48px;
+    line-height: 1;
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+    transition: filter 0.2s, transform 0.15s;
+}
+
+.bbq-meat:hover {
+    transform: scale(1.1);
+}
+
+.bbq-meat--dragging {
+    opacity: 0.35;
+    cursor: grabbing;
+}
+
+.bbq-meat--raw     { filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5)) brightness(0.95); }
+.bbq-meat--cooking { filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5)) hue-rotate(-10deg) brightness(1); }
+.bbq-meat--perfect {
+    filter: drop-shadow(0 0 22px gold) brightness(1.3) hue-rotate(20deg);
+    animation: bbq-perfect-pulse 0.5s ease-in-out infinite alternate;
+}
+.bbq-meat--overcook { filter: brightness(0.7) sepia(0.5); }
+.bbq-meat--burnt {
+    filter: brightness(0.3) grayscale(0.8);
+    transform: rotate(8deg);
+}
+.bbq-meat--golden { text-shadow: 0 0 24px gold; }
+
+@keyframes bbq-perfect-pulse {
+    0%   { transform: scale(1);   filter: drop-shadow(0 0 16px gold) brightness(1.3); }
+    100% { transform: scale(1.15); filter: drop-shadow(0 0 30px gold) brightness(1.55); }
+}
+
+.bbq-meat--leaving-tray {
+    animation: bbq-leave 0.22s ease forwards;
+}
+@keyframes bbq-leave {
+    to { transform: scale(0); opacity: 0; }
+}
+
+/* 드래그 고스트 (커서 따라다님) */
+.bbq-drag-ghost {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    font-size: 64px;
+    pointer-events: none;
+    z-index: 1000;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+    opacity: 0.9;
+}
+
 /* 화로 */
+.bbq-grill-panel {
+    position: relative;
+    overflow: visible;
+}
+
+.bbq-grill-row {
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+}
+
+.bbq-slot {
+    flex: 1;
+    aspect-ratio: 1;
+    max-width: 130px;
+    background: linear-gradient(180deg, #5a3a20 0%, #2a1810 100%);
+    border: 3px solid #8b5a2b;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: inset 0 -6px 0 rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.bbq-slot__hint {
+    color: rgba(255, 220, 180, 0.6);
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    pointer-events: none;
+}
+
+.bbq-slot__gauge {
+    position: absolute;
+    bottom: 6px;
+    left: 8px;
+    right: 8px;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.bbq-slot__gauge-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4caf50 0%, #ffeb3b 50%, #f44336 100%);
+    transition: width 0.05s linear;
+}
+
+.bbq-slot__gauge-perfect {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    background: gold;
+    opacity: 0.55;
+    border-left: 2px solid #fff;
+    border-right: 2px solid #fff;
+    pointer-events: none;
+    box-shadow: 0 0 8px gold;
+}
+
+.bbq-slot .bbq-meat {
+    font-size: 64px;
+    width: 80px;
+    height: 80px;
+}
+
+/* 화로 불꽃 (패널 안에 표시) */
+.bbq-grill-panel .bbq-grill__flames {
+    position: absolute;
+    top: 36px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    pointer-events: none;
+}
+
+.bbq-grill-panel .bbq-flame {
+    position: relative;
+    font-size: 28px;
+    margin: 0 -4px;
+    animation: bbq-flame-dance 0.8s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 10px rgba(255, 120, 30, 0.85));
+    opacity: 0.65;
+}
+.bbq-grill-panel .bbq-flame.f1 { animation-delay: 0s; }
+.bbq-grill-panel .bbq-flame.f2 { animation-delay: 0.3s; font-size: 34px; }
+.bbq-grill-panel .bbq-flame.f3 { animation-delay: 0.15s; }
+
+/* 접시 */
+.bbq-plate {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #f7e8d2 0%, #d8b88a 100%);
+    border-radius: 50%;
+    margin: 12px;
+    aspect-ratio: 1;
+    border: 6px solid #b89060;
+    box-shadow: inset 0 -8px 16px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.5);
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+}
+
+.bbq-plate__icon {
+    font-size: 72px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+}
+
+.bbq-plate__hint {
+    color: #6b4a20;
+    font-weight: 800;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.bbq-plate__placed {
+    position: absolute;
+    font-size: 56px;
+    animation: bbq-plate-bounce 1.3s ease forwards;
+    pointer-events: none;
+    filter: drop-shadow(0 0 18px gold) brightness(1.2);
+}
+.bbq-plate__placed--burnt { filter: brightness(0.4) grayscale(0.8); }
+
+@keyframes bbq-plate-bounce {
+    0%   { transform: translate(0, -60px) scale(1.4); opacity: 0; }
+    20%  { transform: translate(0, 0) scale(1.2); opacity: 1; }
+    35%  { transform: translate(0, -12px) scale(1.1); }
+    50%  { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(0, -20px) scale(0.6); opacity: 0; }
+}
+
+/* 드롭 호버 효과 */
+.bbq-drop-hover.bbq-slot {
+    border-color: gold;
+    box-shadow: 0 0 28px gold, inset 0 -6px 0 rgba(0, 0, 0, 0.5);
+}
+.bbq-drop-hover.bbq-plate {
+    border-color: gold;
+    box-shadow: 0 0 28px gold, inset 0 -8px 16px rgba(0, 0, 0, 0.2);
+    transform: scale(1.04);
+}
+
+/* (구) bbq-grill 단일 화로 (사용 안함) */
 .bbq-grill {
+    display: none;
+}
+.bbq-grill-old {
     position: absolute;
     bottom: 130px;
     left: 50%;
