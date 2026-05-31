@@ -4920,6 +4920,34 @@ body {
     pointer-events: none;       /* 드래그 중 자기 자신이 elementFromPoint를 가리지 않도록 */
 }
 
+/* 라소로 선택된 파일 */
+.sort-file--selected {
+    border-color: #0078d7;
+    box-shadow: 0 0 18px rgba(0, 120, 215, 0.85), 0 6px 14px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(180deg, #e6f0fc 0%, #c6dcf6 100%);
+}
+
+.sort-file--selected::after {
+    content: "✓";
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    background: #0078d7;
+    color: white;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* sort-file 안의 ::after를 위해 position 필요 */
+.sort-file { position: absolute; }
+
 .sort-file--sucked {
     animation: sort-file-suck 0.42s cubic-bezier(0.4, 0, 0.6, 1) forwards;
     pointer-events: none;

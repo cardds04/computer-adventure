@@ -24,9 +24,11 @@ SCREEN_RENDERERS.gameSort = function (root, params) {
     let remaining = 0;
 
     // 드래그 상태
-    let dragFile = null;
-    let dragOffset = { x: 0, y: 0 };
+    let dragFiles = [];          // 한꺼번에 드래그하는 파일들 [{obj, offsetX, offsetY}]
     let dragHover = null;
+    // 라소 선택
+    let pdStart = null;
+    let lassoEl = null;
 
     // HUD
     const goalScore = LESSONS_UNIT3.find(l => l.id === params.lessonId)?.goalScore || 0;
@@ -85,7 +87,7 @@ SCREEN_RENDERERS.gameSort = function (root, params) {
     screen.appendChild(cards.el);
 
     const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 파일을 잡아서 같은 종류의 📁폴더로 끌어다 놓으세요! 다 정리하면 보너스!" });
+        text: "💡 빈 공간 드래그로 여러 파일 한꺼번에 선택! 같은 종류 폴더로 드래그! 다 정리하면 보너스!" });
     screen.appendChild(bottomHelp);
 
     function updateScoreDisplay() {
@@ -164,107 +166,104 @@ SCREEN_RENDERERS.gameSort = function (root, params) {
         fileEl.addEventListener("pointerdown", (e) => {
             if (!inStage || finished || obj.done) return;
             if (e.button !== 0) return;
-            const r = fileEl.getBoundingClientRect();
-            // 절대좌표 → fixed로 전환
-            fileEl.dataset.origLeft = fileEl.style.left;
-            fileEl.dataset.origTop = fileEl.style.top;
-            fileEl.dataset.origRot = fileEl.dataset.rot;
-            fileEl.style.position = "fixed";
-            fileEl.style.left = `${r.left}px`;
-            fileEl.style.top = `${r.top}px`;
-            fileEl.style.transform = `rotate(0deg)`;
-            dragOffset.x = e.clientX - r.left;
-            dragOffset.y = e.clientY - r.top;
-            dragFile = obj;
-            fileEl.classList.add("sort-file--dragging");
+
+            // 이 파일이 라소로 선택되어 있으면 → 선택된 파일들 모두 함께 드래그
+            // 아니라면 → 이 파일만 (다른 선택 해제)
+            let toDrag = [];
+            if (obj.el.classList.contains("sort-file--selected")) {
+                toDrag = files.filter(f => !f.done && f.el.classList.contains("sort-file--selected"));
+            } else {
+                files.forEach(f => f.el.classList.remove("sort-file--selected"));
+                toDrag = [obj];
+            }
+
+            dragFiles = [];
+            toDrag.forEach(f => {
+                const r = f.el.getBoundingClientRect();
+                f.el.dataset.origLeft = f.el.style.left;
+                f.el.dataset.origTop = f.el.style.top;
+                f.el.dataset.origRot = f.el.dataset.rot;
+                f.el.style.position = "fixed";
+                f.el.style.left = `${r.left}px`;
+                f.el.style.top = `${r.top}px`;
+                f.el.style.transform = `rotate(0deg)`;
+                f.el.classList.add("sort-file--dragging");
+                dragFiles.push({
+                    obj: f,
+                    offsetX: e.clientX - r.left,
+                    offsetY: e.clientY - r.top,
+                });
+            });
             e.preventDefault();
         });
     }
 
-    document.addEventListener("pointermove", (e) => {
-        if (!dragFile) return;
-        const fileEl = dragFile.el;
-        fileEl.style.left = `${e.clientX - dragOffset.x}px`;
-        fileEl.style.top = `${e.clientY - dragOffset.y}px`;
-        // 폴더 호버 강조
-        const under = document.elementFromPoint(e.clientX, e.clientY);
-        const folderEl = under && under.closest(".sort-folder");
-        if (dragHover && dragHover !== folderEl) {
-            dragHover.classList.remove("sort-folder--hover");
-        }
-        if (folderEl && folderEl !== dragHover) {
-            folderEl.classList.add("sort-folder--hover");
-            dragHover = folderEl;
-        } else if (!folderEl) {
-            dragHover = null;
-        }
+    // ----- 라소 (빈 공간에서 드래그) -----
+    playArea.addEventListener("pointerdown", (e) => {
+        if (!inStage || finished) return;
+        if (e.button !== 0) return;
+        if (e.target.closest(".sort-file")) return;     // 파일 위는 파일 핸들러
+        pdStart = { x: e.clientX, y: e.clientY, ctrl: e.ctrlKey || e.metaKey || e.shiftKey };
     });
 
-    document.addEventListener("pointerup", (e) => {
-        if (!dragFile) return;
-        const obj = dragFile;
-        const fileEl = obj.el;
-        const under = document.elementFromPoint(e.clientX, e.clientY);
-        const folderEl = under && under.closest(".sort-folder");
-
-        if (dragHover) dragHover.classList.remove("sort-folder--hover");
-        dragHover = null;
-        fileEl.classList.remove("sort-file--dragging");
-        dragFile = null;
-
-        if (folderEl) {
-            const folderType = folderEl.dataset.type;
-            if (folderType === obj.type) {
-                // 정답!
-                obj.done = true;
-                const stage = cfg.stages[stageIndex];
-                score += stage.pointsPerCorrect;
-                remaining--;
-                updateScoreDisplay();
-                Audio.bigCorrect(4);
-
-                // 폴더로 빨려들어가는 애니메이션
-                const fr = folderEl.getBoundingClientRect();
-                const fdr = fileEl.getBoundingClientRect();
-                const dx = (fr.left + fr.width / 2) - (fdr.left + fdr.width / 2);
-                const dy = (fr.top + fr.height / 2) - (fdr.top + fdr.height / 2);
-                fileEl.style.setProperty("--dx", `${dx}px`);
-                fileEl.style.setProperty("--dy", `${dy}px`);
-                fileEl.classList.add("sort-file--sucked");
-                setTimeout(() => fileEl.remove(), 420);
-
-                folderEl.classList.add("sort-folder--accepted");
-                setTimeout(() => folderEl.classList.remove("sort-folder--accepted"), 400);
-
-                const cx = fr.left + fr.width / 2;
-                const cy = fr.top + fr.height / 2;
-                showScoreFloat(cx, cy, `+${stage.pointsPerCorrect}`, "good");
-                emitParticles(cx, cy, 8, ["✨","⭐","🌟"]);
-
-                if (remaining === 0) {
-                    triggerAllCorrect();
-                }
-                return;
-            } else {
-                // 오답
-                const stage = cfg.stages[stageIndex];
-                score = Math.max(0, score - stage.wrongPenalty);
-                updateScoreDisplay();
-                Audio.wrong();
-                folderEl.classList.add("sort-folder--rejected");
-                setTimeout(() => folderEl.classList.remove("sort-folder--rejected"), 400);
-                const fr = folderEl.getBoundingClientRect();
-                showScoreFloat(fr.left + fr.width / 2, fr.top + fr.height / 2, `❌ -${stage.wrongPenalty}`, "bad");
+    // ----- 전역 pointermove (다중 드래그 OR 라소) -----
+    document.addEventListener("pointermove", (e) => {
+        // 다중 드래그 진행 중
+        if (dragFiles.length > 0) {
+            dragFiles.forEach(d => {
+                d.obj.el.style.left = `${e.clientX - d.offsetX}px`;
+                d.obj.el.style.top = `${e.clientY - d.offsetY}px`;
+            });
+            const under = document.elementFromPoint(e.clientX, e.clientY);
+            const folderEl = under && under.closest(".sort-folder");
+            if (dragHover && dragHover !== folderEl) {
+                dragHover.classList.remove("sort-folder--hover");
             }
+            if (folderEl && folderEl !== dragHover) {
+                folderEl.classList.add("sort-folder--hover");
+                dragHover = folderEl;
+            } else if (!folderEl) {
+                dragHover = null;
+            }
+            return;
         }
+        // 라소
+        if (!pdStart) return;
+        const dx = e.clientX - pdStart.x;
+        const dy = e.clientY - pdStart.y;
+        if (!lassoEl && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+        if (!lassoEl) {
+            if (!pdStart.ctrl) {
+                files.forEach(f => f.el.classList.remove("sort-file--selected"));
+            }
+            lassoEl = el("div", { class: "copy-lasso" });
+            document.body.appendChild(lassoEl);
+            document.body.style.userSelect = "none";
+        }
+        const x1 = Math.min(pdStart.x, e.clientX);
+        const y1 = Math.min(pdStart.y, e.clientY);
+        const x2 = Math.max(pdStart.x, e.clientX);
+        const y2 = Math.max(pdStart.y, e.clientY);
+        lassoEl.style.left = `${x1}px`;
+        lassoEl.style.top = `${y1}px`;
+        lassoEl.style.width = `${x2 - x1}px`;
+        lassoEl.style.height = `${y2 - y1}px`;
+        files.forEach(f => {
+            if (f.done) return;
+            const r = f.el.getBoundingClientRect();
+            const overlap = r.left < x2 && r.right > x1 && r.top < y2 && r.bottom > y1;
+            f.el.classList.toggle("sort-file--selected", overlap);
+        });
+    });
 
-        // 오답 or 빈 공간 → 원위치 복귀
+    // ----- 전역 pointerup -----
+    function returnFileToOrig(fobj) {
+        const fileEl = fobj.el;
         const playRect = playArea.getBoundingClientRect();
         const origLeft = parseFloat(fileEl.dataset.origLeft);
         const origTop = parseFloat(fileEl.dataset.origTop);
         const targetX = playRect.left + origLeft;
         const targetY = playRect.top + origTop;
-        // fixed 위치에서 원래 자리(absolute 좌표)로 이동 시각
         fileEl.style.transition = "left 0.3s, top 0.3s, transform 0.3s";
         fileEl.style.left = `${targetX}px`;
         fileEl.style.top = `${targetY}px`;
@@ -276,6 +275,79 @@ SCREEN_RENDERERS.gameSort = function (root, params) {
             fileEl.style.left = `${origLeft}px`;
             fileEl.style.top = `${origTop}px`;
         }, 320);
+    }
+
+    document.addEventListener("pointerup", (e) => {
+        // 다중 드래그 종료
+        if (dragFiles.length > 0) {
+            const under = document.elementFromPoint(e.clientX, e.clientY);
+            const folderEl = under && under.closest(".sort-folder");
+
+            if (dragHover) dragHover.classList.remove("sort-folder--hover");
+            dragHover = null;
+            dragFiles.forEach(d => d.obj.el.classList.remove("sort-file--dragging"));
+
+            if (folderEl) {
+                const folderType = folderEl.dataset.type;
+                const stage = cfg.stages[stageIndex];
+                const correct = dragFiles.filter(d => d.obj.type === folderType);
+                const wrong = dragFiles.filter(d => d.obj.type !== folderType);
+
+                // 정답들 → 폴더로 빨려들어가기
+                if (correct.length > 0) {
+                    const fr = folderEl.getBoundingClientRect();
+                    correct.forEach(d => {
+                        d.obj.done = true;
+                        d.obj.el.classList.remove("sort-file--selected");
+                        score += stage.pointsPerCorrect;
+                        remaining--;
+                        const fdr = d.obj.el.getBoundingClientRect();
+                        const dx = (fr.left + fr.width / 2) - (fdr.left + fdr.width / 2);
+                        const dy = (fr.top + fr.height / 2) - (fdr.top + fdr.height / 2);
+                        d.obj.el.style.setProperty("--dx", `${dx}px`);
+                        d.obj.el.style.setProperty("--dy", `${dy}px`);
+                        d.obj.el.classList.add("sort-file--sucked");
+                        setTimeout((el => () => el.remove())(d.obj.el), 420);
+                    });
+                    folderEl.classList.add("sort-folder--accepted");
+                    setTimeout(() => folderEl.classList.remove("sort-folder--accepted"), 400);
+                    Audio.bigCorrect(Math.min(8, 2 + correct.length));
+                    const cx = fr.left + fr.width / 2;
+                    const cy = fr.top + fr.height / 2;
+                    showScoreFloat(cx, cy,
+                        correct.length > 1
+                            ? `🎯 ${correct.length}개 +${(correct.length * stage.pointsPerCorrect).toLocaleString()}`
+                            : `+${stage.pointsPerCorrect}`,
+                        "good");
+                    emitParticles(cx, cy, Math.min(24, 6 + correct.length * 3), ["✨","⭐","🌟","💫"]);
+                }
+                // 오답들 → 페널티 + 원위치
+                if (wrong.length > 0) {
+                    score = Math.max(0, score - stage.wrongPenalty * wrong.length);
+                    folderEl.classList.add("sort-folder--rejected");
+                    setTimeout(() => folderEl.classList.remove("sort-folder--rejected"), 400);
+                    if (correct.length === 0) Audio.wrong();
+                    const fr = folderEl.getBoundingClientRect();
+                    showScoreFloat(fr.left + fr.width / 2, fr.top + fr.height / 2,
+                        `❌ ${wrong.length}개 -${(wrong.length * stage.wrongPenalty).toLocaleString()}`, "bad");
+                    wrong.forEach(d => returnFileToOrig(d.obj));
+                }
+                updateScoreDisplay();
+                if (remaining === 0) triggerAllCorrect();
+            } else {
+                // 빈 공간에 놓음 → 모두 원위치 (선택 유지)
+                dragFiles.forEach(d => returnFileToOrig(d.obj));
+            }
+            dragFiles = [];
+            return;
+        }
+        // 라소 종료
+        if (lassoEl) {
+            lassoEl.remove();
+            lassoEl = null;
+            document.body.style.userSelect = "";
+        }
+        pdStart = null;
     });
 
     function triggerAllCorrect() {
