@@ -72,13 +72,14 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
     // 단축키 카드
     const cards = makeShortcutCards([
         { combo: "우클릭", label: "메뉴", icon: "🖱️", active: true },
+        { combo: "F2", label: "이름 바꾸기", icon: "⌨️", active: true },
         { combo: "Enter", label: "확정", icon: "↵", active: false },
     ]);
     screen.appendChild(cards.el);
 
     // 하단 안내
     const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 폴더를 클릭 → 마우스 오른쪽 클릭 → '이름 바꾸기' → 힌트대로 입력 → Enter" });
+        text: "💡 폴더 클릭 → 우클릭 메뉴 또는 F2 키 → 힌트대로 입력 → Enter" });
     screen.appendChild(bottomHelp);
 
     function updateScoreDisplay() {
@@ -277,6 +278,7 @@ SCREEN_RENDERERS.gameRename = function (root, params) {
     function cleanup() {
         finished = true;
         if (rafId) cancelAnimationFrame(rafId);
+        document.removeEventListener("keydown", f2Handler);
     }
 
     function finishGame() {

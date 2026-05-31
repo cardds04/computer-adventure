@@ -358,11 +358,20 @@ const LESSONS_UNIT3 = [
     {
         id: "u3_lesson5",
         num: "스텝 5",
+        title: "파일 분류 정리",
+        desc: "🎵 📄 🎬 → 알맞은 폴더로 드래그! 📁",
+        icon: "🗂️",
+        game: "gameSort",
+        goalScore: 60000,
+    },
+    {
+        id: "u3_lesson6",
+        num: "스텝 6",
         title: "송양초 BBQ 보너스!",
-        desc: "고기 완벽 굽기! 타이밍 맞춰 키 누르기 🥩🔥",
+        desc: "고기 완벽 굽기! 드래그로 화로 올리고 접시로! 🥩🔥",
         icon: "🥩",
         game: "gameBbq",
-        goalScore: 100000,
+        goalScore: 120000,
     },
 ];
 
@@ -1117,38 +1126,26 @@ const COPY_GAME_CONFIG = {
     fileNames: ["숙제", "사진", "음악", "그림", "공책", "메모"],
 };
 
-// 스텝 3: DELETE + Ctrl+Z 부활 마법 (10셀, Ctrl+Z 순차 부활)
+// 스텝 3: DELETE + Ctrl+Z 부활 마법 (2단계, 10셀, 키 한 번 = 1칸)
 const DELETE_UNDO_GAME_CONFIG = {
     stages: [
         {
             label: "1단계 — DELETE & Ctrl+Z 부활",
-            duration: 25000,
+            duration: 10000,
             cols: 5,
             rows: 2,            // 5×2 = 10셀
-            pointPerDelete: 600,
-            undoPerCell: 400,    // 부활 한 칸당 점수
+            pointPerDelete: 800,
+            undoPerCell: 600,
             clearBonus: 3000,
-            undoStaggerMs: 180,  // 한 칸씩 등장하는 간격
         },
         {
             label: "2단계 — 반복 폭주!",
-            duration: 35000,
+            duration: 15000,
             cols: 5,
             rows: 2,
-            pointPerDelete: 800,
-            undoPerCell: 500,
-            clearBonus: 4000,
-            undoStaggerMs: 150,
-        },
-        {
-            label: "3단계 — 최종 챌린지!",
-            duration: 40000,
-            cols: 5,
-            rows: 2,
-            pointPerDelete: 1000,
-            undoPerCell: 600,
+            pointPerDelete: 1200,
+            undoPerCell: 900,
             clearBonus: 5000,
-            undoStaggerMs: 120,
         },
     ],
 };
@@ -1184,13 +1181,59 @@ const SELECT_ALL_GAME_CONFIG = {
 };
 
 // 스텝 5: 송양초 BBQ 보너스 (드래그 앤 드롭 — 트레이→화로→접시)
+// 스텝 5: 파일 분류 게임 (드래그 앤 드롭)
+const SORT_GAME_CONFIG = {
+    types: [
+        { id: "music",    folder: "🎵", label: "음악",
+          fileEmoji: "🎵", names: ["신나는노래", "자장가", "동요", "발라드", "댄스곡", "클래식", "K-POP", "트로트", "OST", "교가"] },
+        { id: "document", folder: "📄", label: "문서",
+          fileEmoji: "📄", names: ["일기", "숙제", "편지", "보고서", "메모", "독서록", "이력서", "초대장", "감상문", "발표자료"] },
+        { id: "video",    folder: "🎬", label: "영상",
+          fileEmoji: "🎬", names: ["운동회영상", "친구생일", "가족여행", "수업녹화", "강아지", "공연영상", "드라마", "다큐", "졸업식", "체육대회"] },
+        { id: "image",    folder: "🖼️", label: "사진",
+          fileEmoji: "🖼️", names: ["셀카", "풍경", "강아지사진", "친구들", "가족사진", "캠핑사진", "음식사진", "벚꽃", "단풍", "노을"] },
+    ],
+    stages: [
+        {
+            label: "1단계 — 3종류 8개",
+            duration: 25000,
+            typeCount: 3,
+            fileCount: 8,
+            pointsPerCorrect: 2000,
+            wrongPenalty: 400,
+            timeBonusPerSec: 400,
+            allCorrectBonus: 5000,
+        },
+        {
+            label: "2단계 — 4종류 14개",
+            duration: 35000,
+            typeCount: 4,
+            fileCount: 14,
+            pointsPerCorrect: 2500,
+            wrongPenalty: 500,
+            timeBonusPerSec: 700,
+            allCorrectBonus: 10000,
+        },
+        {
+            label: "3단계 — 4종류 22개",
+            duration: 45000,
+            typeCount: 4,
+            fileCount: 22,
+            pointsPerCorrect: 3000,
+            wrongPenalty: 600,
+            timeBonusPerSec: 1200,
+            allCorrectBonus: 20000,
+        },
+    ],
+};
+
 const BBQ_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 캠핑 시작!",
-            duration: 15000,            // 15초
-            trayCount: 10,
-            grillSlots: 5,              // 화로 5자리
+            label: "1단계 — 화로 1개 (캠핑 시작!)",
+            duration: 15000,
+            trayCount: 5,
+            grillSlots: 1,              // 화로 1개
             cookTimeMs: 4200,
             perfectWindowMs: 1800,
             burnAfterMs: 7000,
@@ -1198,26 +1241,26 @@ const BBQ_GAME_CONFIG = {
             scoreMult: 1.0,
         },
         {
-            label: "2단계 — 친구들 도착!",
-            duration: 20000,            // 20초
-            trayCount: 16,
-            grillSlots: 5,
-            cookTimeMs: 3000,           // 더 빨라짐
+            label: "2단계 — 화로 2개 (친구들 도착!)",
+            duration: 20000,
+            trayCount: 10,
+            grillSlots: 2,              // 화로 2개
+            cookTimeMs: 3000,
             perfectWindowMs: 1300,
             burnAfterMs: 5000,
             timeBonusPerSec: 700,
-            scoreMult: 1.5,             // 점수 1.5배
+            scoreMult: 1.5,
         },
         {
-            label: "3단계 — 회식 폭주!",
-            duration: 30000,            // 30초
-            trayCount: 24,
-            grillSlots: 5,
-            cookTimeMs: 2200,           // 매우 빠름
+            label: "3단계 — 화로 3개 (회식 폭주!)",
+            duration: 30000,
+            trayCount: 18,
+            grillSlots: 3,              // 화로 3개
+            cookTimeMs: 2200,
             perfectWindowMs: 1000,
             burnAfterMs: 3800,
             timeBonusPerSec: 1200,
-            scoreMult: 2.0,             // 점수 2배
+            scoreMult: 2.0,
         },
     ],
     points: {
@@ -1361,7 +1404,7 @@ const TUTORIALS = {
         icon: "📁",
         steps: [
             { illu: "📁 클릭", text: "폴더를 클릭해서 선택해요" },
-            { illu: "🖱️ 우클릭", text: "마우스 오른쪽 클릭 → '이름 바꾸기' 선택" },
+            { illu: "🖱️우클릭 또는 F2", text: "마우스 오른쪽 클릭 메뉴, 또는 F2 키로 이름 바꾸기!" },
             { illu: "입력 → Enter", text: "힌트에 적힌 이름을 입력하고 Enter!" },
         ],
     },
@@ -1392,8 +1435,17 @@ const TUTORIALS = {
             { illu: "💡 Ctrl+A → DELETE", text: "Ctrl+A 로 전부 선택 → 한 방에 ×5 보너스!" },
         ],
     },
+    gameSort: {
+        title: "스텝 5 — 파일 분류 정리",
+        icon: "🗂️",
+        steps: [
+            { illu: "🎵 📄 🎬 🖼️", text: "파일들이 화면에 흩어져 있어요" },
+            { illu: "📁 음악 / 문서 / 영상 / 사진", text: "위에 폴더 4종류! 파일 종류와 같은 폴더로!" },
+            { illu: "🖱️ 드래그 → 📁", text: "파일을 잡아서 알맞은 폴더로 드래그! 다 끝내면 보너스!" },
+        ],
+    },
     gameBbq: {
-        title: "스텝 5 — 송양초 BBQ 보너스",
+        title: "스텝 6 — 송양초 BBQ 보너스",
         icon: "🥩",
         steps: [
             { illu: "🥩 → 🔥", text: "왼쪽 트레이의 고기를 화로 위로 드래그!" },

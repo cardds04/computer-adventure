@@ -4311,10 +4311,38 @@ body {
 }
 
 .game--rename .fake-desktop {
-    align-items: center;     /* 세로 중앙 (한 줄 기준) */
-    align-content: center;   /* 여러 줄일 때도 전체 세로 중앙 */
-    justify-content: center; /* 가로 중앙 */
+    align-items: center;
+    align-content: center;
+    justify-content: center;
     padding: 24px;
+    gap: 36px;               /* 폴더가 커진 만큼 간격도 늘림 */
+}
+
+/* 스텝 1 — 폴더 크기 한 번 더 2배 */
+.game--rename .fd-icon {
+    width: 320px;
+    padding: 22px;
+    gap: 12px;
+}
+
+.game--rename .fd-icon__emoji {
+    font-size: 200px;         /* 100px × 2 */
+    line-height: 1;
+}
+
+.game--rename .fd-icon__label {
+    font-size: 36px;           /* 18px × 2 */
+}
+
+.game--rename .fd-icon__input {
+    font-size: 32px;
+    padding: 12px 18px;
+}
+
+.game--rename .fd-target-hint {
+    font-size: 28px;           /* 폴더 위 태그도 비례 ↑ */
+    padding: 10px 22px;
+    max-width: 320px;
 }
 
 /* 각 폴더 위에 표시되는 목표 이름 태그 */
@@ -4379,24 +4407,25 @@ body {
     flex: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    align-content: flex-start;
+    gap: 12px;
+    justify-content: center;  /* 가로 중앙 */
+    align-content: center;    /* 세로 중앙 — 적을 때 가운데서 시작 */
     overflow-y: auto;
-    padding: 6px;
+    padding: 12px;
 }
 
 .copy-folder-grid .fd-icon {
-    width: 76px;
-    padding: 4px;
+    width: 140px;             /* 76 → 140 (약 2배) */
+    padding: 8px;
     animation: file-pop-in 0.25s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 
 .copy-folder-grid .fd-icon__emoji {
-    font-size: 38px;
+    font-size: 72px;          /* 38 → 72 (약 2배) */
 }
 
 .copy-folder-grid .fd-icon__label {
-    font-size: 11px;
+    font-size: 18px;           /* 11 → 18 (약 2배) */
 }
 
 @keyframes file-pop-in {
@@ -4728,6 +4757,150 @@ body {
 }
 
 /* ============================================================
+   스텝 5: 파일 분류 정리 (드래그 앤 드롭)
+   ============================================================ */
+.game--sort {
+    background: linear-gradient(180deg, #2b5876 0%, #4e4376 100%);
+}
+
+.sort-folder-tray {
+    position: absolute;
+    top: 70px;
+    left: 16px;
+    right: 16px;
+    height: 150px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    z-index: 5;
+}
+
+.sort-folder {
+    flex: 1;
+    max-width: 200px;
+    background: linear-gradient(180deg, #f4d68a 0%, #d8a648 100%);
+    border: 4px solid #8b5a00;
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35), inset 0 -4px 0 rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.sort-folder__icon {
+    font-size: 56px;
+    line-height: 1;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+}
+
+.sort-folder__label {
+    font-size: 20px;
+    font-weight: 900;
+    color: #4a2c00;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.sort-folder--hover {
+    transform: scale(1.1);
+    border-color: gold;
+    box-shadow: 0 0 30px gold, 0 8px 16px rgba(0, 0, 0, 0.35);
+}
+
+.sort-folder--accepted {
+    animation: sort-folder-accept 0.4s ease;
+}
+@keyframes sort-folder-accept {
+    0%, 100% { transform: scale(1); }
+    40% { transform: scale(1.18); filter: brightness(1.4); }
+}
+
+.sort-folder--rejected {
+    animation: sort-folder-reject 0.4s ease;
+}
+@keyframes sort-folder-reject {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-12px); border-color: #d63031; }
+    50% { transform: translateX(12px); border-color: #d63031; }
+    75% { transform: translateX(-6px); }
+}
+
+.sort-play-area {
+    position: absolute;
+    top: 240px;
+    left: 16px;
+    right: 16px;
+    bottom: 180px;
+    background: rgba(0, 0, 0, 0.18);
+    border: 2px dashed rgba(255, 255, 255, 0.25);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.sort-file {
+    position: absolute;
+    background: white;
+    border: 3px solid var(--text-dark);
+    border-radius: 12px;
+    padding: 8px 10px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    transition: box-shadow 0.15s, filter 0.15s;
+    width: 92px;
+}
+
+.sort-file:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+    filter: brightness(1.1);
+}
+
+.sort-file__icon {
+    font-size: 44px;
+    line-height: 1;
+}
+
+.sort-file__name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dark);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.sort-file--dragging {
+    z-index: 999;
+    cursor: grabbing;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+    filter: brightness(1.15);
+}
+
+.sort-file--sucked {
+    animation: sort-file-suck 0.42s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+    pointer-events: none;
+}
+
+@keyframes sort-file-suck {
+    0%   { transform: translate(0, 0) scale(1) rotate(0); opacity: 1; }
+    70%  { transform: translate(var(--dx), var(--dy)) scale(0.6) rotate(180deg); opacity: 0.9; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0) rotate(360deg); opacity: 0; }
+}
+
+/* ============================================================
    스텝 5: BBQ 캠핑장 (단일 화로)
    ============================================================ */
 .game--bbq {
@@ -4925,11 +5098,11 @@ body {
 .bbq-slot {
     flex: 1;
     aspect-ratio: 1;
-    max-width: 110px;
-    min-width: 70px;
+    max-width: 180px;        /* 자리가 적으니 더 크게 */
+    min-width: 90px;
     background: linear-gradient(180deg, #5a3a20 0%, #2a1810 100%);
     border: 3px solid #8b5a2b;
-    border-radius: 12px;
+    border-radius: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -4979,9 +5152,9 @@ body {
 }
 
 .bbq-slot .bbq-meat {
-    font-size: 52px;
-    width: 64px;
-    height: 64px;
+    font-size: 72px;          /* 자리 적으니 더 큰 고기 */
+    width: 90px;
+    height: 90px;
 }
 
 /* 화로 불꽃 (패널 안에 표시) */
