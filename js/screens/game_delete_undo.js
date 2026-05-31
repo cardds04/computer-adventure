@@ -154,14 +154,11 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
 
         showCycleBanner(`⏪ 부활 중... 잠깐만요!`);
 
-        // 셀을 하나씩 차례대로 부활 (역순? 정순? — 정순으로)
-        // 부활할 셀들은 0..nextIdx-1
-        let revivedCount = 0;
+        // 부활은 역순 (Undo): 마지막에 지운 것부터 거꾸로
         const toRevive = nextIdx;
 
         function reviveStep(i) {
-            if (i >= toRevive) {
-                // 모두 부활 완료
+            if (i < 0) {
                 undoing = false;
                 nextIdx = 0;
                 buttons.forEach(b => b.classList.remove("delete-cell--gone"));
@@ -178,12 +175,10 @@ SCREEN_RENDERERS.gameDeleteUndo = function (root, params) {
             setTimeout(() => btn.classList.remove("delete-cell--reviving"), 400);
             score += stage.undoPerCell;
             updateScoreDisplay();
-            revivedCount++;
-            // 작은 효과음
             Audio.tick();
-            undoTimer = setTimeout(() => reviveStep(i + 1), stage.undoStaggerMs);
+            undoTimer = setTimeout(() => reviveStep(i - 1), stage.undoStaggerMs);
         }
-        reviveStep(0);
+        reviveStep(toRevive - 1);
 
         // 화려한 효과
         const cx = window.innerWidth / 2;

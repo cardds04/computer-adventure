@@ -4311,9 +4311,10 @@ body {
 }
 
 .game--rename .fake-desktop {
-    align-items: flex-start;
-    justify-content: center;
-    padding-top: 40px;       /* 폴더 위 힌트 태그 공간 확보 */
+    align-items: center;     /* 세로 중앙 (한 줄 기준) */
+    align-content: center;   /* 여러 줄일 때도 전체 세로 중앙 */
+    justify-content: center; /* 가로 중앙 */
+    padding: 24px;
 }
 
 /* 각 폴더 위에 표시되는 목표 이름 태그 */

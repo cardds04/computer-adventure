@@ -22,11 +22,10 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
     let totalNeeded = 0;
     let clipboard = [];         // 복사된 파일 객체 배열
     let rightFolderSelected = false;
-    // 드래그 선택
-    let isDragging = false;
-    let dragStart = null;
-    let dragRect = null;
+    // 드래그 선택 상태
+    let pdStart = null;         // pointerdown 위치 (드래그 추적)
     let lassoEl = null;
+    let suppressNextClick = false;   // 드래그였으면 click 무시
 
     // HUD
     const goalScore = LESSONS_UNIT3.find(l => l.id === params.lessonId)?.goalScore || 0;
@@ -144,47 +143,63 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
             const fileEl = makeFileIcon(name);
             fileEl.addEventListener("click", (e) => {
                 if (!inStage) return;
+                // 드래그 직후의 click은 무시
+                if (suppressNextClick) {
+                    suppressNextClick = false;
+                    e.stopPropagation();
+                    return;
+                }
                 e.stopPropagation();
                 rightPane.classList.remove("copy-pane--selected");
                 rightFolderSelected = false;
                 const fileObj = leftFiles.find(f => f.el === fileEl);
                 if (!fileObj || fileObj.copied) return;
-                // Ctrl 또는 Shift = 추가 선택, 아니면 단일 선택
+                // Ctrl/Shift = 추가 선택, 그 외 = 단일 선택
                 if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
                     leftFiles.forEach(f => f.el.classList.remove("fd-icon--selected"));
                 }
                 fileEl.classList.toggle("fd-icon--selected");
             });
+            // 텍스트 선택 방지 (드래그 시작 부드럽게)
+            fileEl.style.userSelect = "none";
             leftGrid.appendChild(fileEl);
             leftFiles.push({ el: fileEl, name, copied: false });
         });
     }
 
-    // ----- 드래그 선택 (lasso) -----
-    leftGrid.addEventListener("pointerdown", (e) => {
+    // ----- 드래그 선택 (lasso) — 파일 위에서도 시작 가능 -----
+    leftPane.addEventListener("pointerdown", (e) => {
         if (!inStage) return;
-        if (e.target.closest(".fd-icon")) return;   // 아이콘 위 클릭은 무시
-        isDragging = true;
-        const rect = leftGrid.getBoundingClientRect();
-        dragStart = { x: e.clientX, y: e.clientY };
-        lassoEl = el("div", { class: "copy-lasso" });
-        document.body.appendChild(lassoEl);
-        // 단일 클릭처럼 보이면 선택 해제
-        leftFiles.forEach(f => f.el.classList.remove("fd-icon--selected"));
-        e.preventDefault();
+        if (e.button !== 0) return;        // 좌클릭만
+        pdStart = { x: e.clientX, y: e.clientY, ctrl: e.ctrlKey || e.metaKey || e.shiftKey };
+        // 즉시 preventDefault 하면 click 안 됨. 이동 5px 넘으면 그때 라소 띄움.
     });
 
     document.addEventListener("pointermove", (e) => {
-        if (!isDragging) return;
-        const x1 = Math.min(dragStart.x, e.clientX);
-        const y1 = Math.min(dragStart.y, e.clientY);
-        const x2 = Math.max(dragStart.x, e.clientX);
-        const y2 = Math.max(dragStart.y, e.clientY);
+        if (!pdStart) return;
+        const dx = e.clientX - pdStart.x;
+        const dy = e.clientY - pdStart.y;
+        if (!lassoEl && Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+
+        if (!lassoEl) {
+            // 라소 시작 — Ctrl/Shift 없으면 기존 선택 해제
+            if (!pdStart.ctrl) {
+                leftFiles.forEach(f => f.el.classList.remove("fd-icon--selected"));
+            }
+            lassoEl = el("div", { class: "copy-lasso" });
+            document.body.appendChild(lassoEl);
+            suppressNextClick = true;     // 이번 click 무시 플래그
+            // 텍스트 선택 방지
+            document.body.style.userSelect = "none";
+        }
+        const x1 = Math.min(pdStart.x, e.clientX);
+        const y1 = Math.min(pdStart.y, e.clientY);
+        const x2 = Math.max(pdStart.x, e.clientX);
+        const y2 = Math.max(pdStart.y, e.clientY);
         lassoEl.style.left = `${x1}px`;
         lassoEl.style.top = `${y1}px`;
         lassoEl.style.width = `${x2 - x1}px`;
         lassoEl.style.height = `${y2 - y1}px`;
-        // 라소와 겹치는 파일 선택
         leftFiles.forEach(f => {
             if (f.copied) return;
             const r = f.el.getBoundingClientRect();
@@ -194,10 +209,12 @@ SCREEN_RENDERERS.gameCopy = function (root, params) {
     });
 
     document.addEventListener("pointerup", () => {
-        if (isDragging) {
-            isDragging = false;
-            if (lassoEl) { lassoEl.remove(); lassoEl = null; }
+        if (lassoEl) {
+            lassoEl.remove();
+            lassoEl = null;
+            document.body.style.userSelect = "";
         }
+        pdStart = null;
     });
 
     // ----- 키 입력 -----
