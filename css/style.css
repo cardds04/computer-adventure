@@ -1997,15 +1997,27 @@ body {
 }
 
 .hall-board__list--3col .hall-board__row {
-    grid-template-columns: 36px 1fr auto;
-    gap: 8px;
-    padding: 6px 10px;
+    grid-template-columns: 30px 1fr auto auto;     /* rank | name | lvl | score */
+    gap: 6px;
+    padding: 5px 8px;
     font-size: 13px;
     border-left-width: 3px;
 }
 
-/* 3열 모드에서는 레벨 정보 숨김 (공간 절약) */
+/* 3열 모드에서 레벨은 'Lv.30'만 보이고 이름은 숨김 */
 .hall-board__list--3col .hall-board__lvl {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: var(--primary);
+    padding: 2px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.hall-board__list--3col .hall-board__lvl-name {
     display: none;
 }
 

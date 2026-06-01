@@ -121,11 +121,14 @@ SCREEN_RENDERERS.home = function (root) {
         list.forEach((entry, i) => {
             const rank = i + 1;
             const rankBadge = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
+            const lvl = entry.level || 1;
             const row = el("div", { class: `hall-board__row ${rank <= 3 ? `hall-board__row--top${rank}` : ""}` },
                 el("div", { class: "hall-board__rank", text: rankBadge }),
                 el("div", { class: "hall-board__name", text: entry.name }),
-                el("div", { class: "hall-board__lvl",
-                    text: `Lv.${entry.level || "?"} · ${getLevelName(entry.level || 1)}` }),
+                el("div", { class: "hall-board__lvl" },
+                    el("span", { class: "hall-board__lvl-num", text: `Lv.${lvl}` }),
+                    el("span", { class: "hall-board__lvl-name", text: ` · ${getLevelName(lvl)}` }),
+                ),
                 el("div", { class: "hall-board__score",
                     text: `${Number(entry.score).toLocaleString()}점` }),
             );
