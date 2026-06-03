@@ -304,7 +304,7 @@ const UNITS = [
     { num: 1,  title: "마우스편",  icon: "🖱️", active: true  },
     { num: 2,  title: "키보드편",  icon: "⌨️", active: true  },
     { num: 3,  title: "단축키편",  icon: "🪄", active: true  },
-    { num: 4,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 4,  title: "검색편",    icon: "🔍", active: true  },
     { num: 5,  title: "준비 중",   icon: "🔒", active: false },
     { num: 6,  title: "준비 중",   icon: "🔒", active: false },
     { num: 7,  title: "준비 중",   icon: "🔒", active: false },
@@ -438,10 +438,60 @@ const LESSONS_UNIT3 = [
     },
 ];
 
+// 4단원 검색편 스텝들 (3스텝)
+const LESSONS_UNIT4 = [
+    {
+        id: "u4_lesson1",
+        num: "스텝 1",
+        title: "주소창 타이핑",
+        desc: "www.naver.com 주소를 정확히 입력! ⌨️",
+        icon: "🔗",
+        game: "gameUrl",
+        goalScore: 20000,
+    },
+    {
+        id: "u4_lesson2",
+        num: "스텝 2",
+        title: "검색하기",
+        desc: "검색창 클릭 → 키워드 입력 → Enter! 🔎",
+        icon: "🔎",
+        game: "gameSearch",
+        goalScore: 30000,
+    },
+    {
+        id: "u4_lesson3",
+        num: "스텝 3",
+        title: "검색해서 정답 찾기",
+        desc: "질문 검색 → 결과 읽고 → 정답 입력! 한 문제 +5만점 🧠",
+        icon: "🧠",
+        game: "gameQuiz",
+        goalScore: 150000,
+    },
+    {
+        id: "u4_lesson4",
+        num: "스텝 4",
+        title: "AI 그림 생성기",
+        desc: "AI에 명령해서 그림 만들고 액자에 걸어요! 🎨🤖",
+        icon: "🎨",
+        game: "gameAiArt",
+        goalScore: 200000,
+    },
+    {
+        id: "u4_lesson5",
+        num: "스텝 5",
+        title: "송양초 스페이스 슈터",
+        desc: "비행기로 외계 침공 격추! 갤러그 스타일! 🚀👾",
+        icon: "🚀",
+        game: "gameShooter",
+        goalScore: 400000,
+    },
+];
+
 const LESSONS_BY_UNIT = {
     1: LESSONS_UNIT1,
     2: LESSONS_UNIT2,
     3: LESSONS_UNIT3,
+    4: LESSONS_UNIT4,
 };
 
 function getLessonsForUnit(unitNum) {
@@ -1329,6 +1379,328 @@ const BBQ_GAME_CONFIG = {
     ],
 };
 
+// ============================================================
+// 4단원 검색편 — 게임 설정들
+// ============================================================
+
+// 스텝 1: 인터넷 켜기 (바탕화면에서 브라우저 찾기)
+const INTERNET_GAME_CONFIG = {
+    // 정답: 브라우저로 인정되는 종류
+    browserApps: [
+        { emoji: "🌐", name: "Chrome" },
+        { emoji: "🦊", name: "Firefox" },
+        { emoji: "🐳", name: "Whale" },
+    ],
+    // 오답: 다른 앱들 (낚시용)
+    distractorApps: [
+        { emoji: "📝", name: "메모장" },
+        { emoji: "🎨", name: "그림판" },
+        { emoji: "🎮", name: "게임" },
+        { emoji: "📊", name: "엑셀" },
+        { emoji: "📄", name: "한글" },
+        { emoji: "🎵", name: "음악" },
+        { emoji: "🎬", name: "영상" },
+        { emoji: "📁", name: "폴더" },
+        { emoji: "🧮", name: "계산기" },
+        { emoji: "📅", name: "달력" },
+        { emoji: "✉️", name: "메일" },
+        { emoji: "🗒️", name: "노트" },
+        { emoji: "🛒", name: "쇼핑" },
+        { emoji: "🎤", name: "녹음기" },
+    ],
+    stages: [
+        {
+            label: "1단계 — 아이콘 8개",
+            duration: 10000,
+            iconCount: 8,
+            browserPerScreen: 1,    // 화면에 브라우저 1개
+            pointsPerCorrect: 1500,
+            wrongPenalty: 200,
+        },
+        {
+            label: "2단계 — 아이콘 16개",
+            duration: 15000,
+            iconCount: 16,
+            browserPerScreen: 1,
+            pointsPerCorrect: 2000,
+            wrongPenalty: 300,
+        },
+    ],
+};
+
+// 스텝 1: 주소창 타이핑 (2단계, 1주소 성공시 단계 종료 + 시간보너스)
+const URL_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 네이버 주소창 타이핑",
+            duration: 90000,
+            urls: ["www.naver.com"],
+            pointsPerUrl: 10000,
+            wrongPenalty: 200,
+            timeBonusPerSec: 1000,
+        },
+    ],
+};
+
+// 스텝 2: 네이버 검색하기 (2단계, 짧은 단어만)
+const SEARCH_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 일반 단어",
+            duration: 25000,
+            keywords: ["사과", "학교", "날씨", "지도", "뉴스", "영화", "맛집", "음악",
+                       "공원", "친구", "가족", "사진", "여행", "운동", "축구", "동물",
+                       "도서관", "체육관", "급식", "방학"],
+            pointsPerSearch: 10000,
+            wrongPenalty: 200,
+            timeBonusPerSec: 800,
+        },
+        {
+            label: "2단계 — 디지털 단어",
+            duration: 35000,
+            keywords: ["리터러시", "사이버안전", "코딩", "타자연습", "검색",
+                       "송양초", "디지털", "프로그래밍", "유튜브", "구글",
+                       "네이버", "스마트폰", "컴퓨터", "키보드", "마우스"],
+            pointsPerSearch: 20000,
+            wrongPenalty: 300,
+            timeBonusPerSec: 1500,
+        },
+    ],
+};
+
+// 스텝 4: 문장 타자치기
+const SENTENCE_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 짧은 문장",
+            duration: 30000,
+            sentences: [
+                "오늘 날씨가 좋다.",
+                "학교 가는 길이 즐겁다.",
+                "친구와 함께 놀자.",
+                "맛있는 점심 시간!",
+                "송양초 화이팅!",
+                "재미있는 컴퓨터 수업.",
+            ],
+            pointsPerSentence: 5000,
+            wrongPenalty: 50,
+        },
+        {
+            label: "2단계 — 중간 문장",
+            duration: 45000,
+            sentences: [
+                "송양초등학교 4학년 친구들 모두 사랑해요.",
+                "디지털 수업은 정말 재미있고 신나요!",
+                "오늘은 컴퓨터로 검색하는 법을 배웠다.",
+                "인터넷에서 좋은 정보를 찾아보자.",
+                "한글 타자 연습을 매일 꾸준히 하자.",
+                "스마트폰과 컴퓨터를 바르게 사용해요.",
+            ],
+            pointsPerSentence: 10000,
+            wrongPenalty: 50,
+        },
+        {
+            label: "3단계 — 송양초 챌린지!",
+            duration: 60000,
+            sentences: [
+                "송양초등학교 4학년 디지털 수업 정말 최고!",
+                "검색을 잘하는 사람이 정보를 잘 활용한다.",
+                "송양초 친구들과 선생님 모두 행복하길 바랍니다.",
+                "안전한 인터넷 사용이 우리 모두의 약속입니다.",
+            ],
+            pointsPerSentence: 20000,
+            wrongPenalty: 100,
+        },
+    ],
+};
+
+// 스텝 3: 검색해서 정답 찾기 (3단계 — 한 문제 정답 = 50,000 + 남은시간 보너스)
+const QUIZ_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 쉬운 상식",
+            duration: 60000,
+            pointsPerCorrect: 50000,
+            timeBonusPerSec: 1000,
+            wrongPenalty: 1000,
+            questions: [
+                {
+                    q: "대한민국의 수도는?",
+                    answers: ["서울", "서울특별시"],
+                    answerLabel: "서울특별시",
+                    explanation: "대한민국의 수도는 **서울특별시**입니다. 약 950만 명이 살고 있는 우리나라의 중심 도시이며, 정치·경제·문화의 중심지입니다.",
+                },
+                {
+                    q: "한글을 만든 분은?",
+                    answers: ["세종대왕", "세종"],
+                    answerLabel: "세종대왕",
+                    explanation: "**세종대왕**(조선 4대 왕)은 1443년에 한글(훈민정음)을 만들었습니다. 백성들이 쉽게 글을 읽고 쓸 수 있도록 28개 글자를 창제한 위대한 업적입니다.",
+                },
+                {
+                    q: "1년은 며칠인가요?",
+                    answers: ["365", "365일"],
+                    answerLabel: "365일",
+                    explanation: "1년은 **365일**입니다. 지구가 태양 주위를 한 바퀴 도는(공전) 데 걸리는 시간이에요. 4년마다 한 번씩은 윤년이라 366일이 됩니다.",
+                },
+                {
+                    q: "물이 끓는 온도는?",
+                    answers: ["100", "100도", "100℃"],
+                    answerLabel: "100도",
+                    explanation: "물은 **섭씨 100도**에서 끓고 0도에서 얼어요. 끓는점은 지대 높이나 압력에 따라 조금 달라질 수 있습니다.",
+                },
+                {
+                    q: "지구는 어떤 모양?",
+                    answers: ["구형", "구", "둥근", "공"],
+                    answerLabel: "구형",
+                    explanation: "지구는 **구형**(둥근 공 모양)이에요. 정확히는 자전 때문에 적도 부근이 약간 부푼 '회전 타원체'입니다.",
+                },
+            ],
+        },
+        {
+            label: "2단계 — 4학년 교과",
+            duration: 75000,
+            pointsPerCorrect: 50000,
+            timeBonusPerSec: 1300,
+            wrongPenalty: 1200,
+            questions: [
+                {
+                    q: "식물이 만드는 영양분은?",
+                    answers: ["광합성", "양분", "포도당"],
+                    answerLabel: "광합성",
+                    explanation: "식물은 **광합성**을 통해 양분(포도당)을 스스로 만들어요. 햇빛, 물, 이산화탄소를 이용해 잎에서 일어나는 신기한 과정이에요.",
+                },
+                {
+                    q: "지구가 도는 것을 무엇이라 할까?",
+                    answers: ["자전", "공전", "자전과 공전"],
+                    answerLabel: "자전과 공전",
+                    explanation: "지구는 스스로 도는 **자전**(하루 1회전 → 낮과 밤)과 태양 주위를 도는 **공전**(1년 1바퀴 → 계절)을 동시에 해요.",
+                },
+                {
+                    q: "삼각형 세 내각의 합은?",
+                    answers: ["180", "180도"],
+                    answerLabel: "180도",
+                    explanation: "어떤 삼각형이든 세 내각의 합은 항상 **180도**입니다. 정삼각형은 60도씩, 직각삼각형은 90도+나머지 두 각의 합 90도예요.",
+                },
+            ],
+        },
+        {
+            label: "3단계 — 송양초 챌린지!",
+            duration: 90000,
+            pointsPerCorrect: 50000,
+            timeBonusPerSec: 1800,
+            wrongPenalty: 1500,
+            questions: [
+                {
+                    q: "검색을 잘하는 방법은?",
+                    answers: ["핵심 키워드", "키워드", "짧고 정확"],
+                    answerLabel: "핵심 키워드",
+                    explanation: "긴 문장보다는 **핵심 키워드** 몇 개를 짧고 정확하게 입력하세요. 예: '내일 서울 비 와요?' 보다 '서울 내일 날씨'가 더 좋아요.",
+                },
+                {
+                    q: "인터넷에서 조심해야 할 것은?",
+                    answers: ["개인정보", "피싱", "악성댓글", "사이버 안전", "개인정보 보호"],
+                    answerLabel: "개인정보 보호",
+                    explanation: "🛡️ **개인정보 보호**(이름·전화번호·주소 함부로 알려주지 말기), **피싱 사이트** 클릭 금지, **악성댓글** 쓰지 않기! 이것이 사이버 안전의 3대 수칙이에요.",
+                },
+                {
+                    q: "디지털 리터러시란?",
+                    answers: ["디지털 리터러시", "디지털 정보 활용", "리터러시", "디지털 활용"],
+                    answerLabel: "디지털 리터러시",
+                    explanation: "**디지털 리터러시**는 디지털 정보를 올바르게 이해하고 비판적으로 활용하는 능력입니다. 검색을 잘하고, 가짜뉴스를 구분하고, 정보를 정리·공유하는 모든 능력을 포함해요.",
+                },
+            ],
+        },
+    ],
+};
+
+// 스텝 4: AI 그림 생성기 (프롬프트 입력 → 그림 → 액자 걸기)
+const AI_ART_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 간단한 그림",
+            duration: 70000,
+            pointsPerArt: 30000,
+            timeBonusPerSec: 600,
+            wrongPenalty: 1000,
+            paintings: [
+                { mission: "빨간 사과를 그려줘", keywords: ["사과", "빨간사과", "apple"], emoji: "🍎" },
+                { mission: "큰 나무를 그려줘", keywords: ["나무", "큰나무", "tree"], emoji: "🌳" },
+                { mission: "밝은 해를 그려줘", keywords: ["해", "태양", "sun"], emoji: "☀️" },
+                { mission: "예쁜 꽃을 그려줘", keywords: ["꽃", "flower", "장미"], emoji: "🌸" },
+                { mission: "물고기를 그려줘", keywords: ["물고기", "fish", "생선"], emoji: "🐟" },
+                { mission: "달을 그려줘", keywords: ["달", "moon"], emoji: "🌙" },
+                { mission: "별을 그려줘", keywords: ["별", "star"], emoji: "⭐" },
+                { mission: "무지개를 그려줘", keywords: ["무지개", "rainbow"], emoji: "🌈" },
+            ],
+        },
+        {
+            label: "2단계 — 송양초 미술전",
+            duration: 90000,
+            pointsPerArt: 50000,
+            timeBonusPerSec: 1000,
+            wrongPenalty: 2000,
+            paintings: [
+                { mission: "송양초 학교를 그려줘", keywords: ["학교", "송양초", "송양초등학교"], emoji: "🏫" },
+                { mission: "친구들 단체사진 그려줘", keywords: ["친구", "친구들", "단체사진"], emoji: "👫" },
+                { mission: "귀여운 강아지를 그려줘", keywords: ["강아지", "개", "dog"], emoji: "🐶" },
+                { mission: "로켓을 그려줘", keywords: ["로켓", "우주선", "rocket"], emoji: "🚀" },
+                { mission: "트로피를 그려줘", keywords: ["트로피", "우승컵", "trophy"], emoji: "🏆" },
+                { mission: "졸업장을 그려줘", keywords: ["졸업장", "졸업", "diploma"], emoji: "🎓" },
+                { mission: "케이크를 그려줘 (축하 파티!)", keywords: ["케이크", "생일케이크", "cake"], emoji: "🎂" },
+                { mission: "왕관을 그려줘 (송양초 챔피언!)", keywords: ["왕관", "crown"], emoji: "👑" },
+                { mission: "지구를 그려줘 (송양초 우주최고!)", keywords: ["지구", "earth"], emoji: "🌍" },
+            ],
+        },
+    ],
+};
+
+// 스텝 5: 송양초 스페이스 슈터 (갤러그 스타일 — 무기 업그레이드!)
+const SHOOTER_GAME_CONFIG = {
+    stages: [
+        {
+            label: "1단계 — 기본 미사일",
+            duration: 30000,
+            spawnIntervalMs: 1100,
+            enemySpeed: 90,
+            comboWindowMs: 1200,
+            weapon: "single",          // 단발
+            fireCooldownMs: 220,
+        },
+        {
+            label: "2단계 — 트리플 미사일!",
+            duration: 35000,
+            spawnIntervalMs: 700,
+            enemySpeed: 130,
+            comboWindowMs: 1100,
+            weapon: "triple",          // 3발 부채꼴
+            fireCooldownMs: 280,
+        },
+        {
+            label: "3단계 — 레이저 빔!",
+            duration: 40000,
+            spawnIntervalMs: 500,
+            enemySpeed: 170,
+            comboWindowMs: 1000,
+            weapon: "laser",           // 일렬 관통 레이저
+            fireCooldownMs: 450,
+        },
+    ],
+    playerSpeed: 500,
+    bulletSpeed: 800,
+    fireIntervalMs: 220,                // (기본값, 단계별 fireCooldownMs로 오버라이드)
+    laserDamage: 2,
+    laserHalfWidth: 38,
+    enemyTypes: [
+        { emoji: "👾", points: 1500,   hp: 1, weight: 50, kind: "regular" },
+        { emoji: "🛸", points: 3000,   hp: 1, weight: 22, kind: "fast",  speedMult: 1.5 },
+        { emoji: "🤖", points: 6000,   hp: 2, weight: 15, kind: "tank",  speedMult: 0.7 },
+        { emoji: "⭐", points: 10000,  hp: 1, weight: 8,  kind: "bonus" },
+        { emoji: "🐉", points: 50000,  hp: 5, weight: 3,  kind: "boss",  speedMult: 0.6 },
+        { emoji: "💀", points: -3000,  hp: 1, weight: 2,  kind: "skull" },   // 쏘면 페널티
+    ],
+    comboMultipliers: [1, 1.3, 1.6, 2, 2.5, 3, 4, 5, 7, 10],
+};
+
 const TUTORIALS = {
     game1: {
         title: "1단원 — 컴퓨터의 기초",
@@ -1499,6 +1871,70 @@ const TUTORIALS = {
             { illu: "🥩 → 🔥", text: "왼쪽 트레이의 고기를 화로 위로 드래그!" },
             { illu: "🔥 지글지글~", text: "고기 변화: 생→익는중→완벽! 가끔 황금×10 고기!" },
             { illu: "🥓 → 🍽️", text: "완벽한 순간 접시로 드래그! +10,000점 (황금 = +100,000!)" },
+        ],
+    },
+    // ----- 4단원 검색편 -----
+    gameInternet: {
+        title: "스텝 1 — 인터넷 켜기",
+        icon: "🌐",
+        steps: [
+            { illu: "🌐 🦊 🐳", text: "바탕화면에서 브라우저 아이콘을 찾으세요!" },
+            { illu: "👆👆 더블클릭", text: "정답 아이콘을 빠르게 두 번 클릭하면 인터넷이 켜져요" },
+            { illu: "❌ 오답 -페널티", text: "다른 앱을 클릭하면 점수가 깎여요!" },
+        ],
+    },
+    gameUrl: {
+        title: "스텝 1 — 주소창 타이핑",
+        icon: "🔗",
+        steps: [
+            { illu: "📝 www.naver.com", text: "주소창에 정확히 입력! www. 빼먹지 마세요!" },
+            { illu: "↵ Enter", text: "다 쓰고 Enter 누르면 즉시 다음 단계!" },
+            { illu: "⚡ 빨리 = 보너스", text: "남은 시간 × 보너스 점수! 빨리 칠수록 점수 폭증!" },
+        ],
+    },
+    gameSearch: {
+        title: "스텝 3 — 검색하기",
+        icon: "🔎",
+        steps: [
+            { illu: "🟢 NAVER", text: "가짜 네이버에서 검색창을 클릭하세요" },
+            { illu: "키워드 입력", text: "미션의 검색어를 정확히 입력!" },
+            { illu: "🔎 / ↵", text: "돋보기 클릭 또는 Enter로 검색!" },
+        ],
+    },
+    gameSentence: {
+        title: "스텝 4 — 문장 타자치기",
+        icon: "📝",
+        steps: [
+            { illu: "문장 표시", text: "한 문장이 화면에 나와요" },
+            { illu: "정확히 따라치기", text: "한 글자씩 정확히 따라 입력하세요" },
+            { illu: "⚡ 빨리 → 보너스", text: "다 치면 다음 문장! 빨리 끝낼수록 보너스!" },
+        ],
+    },
+    gameQuiz: {
+        title: "스텝 3 — 검색해서 답 찾기",
+        icon: "🧠",
+        steps: [
+            { illu: "❓ 질문", text: "질문이 화면 위에 나타나요. 3단계로 진행돼요" },
+            { illu: "🔎 질문 검색 → 💡 정답 입력", text: "검색 결과 읽고 정답 입력!" },
+            { illu: "⚡ +50,000 + 시간보너스", text: "한 문제 맞추면 5만점 + 남은시간 × 보너스! 빨리 풀수록 점수↑" },
+        ],
+    },
+    gameAiArt: {
+        title: "스텝 4 — AI 그림 생성기",
+        icon: "🎨",
+        steps: [
+            { illu: "🤖 미션: '사과 그려줘'", text: "AI에게 무슨 그림을 그릴지 명령(프롬프트)을 입력!" },
+            { illu: "🍎 → 생성!", text: "올바른 단어를 입력하면 AI가 그림을 만들어줘요" },
+            { illu: "🖼️ 액자에 걸기!", text: "완성된 그림을 액자에 걸면 점수! 빨리 만들면 보너스!" },
+        ],
+    },
+    gameShooter: {
+        title: "스텝 5 — 송양초 스페이스 슈터",
+        icon: "🚀",
+        steps: [
+            { illu: "🚀 ← → + SPACE", text: "← → 이동, SPACE 발사! 단계 올라가면 무기 업그레이드!" },
+            { illu: "✨ → ✨✨✨ → ⚡", text: "1단계 단발 → 2단계 트리플 → 3단계 레이저 빔!" },
+            { illu: "👾🛸🤖🐉", text: "외계인·UFO·로봇·보스 격추! 콤보 ×10! 💀해골은 쏘지 마세요!" },
         ],
     },
 };
