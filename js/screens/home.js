@@ -121,7 +121,8 @@ SCREEN_RENDERERS.home = function (root) {
         list.forEach((entry, i) => {
             const rank = i + 1;
             const rankBadge = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
-            const lvl = entry.level || 1;
+            // 저장된 level이 아니라 현재 임계점 기준으로 점수에서 다시 산출
+            const lvl = getLevelFromPoints(Number(entry.score) || 0);
             const row = el("div", { class: `hall-board__row ${rank <= 3 ? `hall-board__row--top${rank}` : ""}` },
                 el("div", { class: "hall-board__rank", text: rankBadge }),
                 el("div", { class: "hall-board__name", text: entry.name }),

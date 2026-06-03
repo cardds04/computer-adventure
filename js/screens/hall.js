@@ -45,11 +45,13 @@ SCREEN_RENDERERS.hall = function (root) {
         list.forEach((entry, i) => {
             const rank = i + 1;
             const rankBadge = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
+            // 저장된 level 무시하고 현재 임계점 기준으로 다시 계산
+            const lvl = getLevelFromPoints(Number(entry.score) || 0);
             const row = el("div", { class: `hall__row hall__row--rank${rank <= 3 ? rank : ""}` },
                 el("div", { class: "hall__rank", text: rankBadge }),
                 el("div", { class: "hall__name", text: entry.name }),
                 el("div", { class: "hall__lvl",
-                    text: `Lv.${entry.level || "?"} · ${getLevelName(entry.level || 1)}` }),
+                    text: `Lv.${lvl} · ${getLevelName(lvl)}` }),
                 el("div", { class: "hall__score", text: `${Number(entry.score).toLocaleString()}점` }),
             );
             tableWrap.appendChild(row);
