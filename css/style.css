@@ -1997,28 +1997,75 @@ body {
 }
 
 .hall-board__list--3col .hall-board__row {
-    grid-template-columns: 30px 1fr auto auto;     /* rank | name | lvl | score */
-    gap: 6px;
-    padding: 5px 8px;
+    grid-template-columns: 30px minmax(0, max-content) auto;
+    grid-template-rows: auto auto;
+    gap: 0 6px;
+    padding: 8px 18px 8px 10px;       /* 우측 패딩 늘려서 점수 더 왼쪽으로 */
     font-size: 13px;
     border-left-width: 3px;
 }
 
-/* 3열 모드에서 레벨은 'Lv.30'만 보이고 이름은 숨김 */
-.hall-board__list--3col .hall-board__lvl {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 700;
-    color: white;
-    background: var(--primary);
-    padding: 2px 7px;
-    border-radius: 999px;
+.hall-board__list--3col .hall-board__rank {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
+    font-size: 16px;
+    font-weight: 900;
+}
+
+/* 이름 — 살짝 줄여서 잘리지 않게 */
+.hall-board__list--3col .hall-board__name {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: center;
+    font-weight: 900;
+    font-size: 17px;             /* 20 → 17 (잘림 방지) */
+    line-height: 1.1;
+    color: var(--text-dark);
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: 1.4;
+}
+
+/* 레벨 — 오른쪽 위, 끝 라인을 점수와 맞춤 */
+.hall-board__list--3col .hall-board__lvl {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: end;
+    justify-self: end;
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-soft);
+    font-weight: 600;
+    white-space: nowrap;
+    line-height: 1.1;
+    opacity: 0.85;
+    margin: 0;
+    padding: 0;
+}
+
+.hall-board__list--3col .hall-board__lvl-num {
+    color: var(--primary);
+    font-weight: 800;
 }
 
 .hall-board__list--3col .hall-board__lvl-name {
-    display: none;
+    display: inline;
+}
+
+.hall-board__list--3col .hall-board__score {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: start;
+    justify-self: end;
+    text-align: right;
+    font-weight: 900;
+    color: var(--primary-dark);
+    font-size: 22px;
+    white-space: nowrap;
+    line-height: 1.05;
+    margin: 3px 0 0 0;            /* 가로 마진 0으로 보장 */
+    padding: 0;
 }
 
 .hall-board__list--3col .hall-board__rank {
