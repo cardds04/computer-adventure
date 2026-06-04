@@ -201,7 +201,12 @@ SCREEN_RENDERERS.home = function (root) {
         );
 
         if (isUnlocked && lesson.game) {
-            card.addEventListener("click", () => navigate(lesson.game, { lessonId: lesson.id }));
+            card.addEventListener("click", () => {
+                // 졸업 후 10분 자동 초기화 타이머가 살아있으면 취소
+                // (학생이 다시 플레이를 시작했으므로 도중에 갑자기 리셋되면 안 됨)
+                cancelGraduationReset();
+                navigate(lesson.game, { lessonId: lesson.id });
+            });
         } else if (!isUnlocked) {
             card.addEventListener("click", () => {
                 Audio.wrong();
