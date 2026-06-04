@@ -1720,7 +1720,7 @@ const SHOOTER_GAME_CONFIG = {
         // ===== 3번째 도전 이후 (무한 반복) =====
         {
             label: "7단계 — 송양초 궁극의 무기 🌟⚡🌟",
-            duration: 60000,
+            duration: 20000,
             spawnIntervalMs: 220,
             enemySpeed: 290,
             comboWindowMs: 750,
