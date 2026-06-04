@@ -51,40 +51,83 @@ function resetState() {
     cancelGraduationReset();
 }
 
-// ----- 졸업 후 자동 초기화 (10분) -----
-// 한 수업이 끝난 후 다음 수업이 들어왔을 때 이전 기록이 이어지지 않도록
+// ----- 졸업 후 자동 초기화 (유휴 시간 기반) -----
+// 한 수업이 끝난 후 다음 수업이 들어왔을 때 이전 기록이 이어지지 않도록.
+//
+// ⚠️ 예전엔 졸업 화면을 본 시점부터 "벽시계 10분"이 지나면 무조건 초기화했는데,
+//    학생이 졸업 후 다른 단원을 계속 플레이해도 게임 도중에 갑자기 리셋되는
+//    버그가 있었다. 이제는 "활동이 없는 유휴 시간"을 기준으로 바꾼다.
+//    → 클릭/키 입력 등 활동이 있을 때마다 데드라인을 뒤로 미루므로,
+//      게임을 활발히 하고 있는 학생은 절대 초기화되지 않는다.
+//    → 자리가 비어 N분간 아무 활동도 없을 때(= 다음 수업 차례)만 초기화된다.
 let _gradResetTimer = null;
-let _gradResetAt = null;
+let _gradResetArmed = false;          // 졸업 화면을 본 후 감시 활성화 여부
+let _gradResetMinutes = 10;
+let _gradIdleDeadline = null;         // 이 시각까지 활동 없으면 초기화
 
+function _performGraduationReset() {
+    _gradResetTimer = null;
+    _gradResetArmed = false;
+    _gradIdleDeadline = null;
+    sessionStorage.removeItem(STATE_KEY);
+    // freshState()로 깨끗한 새 객체 생성 (bestScores 등 nested 객체까지 모두 초기화)
+    const f = freshState();
+    for (const k of Object.keys(state)) delete state[k];
+    Object.assign(state, f);
+    if (typeof navigate === "function") navigate("home");
+    if (typeof showToast === "function") {
+        showToast("🌟 새 수업이 시작돼요!\n진행이 초기화되었어요.");
+    }
+}
+
+// 졸업 화면에서 호출 — 유휴 감시 시작
 function scheduleGraduationReset(minutes = 10) {
-    if (_gradResetTimer) return;   // 이미 예약됨
-    _gradResetAt = Date.now() + minutes * 60 * 1000;
-    _gradResetTimer = setTimeout(() => {
-        _gradResetTimer = null;
-        _gradResetAt = null;
-        sessionStorage.removeItem(STATE_KEY);
-        // freshState()로 깨끗한 새 객체 생성 (bestScores 등 nested 객체까지 모두 초기화)
-        const f = freshState();
-        for (const k of Object.keys(state)) delete state[k];
-        Object.assign(state, f);
-        if (typeof navigate === "function") navigate("home");
-        if (typeof showToast === "function") {
-            showToast("🌟 새 수업이 시작돼요!\n진행이 초기화되었어요.");
-        }
-    }, minutes * 60 * 1000);
+    _gradResetMinutes = minutes;
+    _gradResetArmed = true;
+    bumpGraduationIdle();   // 첫 데드라인 설정
+}
+
+// 활동이 감지될 때마다 호출 — 유휴 데드라인을 뒤로 미룬다
+function bumpGraduationIdle() {
+    if (!_gradResetArmed) return;     // 감시 중이 아니면 아무 것도 안 함 (오버헤드 0)
+    _gradIdleDeadline = Date.now() + _gradResetMinutes * 60 * 1000;
+    if (_gradResetTimer) clearTimeout(_gradResetTimer);
+    _gradResetTimer = setTimeout(_onGraduationIdleCheck, _gradResetMinutes * 60 * 1000);
+}
+
+function _onGraduationIdleCheck() {
+    _gradResetTimer = null;
+    if (!_gradResetArmed) return;
+    const remaining = (_gradIdleDeadline || 0) - Date.now();
+    if (remaining > 250) {
+        // 활동으로 데드라인이 미뤄졌음 — 남은 시간만큼 다시 대기
+        _gradResetTimer = setTimeout(_onGraduationIdleCheck, remaining);
+        return;
+    }
+    _performGraduationReset();
 }
 
 function cancelGraduationReset() {
+    _gradResetArmed = false;
+    _gradIdleDeadline = null;
     if (_gradResetTimer) {
         clearTimeout(_gradResetTimer);
         _gradResetTimer = null;
-        _gradResetAt = null;
     }
 }
 
 function getGraduationResetRemaining() {
-    if (!_gradResetAt) return null;
-    return Math.max(0, _gradResetAt - Date.now());
+    if (!_gradResetArmed || !_gradIdleDeadline) return null;
+    return Math.max(0, _gradIdleDeadline - Date.now());
+}
+
+// 전역 활동 감지 — 졸업 유휴 초기화 데드라인을 활동마다 미룸.
+// (감시 중이 아닐 땐 bumpGraduationIdle()이 즉시 return 하므로 부담 없음)
+// pointerdown은 마우스·터치·펜을 모두 포함, touchstart는 구형 사파리 대비.
+if (typeof document !== "undefined") {
+    ["pointerdown", "keydown", "touchstart"].forEach(evt => {
+        document.addEventListener(evt, bumpGraduationIdle, { passive: true, capture: true });
+    });
 }
 
 // 전역 상태

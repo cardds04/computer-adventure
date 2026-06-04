@@ -81,12 +81,13 @@ SCREEN_RENDERERS.graduation = function (root) {
         }),
     );
 
-    // 10분 후 자동 초기화 예약 (다음 수업 시작 보호)
+    // 졸업 후 유휴 초기화 예약 (다음 수업 시작 보호)
+    // 활동이 있는 동안엔 초기화되지 않고, 10분간 아무 활동이 없을 때만 초기화됨
     scheduleGraduationReset(10);
 
     // 안내 메시지
     const autoNote = el("div", { class: "diploma-auto-reset",
-        text: "⏰ 10분 후 다음 수업을 위해 자동으로 초기화돼요" });
+        text: "⏰ 10분 동안 아무 활동이 없으면 다음 수업을 위해 자동으로 초기화돼요\n(계속 플레이하면 초기화되지 않아요!)" });
 
     // 명예의 전당 등록 버튼 (수동 진입 가능)
     const hallRegisterBtn = el("button", {
