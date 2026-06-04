@@ -19,6 +19,7 @@ function freshState() {
         bestScores: {},                 // { lesson1: 2700, ... }
         playerName: "",                  // 명예의 전당 이름
         currentUnit: 1,                  // 현재 보고 있는 단원
+        shooterAttempts: 0,              // 스텝5 슈터 도전 횟수 (단계 진행 결정)
     };
 }
 

@@ -1656,38 +1656,81 @@ const AI_ART_GAME_CONFIG = {
 
 // 스텝 5: 송양초 스페이스 슈터 (갤러그 스타일 — 무기 업그레이드!)
 const SHOOTER_GAME_CONFIG = {
+    // 7개 단계가 정의되어 있고, 도전 횟수에 따라 어떤 단계를 보여줄지가 달라짐:
+    //   1번째 도전: 1·2·3단계
+    //   2번째 도전: 4·5·6단계
+    //   3번째 도전 이후: 7단계만 무한 반복
     stages: [
+        // ===== 1번째 도전 =====
         {
-            label: "1단계 — 기본 미사일",
+            label: "1단계 — 기본 미사일 ✨",
             duration: 30000,
             spawnIntervalMs: 1100,
             enemySpeed: 90,
             comboWindowMs: 1200,
-            weapon: "single",          // 단발
+            weapon: "single",
             fireCooldownMs: 220,
         },
         {
-            label: "2단계 — 트리플 미사일!",
+            label: "2단계 — 트리플 미사일! ✨✨✨",
             duration: 35000,
             spawnIntervalMs: 700,
             enemySpeed: 130,
             comboWindowMs: 1100,
-            weapon: "triple",          // 3발 부채꼴
+            weapon: "triple",
             fireCooldownMs: 280,
         },
         {
-            label: "3단계 — 레이저 빔!",
+            label: "3단계 — 레이저 빔! ⚡",
             duration: 40000,
             spawnIntervalMs: 500,
             enemySpeed: 170,
             comboWindowMs: 1000,
-            weapon: "laser",           // 일렬 관통 레이저
+            weapon: "laser",
             fireCooldownMs: 450,
+        },
+        // ===== 2번째 도전 =====
+        {
+            label: "4단계 — 5웨이 산탄! ⭐⭐⭐⭐⭐",
+            duration: 40000,
+            spawnIntervalMs: 420,
+            enemySpeed: 200,
+            comboWindowMs: 900,
+            weapon: "spread5",         // 5방향 부채꼴
+            fireCooldownMs: 320,
+        },
+        {
+            label: "5단계 — 듀얼 레이저! ⚡⚡",
+            duration: 42000,
+            spawnIntervalMs: 360,
+            enemySpeed: 230,
+            comboWindowMs: 850,
+            weapon: "doubleLaser",     // 좌·우 동시 레이저
+            fireCooldownMs: 380,
+        },
+        {
+            label: "6단계 — 트리플 레이저! ⚡⚡⚡",
+            duration: 45000,
+            spawnIntervalMs: 300,
+            enemySpeed: 260,
+            comboWindowMs: 800,
+            weapon: "tripleLaser",     // 3가닥 레이저 + 트리플 미사일 보조
+            fireCooldownMs: 420,
+        },
+        // ===== 3번째 도전 이후 (무한 반복) =====
+        {
+            label: "7단계 — 송양초 궁극의 무기 🌟⚡🌟",
+            duration: 60000,
+            spawnIntervalMs: 220,
+            enemySpeed: 290,
+            comboWindowMs: 750,
+            weapon: "ultimate",        // 5웨이 + 트리플 레이저 동시
+            fireCooldownMs: 350,
         },
     ],
     playerSpeed: 500,
     bulletSpeed: 800,
-    fireIntervalMs: 220,                // (기본값, 단계별 fireCooldownMs로 오버라이드)
+    fireIntervalMs: 220,
     laserDamage: 2,
     laserHalfWidth: 38,
     enemyTypes: [
@@ -1696,10 +1739,17 @@ const SHOOTER_GAME_CONFIG = {
         { emoji: "🤖", points: 6000,   hp: 2, weight: 15, kind: "tank",  speedMult: 0.7 },
         { emoji: "⭐", points: 10000,  hp: 1, weight: 8,  kind: "bonus" },
         { emoji: "🐉", points: 50000,  hp: 5, weight: 3,  kind: "boss",  speedMult: 0.6 },
-        { emoji: "💀", points: -3000,  hp: 1, weight: 2,  kind: "skull" },   // 쏘면 페널티
+        { emoji: "💀", points: -3000,  hp: 1, weight: 2,  kind: "skull" },
     ],
     comboMultipliers: [1, 1.3, 1.6, 2, 2.5, 3, 4, 5, 7, 10],
 };
+
+// 도전 횟수에 따라 진행할 단계 인덱스 배열 반환
+function getShooterStageIndices(attemptCount) {
+    if (attemptCount <= 0) return [0, 1, 2];       // 1번째: 1·2·3단계
+    if (attemptCount === 1) return [3, 4, 5];      // 2번째: 4·5·6단계
+    return [6];                                     // 3번째~: 7단계만
+}
 
 const TUTORIALS = {
     game1: {
@@ -1933,7 +1983,7 @@ const TUTORIALS = {
         icon: "🚀",
         steps: [
             { illu: "🚀 ← → + SPACE", text: "← → 이동, SPACE 발사! 단계 올라가면 무기 업그레이드!" },
-            { illu: "✨ → ✨✨✨ → ⚡", text: "1단계 단발 → 2단계 트리플 → 3단계 레이저 빔!" },
+            { illu: "✨ → ✨✨✨ → ⚡", text: "1차: 단발→트리플→레이저 / 2차: 5웨이→듀얼레이저→트리플레이저 / 3차+: 궁극의 무기!" },
             { illu: "👾🛸🤖🐉", text: "외계인·UFO·로봇·보스 격추! 콤보 ×10! 💀해골은 쏘지 마세요!" },
         ],
     },

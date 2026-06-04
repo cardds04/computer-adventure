@@ -11,7 +11,17 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
 
     const startingScore = getStartingScore(params.lessonId);
     let score = startingScore;
-    let stageIndex = 0;
+
+    // 도전 횟수에 따라 진행할 단계들 결정
+    //  1번째 도전: [0,1,2] (1·2·3단계)
+    //  2번째 도전: [3,4,5] (4·5·6단계)
+    //  3번째 도전 이후: [6] (7단계만 무한)
+    const attemptCount = state.shooterAttempts || 0;
+    const stageIndices = getShooterStageIndices(attemptCount);
+    let localStageIdx = 0;                       // 0..stageIndices.length-1
+    let stageIndex = stageIndices[0];            // 실제 cfg.stages 인덱스
+    const totalStagesThisRun = stageIndices.length;
+
     let stageEndsAt = 0;
     let inStage = false;
     let finished = false;
@@ -31,7 +41,7 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
 
     const goalScore = LESSONS_UNIT4.find(l => l.id === params.lessonId)?.goalScore || 0;
     const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
-    const stageEl = el("span", { text: "1 / 3" });
+    const stageEl = el("span", { text: `1 / ${totalStagesThisRun}` });
     const timerEl = el("span", { class: "hud-chip__big", text: "30.0", style: { color: "var(--secondary-dark)" } });
     const comboEl = el("span", { class: "hud-chip__big", text: "0" });
     const lvlChip = makeLevelChip();
@@ -79,8 +89,12 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     const playerEl = el("div", { class: "shooter-player", text: "🚀" });
     playArea.appendChild(playerEl);
 
-    const bottomHelp = el("div", { class: "game-bottom-help",
-        text: "💡 ← → 이동 + SPACE 발사! 단계마다 무기 업그레이드 (단발→트리플→레이저)!" });
+    // 도전 횟수에 따른 안내 문구
+    const helpByAttempt =
+        attemptCount === 0 ? "💡 ← → 이동 + SPACE 발사! 단계마다 무기 업그레이드 (단발→트리플→레이저)!"
+        : attemptCount === 1 ? "🔥 두 번째 도전! 5웨이 산탄 → 듀얼 레이저 → 트리플 레이저! 적도 훨씬 많아요!"
+        : "💀 송양초 궁극의 무기 모드! 5웨이 + 3가닥 레이저 동시 발사! 끝없는 적의 침공!";
+    const bottomHelp = el("div", { class: "game-bottom-help", text: helpByAttempt });
     screen.appendChild(bottomHelp);
 
     function updateScoreDisplay() {
@@ -149,15 +163,51 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         const bx = playerX;
         const by = playerEl.offsetTop;
 
-        if (weapon === "laser") {
-            fireLaser(bx);
-        } else if (weapon === "triple") {
-            // 정면 + 좌·우 부채꼴
-            spawnBullet(bx, by, 0);
-            spawnBullet(bx, by, -0.45);
-            spawnBullet(bx, by, 0.45);
-        } else {
-            spawnBullet(bx, by, 0);
+        switch (weapon) {
+            case "laser":
+                fireLaser(bx);
+                break;
+            case "triple":
+                spawnBullet(bx, by, 0);
+                spawnBullet(bx, by, -0.45);
+                spawnBullet(bx, by, 0.45);
+                break;
+            case "spread5":
+                // 5웨이 산탄 — 정면 + 좌2 + 우2
+                spawnBullet(bx, by, 0);
+                spawnBullet(bx, by, -0.35);
+                spawnBullet(bx, by, 0.35);
+                spawnBullet(bx, by, -0.75);
+                spawnBullet(bx, by, 0.75);
+                Audio.bigCorrect && Audio.bigCorrect(4);
+                break;
+            case "doubleLaser":
+                // 좌·우 동시 레이저 (중앙에서 약간 떨어진 두 가닥)
+                fireLaser(bx - 50);
+                fireLaser(bx + 50);
+                break;
+            case "tripleLaser":
+                // 3가닥 레이저 + 트리플 미사일 보조
+                fireLaser(bx - 70);
+                fireLaser(bx);
+                fireLaser(bx + 70);
+                spawnBullet(bx, by, -0.5);
+                spawnBullet(bx, by, 0.5);
+                break;
+            case "ultimate":
+                // 송양초 궁극의 무기: 5웨이 산탄 + 3가닥 레이저 동시
+                fireLaser(bx - 90);
+                fireLaser(bx);
+                fireLaser(bx + 90);
+                spawnBullet(bx, by, 0);
+                spawnBullet(bx, by, -0.35);
+                spawnBullet(bx, by, 0.35);
+                spawnBullet(bx, by, -0.75);
+                spawnBullet(bx, by, 0.75);
+                if (Audio.perfectBell) Audio.perfectBell();
+                break;
+            default:
+                spawnBullet(bx, by, 0);
         }
         Audio.tick && Audio.tick();
     }
@@ -343,10 +393,11 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         rafId = requestAnimationFrame(tick);
     }
 
-    function startStage(idx) {
-        stageIndex = idx;
-        const stage = cfg.stages[idx];
-        stageEl.textContent = `${idx + 1} / ${cfg.stages.length}`;
+    function startStage(localIdx) {
+        localStageIdx = localIdx;
+        stageIndex = stageIndices[localIdx];
+        const stage = cfg.stages[stageIndex];
+        stageEl.textContent = `${localIdx + 1} / ${totalStagesThisRun}`;
         timerEl.textContent = (stage.duration / 1000).toFixed(1);
         showStageBanner(stage.label);
         Audio.roundStart();
@@ -386,11 +437,11 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         enemies = [];
         bullets.forEach(b => b.el.remove());
         bullets = [];
-        stageIndex++;
-        if (stageIndex >= cfg.stages.length) {
+        const nextLocal = localStageIdx + 1;
+        if (nextLocal >= totalStagesThisRun) {
             setTimeout(finishGame, 1000);
         } else {
-            setTimeout(() => startStage(stageIndex), 1400);
+            setTimeout(() => startStage(nextLocal), 1400);
         }
     }
 
@@ -407,6 +458,9 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         finished = true;
         cleanup();
         Audio.gameOver();
+        // 도전 횟수 증가 — 다음 도전부터 더 강한 무기 + 더 많은 적
+        state.shooterAttempts = (state.shooterAttempts || 0) + 1;
+        commit();
         const prevLevel = getLevelFromPoints(state.points);
         finishLesson(params.lessonId, score);
         const newLevel = getLevelFromPoints(state.points);
