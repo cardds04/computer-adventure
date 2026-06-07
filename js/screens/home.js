@@ -15,6 +15,9 @@ SCREEN_RENDERERS.home = function (root) {
     const gradeBadge = gMeta ? el("button", {
         class: "home-grade-badge",
         style: { "--grade-color": gMeta.color },
+        // tabindex=-1: 키보드 Tab 순서에서 제외 → 게임 후 스페이스/엔터/탭으로
+        //              실수로 학년변경 확인창이 뜨는 것 방지 (실제 클릭/터치만 동작)
+        attrs: { tabindex: "-1" },
         on: { click: () => {
             if (confirm("학년을 바꾸려면 새 학년의 비밀번호가 필요해요.\n학년 선택으로 갈까요?")) {
                 state.grade = null;

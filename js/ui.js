@@ -19,6 +19,11 @@ function navigate(screenName, params) {
     document.querySelectorAll(".help-btn, .tutorial-modal, .carry-over-banner, .lvl-up-burst").forEach(n => n.remove());
     app.innerHTML = "";
     renderer(app, params || {});
+    // 화면 전환 후 포커스 해제 — 게임에서 쓰던 키(스페이스/엔터/탭)가
+    // 다음 화면의 버튼을 실수로 누르는 것 방지 (예: 학년변경 확인창이 갑자기 뜸)
+    if (document.activeElement && document.activeElement.blur) {
+        try { document.activeElement.blur(); } catch (_) {}
+    }
 }
 
 // ----- 작은 헬퍼들 -----
