@@ -165,12 +165,17 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     }
 
     // ----- 키 입력 -----
+    // ⚠️ 방향키는 e.code(물리키, 레이아웃·IME 무관)를 우선 검사한다.
+    //    예전엔 방향키를 e.key로만 봐서, 브라우저/IME에 따라 e.key가 비표준이면
+    //    방향키가 안 먹고(이동 X) preventDefault도 안 돼 페이지가 스크롤/선택되는 버그가 있었다.
+    function keyIsLeft(e)  { return e.code === "ArrowLeft"  || e.code === "KeyA" || e.key === "ArrowLeft"  || e.keyCode === 37; }
+    function keyIsRight(e) { return e.code === "ArrowRight" || e.code === "KeyD" || e.key === "ArrowRight" || e.keyCode === 39; }
+    function keyIsFire(e)  { return e.code === "Space" || e.key === " " || e.keyCode === 32; }
+
     function onKeyDown(e) {
         if (finished) return;
-        const isLeft  = e.key === "ArrowLeft"  || e.key === "a" || e.key === "A";
-        const isRight = e.key === "ArrowRight" || e.key === "d" || e.key === "D";
-        const isFire  = e.code === "Space" || e.key === " ";
-        // 게임 키는 항상 기본동작(페이지 스크롤·선택) 차단 — 게임 시작 직후 잔떨림 방지
+        const isLeft = keyIsLeft(e), isRight = keyIsRight(e), isFire = keyIsFire(e);
+        // 게임 키는 항상 기본동작(페이지 스크롤·선택) 차단
         if (isLeft || isRight || isFire) e.preventDefault();
         if (!inStage) return;
         if (isLeft) {
@@ -189,8 +194,8 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         }
     }
     function onKeyUp(e) {
-        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = false;
-        else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = false;
+        if (keyIsLeft(e)) keys.left = false;
+        else if (keyIsRight(e)) keys.right = false;
     }
     // 창 포커스를 잃으면 키 상태 전부 리셋
     // (다른 창으로 전환 중 keyup을 놓쳐 비행기가 한쪽으로 계속 가는 문제 방지)
