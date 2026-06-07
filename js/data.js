@@ -210,13 +210,13 @@ function getLevelName(level) {
 // ============================================================
 
 const COMPUTER_PARTS = {
-    monitor: { word: "모니터", emoji: "🖥️" },
-    keyboard: { word: "키보드", emoji: "⌨️" },
-    mouse: { word: "마우스", emoji: "🖱️" },
-    speaker: { word: "스피커", emoji: "🔊" },
-    printer: { word: "프린터", emoji: "🖨️" },
-    body: { word: "본체", emoji: "💻" },
-    cable: { word: "케이블", emoji: "🔌" },
+    monitor:  { word: "모니터", emoji: "🖥️", sprite: "assets/unit1/monitor.svg" },
+    keyboard: { word: "키보드", emoji: "⌨️", sprite: "assets/unit1/keyboard.svg" },
+    mouse:    { word: "마우스", emoji: "🖱️", sprite: "assets/unit1/mouse.svg" },
+    speaker:  { word: "스피커", emoji: "🔊", sprite: "assets/unit1/speaker.svg" },
+    printer:  { word: "프린터", emoji: "🖨️", sprite: "assets/unit1/printer.svg" },
+    body:     { word: "본체",   emoji: "💻", sprite: "assets/unit1/body.svg" },
+    cable:    { word: "케이블", emoji: "🔌", sprite: "assets/unit1/cable.svg" },
 };
 
 const DISTRACTORS = [

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="kBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0f3fb"/><stop offset="1" stop-color="#aeb6d4"/>
+    </linearGradient>
+    <linearGradient id="kKey" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#c4cce4"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="28" width="84" height="48" rx="10" fill="url(#kBody)" stroke="#2d2a52" stroke-width="3.5"/>
+  <!-- key rows -->
+  <g fill="url(#kKey)" stroke="#2d2a52" stroke-width="2" >
+    <rect x="16" y="36" width="9" height="9" rx="2.5"/><rect x="28" y="36" width="9" height="9" rx="2.5"/>
+    <rect x="40" y="36" width="9" height="9" rx="2.5"/><rect x="52" y="36" width="9" height="9" rx="2.5"/>
+    <rect x="64" y="36" width="9" height="9" rx="2.5"/><rect x="76" y="36" width="9" height="9" rx="2.5"/>
+    <rect x="16" y="49" width="9" height="9" rx="2.5"/><rect x="28" y="49" width="9" height="9" rx="2.5"/>
+    <rect x="40" y="49" width="9" height="9" rx="2.5"/><rect x="52" y="49" width="9" height="9" rx="2.5"/>
+    <rect x="64" y="49" width="9" height="9" rx="2.5"/><rect x="76" y="49" width="9" height="9" rx="2.5"/>
+  </g>
+  <!-- spacebar -->
+  <rect x="30" y="62" width="40" height="8" rx="3" fill="url(#kKey)" stroke="#2d2a52" stroke-width="2"/>
+</svg>

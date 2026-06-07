@@ -111,9 +111,14 @@ SCREEN_RENDERERS.game1 = function (root, params) {
         const part = COMPUTER_PARTS[key];
         // 1/30 확률로 ×10 보너스 단어
         const isBonus = Math.random() < (1 / 30);
-        const displayHtml = part
-            ? `<span style="font-size: 32px; line-height: 1;">${part.emoji}</span><span>${part.word}</span>${isBonus ? '<span class="word-bonus">×10</span>' : ''}`
-            : `<span>${key}</span>${isBonus ? '<span class="word-bonus">×10</span>' : ''}`;
+        // 아이콘: 스프라이트(SVG)가 있으면 이미지로, 없으면 이모지로 폴백
+        const iconHtml = part
+            ? (part.sprite
+                ? `<span class="word-sprite" style="background-image:url('${part.sprite}')"></span>`
+                : `<span style="font-size: 32px; line-height: 1;">${part.emoji}</span>`)
+            : "";
+        const labelHtml = part ? `<span>${part.word}</span>` : `<span>${key}</span>`;
+        const displayHtml = `${iconHtml}${labelHtml}${isBonus ? '<span class="word-bonus">×10</span>' : ''}`;
 
         const areaWidth = screen.clientWidth;
         const speed = GAME_CONFIG.fallSpeedBase + roundIndex * GAME_CONFIG.fallSpeedPerRound;

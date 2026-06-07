@@ -971,6 +971,17 @@ body {
     line-height: 1.2;
 }
 
+/* 컴퓨터 부품 SVG 스프라이트 아이콘 (이모지 대체) */
+.word-sprite {
+    display: block;
+    width: 46px;
+    height: 46px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    filter: drop-shadow(0 2px 3px rgba(45, 42, 82, 0.25));
+}
+
 /* ×10 보너스 단어 — 화려한 색상 + 빛나는 효과 */
 .falling-word--bonus {
     background: linear-gradient(135deg, #ffd23f 0%, #ff8a5b 100%);
@@ -3312,6 +3323,7 @@ body {
     /* 단어 박스 더 작게 */
     .falling-word { padding: 12px 10px; font-size: 14px; min-height: 56px; }
     .falling-word > span:first-child { font-size: 24px !important; }
+    .word-sprite { width: 34px; height: 34px; }
 
     /* 수학 키패드 모바일 최적화 */
     .math-key { width: 52px; height: 52px; font-size: 24px; }
