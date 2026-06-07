@@ -74,7 +74,7 @@ SCREEN_RENDERERS.graduation = function (root) {
                         const f = freshState();
                         for (const k of Object.keys(state)) delete state[k];
                         Object.assign(state, f);
-                        navigate("home");
+                        navigate("gradeSelect");
                     }
                 },
             },

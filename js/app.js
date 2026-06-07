@@ -4,5 +4,10 @@
    ============================================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
-    navigate("home");
+    // 학년을 먼저 선택해야 시작 (명예의 전당을 학년별로 분리하기 위함)
+    if (!state.grade) {
+        navigate("gradeSelect");
+    } else {
+        navigate("home");
+    }
 });

@@ -9,6 +9,22 @@ SCREEN_RENDERERS.home = function (root) {
     const currentLessons = getLessonsForUnit(state.currentUnit);
     const allPassed = areAllLessonsPassed(state.currentUnit);
 
+    // ----- 학년 배지 (탭하면 학년 변경 = 다시 비밀번호) -----
+    const gMeta = (typeof GRADES !== "undefined" && state.grade)
+        ? GRADES.find(g => g.num === state.grade) : null;
+    const gradeBadge = gMeta ? el("button", {
+        class: "home-grade-badge",
+        style: { "--grade-color": gMeta.color },
+        on: { click: () => {
+            if (confirm("학년을 바꾸려면 새 학년의 비밀번호가 필요해요.\n학년 선택으로 갈까요?")) {
+                state.grade = null;
+                commit();
+                navigate("gradeSelect");
+            }
+        } },
+        text: `${gMeta.icon} ${gMeta.label} ▾`,
+    }) : null;
+
     // ----- 단원 선택 -----
     const unitSelector = el("div", { class: "unit-selector unit-selector--top" });
     UNITS.forEach(u => {
@@ -228,12 +244,18 @@ SCREEN_RENDERERS.home = function (root) {
                     const f = freshState();
                     for (const k of Object.keys(state)) delete state[k];
                     Object.assign(state, f);
-                    navigate("home");
+                    navigate("gradeSelect");
                 }
             },
         },
     });
 
+    if (gradeBadge) {
+        const gradeRow = el("div", {
+            style: { display: "flex", justifyContent: "center", marginBottom: "6px" },
+        }, gradeBadge);
+        screen.appendChild(gradeRow);
+    }
     screen.appendChild(unitSelector);
     screen.appendChild(top);
     if (graduateBtn) screen.appendChild(graduateBtn);

@@ -5,10 +5,17 @@
 SCREEN_RENDERERS.hall = function (root) {
     const screen = el("div", { class: "screen hall" });
 
+    const gradeMeta = (typeof GRADES !== "undefined" && state.grade)
+        ? GRADES.find(g => g.num === state.grade) : null;
+    const gradeLabel = gradeMeta ? gradeMeta.label : "";
     const header = el("div", { class: "hall__header" },
-        el("div", { class: "hall__badge", text: "🏆" }),
-        el("h1", { class: "hall__title", text: "명예의 전당" }),
-        el("div", { class: "hall__subtitle", text: "송양초등학교 디지털수업 · 마우스편" }),
+        el("div", { class: "hall__badge", text: gradeMeta ? gradeMeta.icon : "🏆" }),
+        el("h1", { class: "hall__title",
+            text: gradeLabel ? `${gradeLabel} 명예의 전당` : "명예의 전당" }),
+        el("div", { class: "hall__subtitle",
+            text: gradeLabel
+                ? `송양초등학교 · ${gradeLabel} 전용 순위`
+                : "송양초등학교 디지털수업" }),
     );
 
     const tableWrap = el("div", { class: "hall__table-wrap" });

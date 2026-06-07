@@ -7285,3 +7285,189 @@ body {
     .ai-suggest__item,
     .url-suggest__item { font-size: 16px; padding: 10px 14px; }
 }
+
+/* ============================================================
+   학년 선택 화면 + 비밀번호 키패드
+   ============================================================ */
+.grade-select {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 16px;
+    gap: 20px;
+    min-height: 100%;
+}
+.grade-select__header { text-align: center; }
+.grade-select__badge {
+    font-size: 64px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    animation: grade-badge-bob 2.4s ease-in-out infinite;
+}
+@keyframes grade-badge-bob {
+    0%, 100% { transform: translateY(0) rotate(-4deg); }
+    50% { transform: translateY(-8px) rotate(4deg); }
+}
+.grade-select__title {
+    font-family: 'Jua', sans-serif;
+    font-size: 34px;
+    color: var(--primary-dark, #5b3ec8);
+    margin: 8px 0 4px;
+    text-shadow: 0 2px 0 #fff;
+}
+.grade-select__subtitle {
+    font-family: 'Gaegu', cursive;
+    font-size: 18px;
+    color: var(--text-mid, #6b6b8a);
+}
+.grade-select__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: min(540px, 94vw);
+}
+.grade-card {
+    --grade-color: #7c5cff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 22px 10px;
+    border: 4px solid var(--grade-color);
+    border-radius: 22px;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--grade-color) 55%, #000 12%),
+                0 10px 22px rgba(0,0,0,0.12);
+    transition: transform 0.1s, box-shadow 0.1s, filter 0.1s;
+}
+.grade-card:hover { transform: translateY(-3px); filter: brightness(1.04); }
+.grade-card:active { transform: translateY(3px); box-shadow: 0 3px 0 color-mix(in srgb, var(--grade-color) 55%, #000 12%); }
+.grade-card__icon { font-size: 46px; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.18)); }
+.grade-card__label {
+    font-family: 'Jua', sans-serif;
+    font-size: 22px;
+    color: var(--grade-color);
+}
+.grade-select__note {
+    font-family: 'Gaegu', cursive;
+    font-size: 15px;
+    color: var(--text-light, #9a9ab0);
+    margin-top: 4px;
+}
+
+/* ----- 비밀번호 모달 ----- */
+.grade-pw-card {
+    --grade-color: #7c5cff;
+    max-width: min(360px, 92vw);
+    border-top: 8px solid var(--grade-color);
+}
+.grade-pw__icon { font-size: 54px; line-height: 1; }
+.grade-pw__title {
+    font-family: 'Jua', sans-serif;
+    font-size: 26px;
+    color: var(--grade-color);
+    margin: 6px 0 2px;
+    text-align: center;
+}
+.grade-pw__sub {
+    font-family: 'Gaegu', cursive;
+    font-size: 16px;
+    color: var(--text-mid, #6b6b8a);
+    margin-bottom: 14px;
+    text-align: center;
+}
+.grade-pw__sub--error { color: #e53935; font-weight: 700; }
+
+.grade-pw__dots {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+.grade-pw__dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid var(--grade-color);
+    background: transparent;
+    transition: background 0.12s, transform 0.12s;
+}
+.grade-pw__dot--filled {
+    background: var(--grade-color);
+    transform: scale(1.18);
+}
+
+.grade-pw__keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: min(280px, 80vw);
+    margin: 0 auto 8px;
+}
+.grade-pw__key {
+    font-family: 'Jua', sans-serif;
+    font-size: 26px;
+    padding: 14px 0;
+    border: none;
+    border-radius: 14px;
+    background: #f0f2f9;
+    color: #2d2a52;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #c7cbe0;
+    transition: transform 0.08s, box-shadow 0.08s, background 0.08s;
+    user-select: none;
+}
+.grade-pw__key:hover { background: #e6e9f5; }
+.grade-pw__key:active { transform: translateY(3px); box-shadow: 0 0 0 #c7cbe0; }
+.grade-pw__key--fn { font-size: 22px; background: #ffe6e6; color: #d63031; box-shadow: 0 3px 0 #f0c0c0; }
+.grade-pw__key--fn:hover { background: #ffd6d6; }
+
+.grade-pw__close {
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.grade-pw-card--shake { animation: grade-pw-shake 0.45s; }
+@keyframes grade-pw-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-10px); }
+    40% { transform: translateX(10px); }
+    60% { transform: translateX(-7px); }
+    80% { transform: translateX(7px); }
+}
+.grade-pw-card--ok {
+    animation: grade-pw-ok 0.5s ease;
+    border-color: #27ae60;
+}
+@keyframes grade-pw-ok {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.06); box-shadow: 0 0 30px rgba(39,174,96,0.5); }
+    100% { transform: scale(1); }
+}
+
+/* 홈 화면 학년 배지 */
+.home-grade-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: #fff;
+    border: 2px solid var(--grade-color, #7c5cff);
+    color: var(--grade-color, #7c5cff);
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.home-grade-badge:hover { filter: brightness(1.05); transform: translateY(-1px); }
+
+@media (max-width: 640px) {
+    .grade-select__title { font-size: 26px; }
+    .grade-card__icon { font-size: 38px; }
+    .grade-card__label { font-size: 18px; }
+    .grade-card { padding: 16px 6px; border-radius: 18px; }
+    .grade-pw__keypad { width: min(260px, 84vw); }
+}

@@ -300,6 +300,28 @@ const LESSONS = [
 ];
 
 // 상위 단원 정보
+// ============================================================
+// 학년 (1~6) — 명예의 전당을 학년별로 분리 + 비밀번호 게이트
+// ============================================================
+const GRADES = [
+    { num: 1, label: "1학년", icon: "🐣", color: "#ff8fb1" },
+    { num: 2, label: "2학년", icon: "🐥", color: "#ffb74d" },
+    { num: 3, label: "3학년", icon: "🦊", color: "#ffd23f" },
+    { num: 4, label: "4학년", icon: "🐻", color: "#66bb6a" },
+    { num: 5, label: "5학년", icon: "🦅", color: "#42a5f5" },
+    { num: 6, label: "6학년", icon: "🦁", color: "#ab47bc" },
+];
+
+// 학년별 비밀번호 (4자리) — 다른 학년이 잘못 들어가는 것 방지용 소프트 잠금
+const GRADE_PASSWORDS = {
+    1: "1063",
+    2: "6315",
+    3: "3088",
+    4: "7101",
+    5: "5603",
+    6: "8851",
+};
+
 const UNITS = [
     { num: 1,  title: "마우스편",  icon: "🖱️", active: true  },
     { num: 2,  title: "키보드편",  icon: "⌨️", active: true  },

@@ -17,9 +17,10 @@ function freshState() {
         points: 0,
         lessonsCompleted: [],
         bestScores: {},                 // { lesson1: 2700, ... }
-        playerName: "",                  // 명예의 전당 이름
+        playerName: "",                  // 명예의 전당 이름 (학년 접두사 없는 원본)
         currentUnit: 1,                  // 현재 보고 있는 단원
         shooterAttempts: 0,              // 스텝5 슈터 도전 횟수 (단계 진행 결정)
+        grade: null,                     // 선택한 학년 (1~6) — 명예의 전당 분리용
     };
 }
 
@@ -74,9 +75,10 @@ function _performGraduationReset() {
     const f = freshState();
     for (const k of Object.keys(state)) delete state[k];
     Object.assign(state, f);
-    if (typeof navigate === "function") navigate("home");
+    // 학년도 초기화됐으니 학년 선택부터 다시
+    if (typeof navigate === "function") navigate("gradeSelect");
     if (typeof showToast === "function") {
-        showToast("🌟 새 수업이 시작돼요!\n진행이 초기화되었어요.");
+        showToast("🌟 새 수업이 시작돼요!\n학년을 다시 선택해 주세요.");
     }
 }
 
@@ -206,6 +208,24 @@ function isSharedHallEnabled() {
     return !!supabaseClient;
 }
 
+// ----- 학년별 명예의 전당 분리 -----
+// Supabase 스키마(name,score,level)를 바꾸지 않고 학년을 나누기 위해
+// 저장되는 name 앞에 "G{학년}·" 접두사를 붙인다. (예: "G3·홍길동")
+// 화면에는 접두사를 떼고 보여주고, 조회 시 현재 학년 접두사로 필터한다.
+const HALL_GRADE_DELIM = "·";   // 가운뎃점 ·
+function encodeHallName(grade, name) {
+    if (!grade) return name;
+    return `G${grade}${HALL_GRADE_DELIM}${name}`;
+}
+function decodeHallName(stored) {
+    const m = /^G([1-6])·([\s\S]*)$/.exec(stored || "");
+    if (m) return { grade: Number(m[1]), name: m[2] };
+    return { grade: null, name: stored || "" };
+}
+function currentGrade() {
+    return (typeof state !== "undefined" && state.grade) ? state.grade : null;
+}
+
 // --- 로컬 백업 ---
 function getLocalHall() {
     try {
@@ -235,41 +255,53 @@ function addToLocalHall(name, score, level) {
     saveLocalHall(list.slice(0, 50));
 }
 
-// --- 통합 API (async, Supabase 우선) ---
+// --- 통합 API (async, Supabase 우선) — 현재 학년만 조회 ---
 async function fetchHallTop(n = 10) {
+    const g = currentGrade();
     if (supabaseClient) {
         try {
-            const { data, error } = await supabaseClient
+            let q = supabaseClient
                 .from("hall_of_fame")
                 .select("name, score, level")
                 .order("score", { ascending: false })
                 .limit(n);
-            if (!error && data) return data;
+            // 학년이 선택돼 있으면 해당 학년 접두사로만 필터
+            if (g) q = q.like("name", `G${g}${HALL_GRADE_DELIM}%`);
+            const { data, error } = await q;
+            if (!error && data) {
+                return data.map(e => ({ ...e, name: decodeHallName(e.name).name }));
+            }
         } catch (e) {
             console.warn("Supabase fetch 실패, 로컬로 폴백", e);
         }
     }
-    return getLocalHall().slice(0, n);
+    // 로컬 폴백 — 현재 학년 접두사만
+    return getLocalHall()
+        .filter(e => decodeHallName(e.name).grade === g)
+        .map(e => ({ ...e, name: decodeHallName(e.name).name }))
+        .slice(0, n);
 }
 
 async function addToHall(name, score, level) {
     if (!name || typeof score !== "number") return;
-    addToLocalHall(name, score, level);  // 항상 로컬 백업
+    // 저장 시 현재 학년 접두사를 붙임 (예: "G3·홍길동")
+    const storedName = encodeHallName(currentGrade(), name);
+    addToLocalHall(storedName, score, level);  // 항상 로컬 백업
 
     if (supabaseClient) {
         try {
-            // 기존 점수 확인
+            // 기존 점수 확인 (학년 접두사 포함 이름으로)
             const { data: existing } = await supabaseClient
                 .from("hall_of_fame")
                 .select("score")
-                .eq("name", name)
+                .eq("name", storedName)
                 .maybeSingle();
             // 새 점수가 더 높을 때만 갱신/삽입
             if (!existing || score > (existing.score || 0)) {
                 const { error } = await supabaseClient
                     .from("hall_of_fame")
                     .upsert(
-                        { name, score, level, updated_at: new Date().toISOString() },
+                        { name: storedName, score, level, updated_at: new Date().toISOString() },
                         { onConflict: "name" }
                     );
                 if (error) console.warn("Supabase upsert 에러", error);
