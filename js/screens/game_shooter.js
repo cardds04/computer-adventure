@@ -32,6 +32,7 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     let lastHitAt = 0;
     let combo = 0;
     let maxCombo = 0;
+    let pointerFiring = false;   // 터치/마우스를 누르고 있는 동안 자동 발사
 
     let playerX = 0;
     let playerW = 64;
@@ -137,9 +138,9 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         applySprite(playerEl, cfg.playerSprite, "🚀");
     }
 
-    // 도전 횟수에 따른 안내 문구
+    // 도전 횟수에 따른 안내 문구 (태블릿: 화면 누르고 움직이기 / PC: 방향키+스페이스)
     const helpByAttempt =
-        attemptCount === 0 ? "💡 ← → 이동 + SPACE 발사! 단계마다 무기 업그레이드 (단발→트리플→레이저)!"
+        attemptCount === 0 ? "💡 화면을 손가락으로 누르고 움직이면 이동+자동발사! (PC는 ← → + SPACE) 단계마다 무기 업그레이드!"
         : attemptCount === 1 ? "🔥 두 번째 도전! 5웨이 산탄 → 듀얼 레이저 → 트리플 레이저! 적도 훨씬 많아요!"
         : "💀 송양초 궁극의 무기 모드! 5웨이 + 3가닥 레이저 동시 발사! 끝없는 적의 침공!";
     const bottomHelp = el("div", { class: "game-bottom-help", text: helpByAttempt });
@@ -191,13 +192,37 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
 
-    // ----- 마우스 이동 지원 -----
-    playArea.addEventListener("pointermove", (e) => {
-        if (!inStage || finished) return;
+    // ----- 터치/마우스 이동 + 누르고 있으면 자동 발사 (태블릿 지원) -----
+    function pointerMoveTo(clientX) {
         const r = playArea.getBoundingClientRect();
-        const x = e.clientX - r.left;
+        const x = clientX - r.left;
         playerX = Math.max(playerW / 2, Math.min(r.width - playerW / 2, x));
         updatePlayerEl();
+    }
+    playArea.addEventListener("pointerdown", (e) => {
+        if (!inStage || finished) return;
+        pointerFiring = true;          // 누르는 동안 자동 발사 (tick에서 처리)
+        pointerMoveTo(e.clientX);
+        // 즉시 한 발 (반응성) — 이후 tick이 연사
+        const now = performance.now();
+        if (now - lastFireAt >= (cfg.stages[stageIndex].fireCooldownMs || cfg.fireIntervalMs)) {
+            fireWeapon();
+            lastFireAt = now;
+        }
+        // 주의: preventDefault()는 일부 브라우저에서 pointercancel을 유발해
+        //       자동발사가 즉시 꺼지는 문제가 있어 호출하지 않음.
+        //       스크롤 방지는 .shooter-area { touch-action: none }로 처리.
+    });
+    playArea.addEventListener("pointermove", (e) => {
+        if (!inStage || finished) return;
+        pointerMoveTo(e.clientX);      // 마우스 호버/드래그 모두 이동
+    });
+    function stopPointerFire() { pointerFiring = false; }
+    playArea.addEventListener("pointerup", stopPointerFire);
+    playArea.addEventListener("pointercancel", stopPointerFire);
+    // 마우스가 영역 밖으로 나가면 발사 중지 (단, 터치 드래그는 계속되도록 pointerup만으로 충분)
+    playArea.addEventListener("pointerleave", (e) => {
+        if (e.pointerType === "mouse") pointerFiring = false;
     });
 
     function updatePlayerEl() {
@@ -405,7 +430,17 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
             if (keys.right) playerX = Math.min(areaW - playerW / 2, playerX + cfg.playerSpeed * dt);
             updatePlayerEl();
 
-            // 발사는 SPACE 키 입력에서 처리 (자동 발사 X)
+            // 발사:
+            //  - 키보드: SPACE 키 입력에서 처리
+            //  - 터치/마우스: 누르고 있는 동안 자동 발사 (태블릿용)
+            // (rAF 타임스탬프 t 사용 — performance.now()와 동일 클럭이며 일관성 ↑)
+            if (pointerFiring) {
+                const cd = cfg.stages[stageIndex].fireCooldownMs || cfg.fireIntervalMs;
+                if (t - lastFireAt >= cd) {
+                    fireWeapon();
+                    lastFireAt = t;
+                }
+            }
 
             // 콤보 시간 초과 리셋
             if (combo > 0 && performance.now() - lastHitAt > cfg.stages[stageIndex].comboWindowMs * 1.4) {
@@ -537,7 +572,7 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
 
     const startGame = () => {
         showCarryOverBanner(startingScore);
-        showIntroInstruction(screen, "🚀 ← → 이동 + SPACE 발사!");
+        showIntroInstruction(screen, "🚀 화면을 누르고 움직이면 이동+발사! (PC: ← → + SPACE)");
         startStage(0);
     };
     if (!hasSeenTutorial("gameShooter")) {

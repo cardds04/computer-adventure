@@ -5189,6 +5189,8 @@ body {
     overflow: hidden;
     cursor: crosshair;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+    touch-action: none;               /* 터치 드래그가 페이지 스크롤로 새지 않게 */
+    user-select: none;
 }
 
 .shooter-area::before {
