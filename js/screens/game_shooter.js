@@ -166,14 +166,18 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
 
     // ----- 키 입력 -----
     function onKeyDown(e) {
-        if (!inStage || finished) return;
-        if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
+        if (finished) return;
+        const isLeft  = e.key === "ArrowLeft"  || e.key === "a" || e.key === "A";
+        const isRight = e.key === "ArrowRight" || e.key === "d" || e.key === "D";
+        const isFire  = e.code === "Space" || e.key === " ";
+        // 게임 키는 항상 기본동작(페이지 스크롤·선택) 차단 — 게임 시작 직후 잔떨림 방지
+        if (isLeft || isRight || isFire) e.preventDefault();
+        if (!inStage) return;
+        if (isLeft) {
             keys.left = true;
-            e.preventDefault();
-        } else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
+        } else if (isRight) {
             keys.right = true;
-            e.preventDefault();
-        } else if (e.code === "Space" || e.key === " ") {
+        } else if (isFire) {
             // 스페이스바 → 발사 (단계별 쿨다운)
             const stage = cfg.stages[stageIndex];
             const cd = stage.fireCooldownMs || cfg.fireIntervalMs;
@@ -182,15 +186,19 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
                 fireWeapon();
                 lastFireAt = now;
             }
-            e.preventDefault();
         }
     }
     function onKeyUp(e) {
         if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.left = false;
         else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.right = false;
     }
+    // 창 포커스를 잃으면 키 상태 전부 리셋
+    // (다른 창으로 전환 중 keyup을 놓쳐 비행기가 한쪽으로 계속 가는 문제 방지)
+    function resetKeys() { keys.left = false; keys.right = false; pointerFiring = false; }
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", resetKeys);
+    document.addEventListener("visibilitychange", resetKeys);
 
     // ----- 터치/마우스 이동 + 누르고 있으면 자동 발사 (태블릿 지원) -----
     function pointerMoveTo(clientX) {
@@ -541,6 +549,8 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         if (spawnTimer) clearInterval(spawnTimer);
         document.removeEventListener("keydown", onKeyDown);
         document.removeEventListener("keyup", onKeyUp);
+        window.removeEventListener("blur", resetKeys);
+        document.removeEventListener("visibilitychange", resetKeys);
     }
 
     function finishGame() {
@@ -571,6 +581,10 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     preloadSprites(applyLoadedSprites);
 
     const startGame = () => {
+        // 포커스 남은 버튼 해제 — 파란 포커스 외곽선 + 스페이스/엔터로 버튼 눌리는 문제 방지
+        if (document.activeElement && document.activeElement.blur) {
+            document.activeElement.blur();
+        }
         showCarryOverBanner(startingScore);
         showIntroInstruction(screen, "🚀 화면을 누르고 움직이면 이동+발사! (PC: ← → + SPACE)");
         startStage(0);

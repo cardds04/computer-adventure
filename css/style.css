@@ -5174,7 +5174,13 @@ body {
 .game--shooter {
     background: radial-gradient(circle at 50% 0%, #0d1e3a 0%, #050912 80%);
     overflow: hidden;
+    /* 키 입력 시 텍스트가 파랗게 선택되는 현상 방지 */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
+/* 슈터의 버튼/HUD에 파란 포커스 외곽선 안 보이게 (게임 몰입 방해 방지) */
+.game--shooter button:focus { outline: none; }
 
 .shooter-area {
     position: absolute;
