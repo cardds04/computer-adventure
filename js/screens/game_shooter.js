@@ -81,29 +81,61 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     const playerChar = el("div", { class: "player-character player-character--topleft", text: getCurrentEmoji() });
     screen.appendChild(playerChar);
 
-    // 스프라이트 헬퍼 — src가 있으면 SVG 이미지로, 없으면 이모지 텍스트로
+    // 스프라이트 사용 가능 여부 — 에셋이 로드 성공할 때만 true.
+    // 실패(404·캐시·배포지연)하면 false로 남아 이모지로 자동 폴백 → 절대 투명해지지 않음.
+    let useSprites = false;
+
+    // 스프라이트 헬퍼 — useSprites가 true이고 src가 있으면 SVG, 아니면 이모지
     function applySprite(elm, src, emoji) {
-        if (src) {
+        if (useSprites && src) {
             elm.style.backgroundImage = `url("${src}")`;
             elm.classList.add("has-sprite");
+            // 인라인 보강 — CSS 캐시가 옛 버전이어도 보이도록
+            elm.style.backgroundSize = "contain";
+            elm.style.backgroundRepeat = "no-repeat";
+            elm.style.backgroundPosition = "center";
         } else if (emoji) {
             elm.textContent = emoji;
+            elm.style.backgroundImage = "";
+            elm.classList.remove("has-sprite");
         }
+    }
+
+    // 모든 스프라이트를 미리 로드. 전부 성공하면 useSprites=true 후 콜백.
+    function preloadSprites(done) {
+        const urls = [cfg.playerSprite, cfg.bulletSprite, cfg.bgSprite,
+                      ...cfg.enemyTypes.map(t => t.sprite)].filter(Boolean);
+        if (urls.length === 0) { done(); return; }
+        let remaining = urls.length;
+        let allOk = true;
+        urls.forEach(u => {
+            const img = new Image();
+            const finish = () => { if (--remaining === 0) { useSprites = allOk; done(); } };
+            img.onload = finish;
+            img.onerror = () => { allOk = false; finish(); };
+            img.src = u;
+        });
     }
 
     // 플레이 영역 (우주)
     const playArea = el("div", { class: "shooter-area" });
-    if (cfg.bgSprite) {
-        playArea.style.backgroundImage = `url("${cfg.bgSprite}")`;
-        playArea.style.backgroundSize = "cover";
-        playArea.style.backgroundPosition = "center";
-    }
     screen.appendChild(playArea);
 
-    // 플레이어 비행기
-    const playerEl = el("div", { class: "shooter-player" });
-    applySprite(playerEl, cfg.playerSprite, "🚀");
+    // 플레이어 비행기 (처음엔 이모지, 프리로드 성공 시 스프라이트로 교체)
+    const playerEl = el("div", { class: "shooter-player", text: "🚀" });
     playArea.appendChild(playerEl);
+
+    // 프리로드 성공 시 배경·플레이어에 스프라이트 적용
+    function applyLoadedSprites() {
+        if (!useSprites) return;
+        if (cfg.bgSprite) {
+            playArea.style.backgroundImage = `url("${cfg.bgSprite}")`;
+            playArea.style.backgroundSize = "cover";
+            playArea.style.backgroundPosition = "center";
+        }
+        playerEl.textContent = "";
+        applySprite(playerEl, cfg.playerSprite, "🚀");
+    }
 
     // 도전 횟수에 따른 안내 문구
     const helpByAttempt =
@@ -231,6 +263,11 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     function spawnBullet(x, y, vxFactor) {
         const bulletEl = el("div", { class: "shooter-bullet" });
         applySprite(bulletEl, cfg.bulletSprite, "✨");
+        // 스프라이트 모드일 때 크기를 인라인으로 보장 (CSS 캐시 옛 버전 대비)
+        if (bulletEl.classList.contains("has-sprite")) {
+            bulletEl.style.width = "14px";
+            bulletEl.style.height = "28px";
+        }
         bulletEl.style.left = `${x - 8}px`;
         bulletEl.style.top = `${y}px`;
         playArea.appendChild(bulletEl);
@@ -494,6 +531,9 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     root.appendChild(screen);
     updateScoreDisplay();
     rafId = requestAnimationFrame(tick);
+
+    // 스프라이트 프리로드 — 성공하면 배경·플레이어에 적용 (실패해도 이모지로 잘 작동)
+    preloadSprites(applyLoadedSprites);
 
     const startGame = () => {
         showCarryOverBanner(startingScore);

@@ -20,6 +20,22 @@ SCREEN_RENDERERS.game1 = function (root, params) {
     let inRound = false;
     let roundClicks = { correct: 0, wrong: 0 };
 
+    // 스프라이트 프리로드 — 전부 로드 성공할 때만 SVG 사용, 실패하면 이모지 폴백
+    // (에셋 404·배포지연·캐시에도 아이콘이 사라지지 않도록)
+    let useSprites = false;
+    (function preloadPartSprites() {
+        const urls = Object.values(COMPUTER_PARTS).map(p => p.sprite).filter(Boolean);
+        if (urls.length === 0) return;
+        let remaining = urls.length, allOk = true;
+        urls.forEach(u => {
+            const img = new Image();
+            const fin = () => { if (--remaining === 0) useSprites = allOk; };
+            img.onload = fin;
+            img.onerror = () => { allOk = false; fin(); };
+            img.src = u;
+        });
+    })();
+
     // ----- HUD -----
     const goalScore = (LESSONS.find(l => l.id === params.lessonId) || {}).goalScore || 0;
     const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
@@ -111,9 +127,9 @@ SCREEN_RENDERERS.game1 = function (root, params) {
         const part = COMPUTER_PARTS[key];
         // 1/30 확률로 ×10 보너스 단어
         const isBonus = Math.random() < (1 / 30);
-        // 아이콘: 스프라이트(SVG)가 있으면 이미지로, 없으면 이모지로 폴백
+        // 아이콘: 스프라이트가 로드 성공(useSprites)했을 때만 이미지로, 아니면 이모지 폴백
         const iconHtml = part
-            ? (part.sprite
+            ? ((useSprites && part.sprite)
                 ? `<span class="word-sprite" style="background-image:url('${part.sprite}')"></span>`
                 : `<span style="font-size: 32px; line-height: 1;">${part.emoji}</span>`)
             : "";
