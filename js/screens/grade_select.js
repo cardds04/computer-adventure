@@ -17,17 +17,28 @@ SCREEN_RENDERERS.gradeSelect = function (root) {
 
     const grid = el("div", { class: "grade-select__grid" });
     GRADES.forEach(g => {
+        const hasPw = !!String(GRADE_PASSWORDS[g.num] || "");
         const card = el("button", {
             class: "grade-card",
             style: { "--grade-color": g.color },
-            on: { click: () => openPasswordModal(g) },
+            on: { click: () => hasPw ? openPasswordModal(g) : enterGrade(g) },
         },
             el("span", { class: "grade-card__icon", text: g.icon }),
             el("span", { class: "grade-card__label", text: g.label }),
+            // 비번 없는 학년은 자물쇠 없이 바로 입장 표시
+            el("span", { class: "grade-card__lock", text: hasPw ? "🔒" : "" }),
         );
         grid.appendChild(card);
     });
     screen.appendChild(grid);
+
+    // 비번 없이 바로 입장
+    function enterGrade(g) {
+        Audio.bigCorrect && Audio.bigCorrect(6);
+        state.grade = g.num;
+        commit();
+        navigate("home");
+    }
 
     const footnote = el("div", { class: "grade-select__note",
         text: "🔒 비밀번호는 선생님께 물어보세요" });

@@ -7350,6 +7350,7 @@ body {
     font-size: 22px;
     color: var(--grade-color);
 }
+.grade-card__lock { font-size: 13px; line-height: 1; opacity: 0.7; min-height: 14px; }
 .grade-select__note {
     font-family: 'Gaegu', cursive;
     font-size: 15px;

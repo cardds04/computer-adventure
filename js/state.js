@@ -213,14 +213,19 @@ function isSharedHallEnabled() {
 // 저장되는 name 앞에 "G{학년}·" 접두사를 붙인다. (예: "G3·홍길동")
 // 화면에는 접두사를 떼고 보여주고, 조회 시 현재 학년 접두사로 필터한다.
 const HALL_GRADE_DELIM = "·";   // 가운뎃점 ·
+// ★ 4학년 = 학년 기능 도입 이전의 "접두사 없는 레거시 기록"과 같은 네임스페이스.
+//   (기존 156개 기록이 전부 4학년 것이라, 4학년은 접두사 없이 저장/조회한다.)
+//   나머지 학년만 "G{학년}·" 접두사를 붙여 분리한다.
+const LEGACY_GRADE = 4;
 function encodeHallName(grade, name) {
-    if (!grade) return name;
+    if (!grade || grade === LEGACY_GRADE) return name;   // 4학년·미선택 → 접두사 없음
     return `G${grade}${HALL_GRADE_DELIM}${name}`;
 }
 function decodeHallName(stored) {
     const m = /^G([1-6])·([\s\S]*)$/.exec(stored || "");
     if (m) return { grade: Number(m[1]), name: m[2] };
-    return { grade: null, name: stored || "" };
+    // 접두사 없으면 레거시 = 4학년
+    return { grade: LEGACY_GRADE, name: stored || "" };
 }
 function currentGrade() {
     return (typeof state !== "undefined" && state.grade) ? state.grade : null;
@@ -258,24 +263,39 @@ function addToLocalHall(name, score, level) {
 // --- 통합 API (async, Supabase 우선) — 현재 학년만 조회 ---
 async function fetchHallTop(n = 10) {
     const g = currentGrade();
+    if (!g) return [];   // 학년 선택 전엔 표시 안 함
     if (supabaseClient) {
         try {
-            let q = supabaseClient
-                .from("hall_of_fame")
-                .select("name, score, level")
-                .order("score", { ascending: false })
-                .limit(n);
-            // 학년이 선택돼 있으면 해당 학년 접두사로만 필터
-            if (g) q = q.like("name", `G${g}${HALL_GRADE_DELIM}%`);
-            const { data, error } = await q;
-            if (!error && data) {
-                return data.map(e => ({ ...e, name: decodeHallName(e.name).name }));
+            if (g === LEGACY_GRADE) {
+                // 4학년 = 접두사 없는 레거시 기록. 넉넉히 가져와 클라이언트에서 필터.
+                const { data, error } = await supabaseClient
+                    .from("hall_of_fame")
+                    .select("name, score, level")
+                    .order("score", { ascending: false })
+                    .limit(500);
+                if (!error && data) {
+                    return data
+                        .filter(e => decodeHallName(e.name).grade === LEGACY_GRADE)
+                        .map(e => ({ ...e, name: decodeHallName(e.name).name }))
+                        .slice(0, n);
+                }
+            } else {
+                // 1·2·3·5·6학년 = "G{학년}·" 접두사로 서버 필터
+                const { data, error } = await supabaseClient
+                    .from("hall_of_fame")
+                    .select("name, score, level")
+                    .like("name", `G${g}${HALL_GRADE_DELIM}%`)
+                    .order("score", { ascending: false })
+                    .limit(n);
+                if (!error && data) {
+                    return data.map(e => ({ ...e, name: decodeHallName(e.name).name }));
+                }
             }
         } catch (e) {
             console.warn("Supabase fetch 실패, 로컬로 폴백", e);
         }
     }
-    // 로컬 폴백 — 현재 학년 접두사만
+    // 로컬 폴백 — 현재 학년만
     return getLocalHall()
         .filter(e => decodeHallName(e.name).grade === g)
         .map(e => ({ ...e, name: decodeHallName(e.name).name }))
