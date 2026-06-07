@@ -81,12 +81,28 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     const playerChar = el("div", { class: "player-character player-character--topleft", text: getCurrentEmoji() });
     screen.appendChild(playerChar);
 
+    // 스프라이트 헬퍼 — src가 있으면 SVG 이미지로, 없으면 이모지 텍스트로
+    function applySprite(elm, src, emoji) {
+        if (src) {
+            elm.style.backgroundImage = `url("${src}")`;
+            elm.classList.add("has-sprite");
+        } else if (emoji) {
+            elm.textContent = emoji;
+        }
+    }
+
     // 플레이 영역 (우주)
     const playArea = el("div", { class: "shooter-area" });
+    if (cfg.bgSprite) {
+        playArea.style.backgroundImage = `url("${cfg.bgSprite}")`;
+        playArea.style.backgroundSize = "cover";
+        playArea.style.backgroundPosition = "center";
+    }
     screen.appendChild(playArea);
 
     // 플레이어 비행기
-    const playerEl = el("div", { class: "shooter-player", text: "🚀" });
+    const playerEl = el("div", { class: "shooter-player" });
+    applySprite(playerEl, cfg.playerSprite, "🚀");
     playArea.appendChild(playerEl);
 
     // 도전 횟수에 따른 안내 문구
@@ -213,7 +229,8 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
     }
 
     function spawnBullet(x, y, vxFactor) {
-        const bulletEl = el("div", { class: "shooter-bullet", text: "✨" });
+        const bulletEl = el("div", { class: "shooter-bullet" });
+        applySprite(bulletEl, cfg.bulletSprite, "✨");
         bulletEl.style.left = `${x - 8}px`;
         bulletEl.style.top = `${y}px`;
         playArea.appendChild(bulletEl);
@@ -258,7 +275,8 @@ SCREEN_RENDERERS.gameShooter = function (root, params) {
         const type = weightedPick(cfg.enemyTypes);
         const areaW = playArea.clientWidth;
         const x = 40 + Math.random() * (areaW - 80);
-        const enemyEl = el("div", { class: "shooter-enemy shooter-enemy--" + type.kind, text: type.emoji });
+        const enemyEl = el("div", { class: "shooter-enemy shooter-enemy--" + type.kind });
+        applySprite(enemyEl, type.sprite, type.emoji);
         enemyEl.style.left = `${x - 30}px`;
         enemyEl.style.top = `-60px`;
         playArea.appendChild(enemyEl);

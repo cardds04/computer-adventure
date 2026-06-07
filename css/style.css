@@ -5319,6 +5319,40 @@ body {
     100% { transform: scale(0) rotate(360deg); opacity: 0; }
 }
 
+/* ===== 스프라이트 모드 — 이모지 대신 SVG 이미지로 렌더 ===== */
+.shooter-player.has-sprite,
+.shooter-enemy.has-sprite {
+    color: transparent;
+    font-size: 0 !important;
+    text-shadow: none;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+}
+.shooter-player.has-sprite {
+    filter: drop-shadow(0 -2px 10px rgba(54, 169, 255, 0.85))
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.5));
+}
+.shooter-enemy.has-sprite {
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
+}
+.shooter-enemy--fast.has-sprite {
+    filter: drop-shadow(0 0 8px rgba(40, 217, 122, 0.8)) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.5));
+}
+.shooter-enemy--tank.has-sprite {
+    filter: drop-shadow(0 0 8px rgba(255, 90, 60, 0.8)) drop-shadow(0 3px 5px rgba(0, 0, 0, 0.5));
+}
+.shooter-bullet.has-sprite {
+    width: 14px;
+    height: 28px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    color: transparent;
+    text-shadow: none;
+    filter: drop-shadow(0 0 6px #18b6ff);
+}
+
 /* ============================================================
    3단원 단축키편 — 공통 스타일
    ============================================================ */

@@ -1733,13 +1733,17 @@ const SHOOTER_GAME_CONFIG = {
     fireIntervalMs: 220,
     laserDamage: 2,
     laserHalfWidth: 38,
+    // 스프라이트 (이모지 대신 SVG 이미지로 렌더; 없으면 emoji로 폴백)
+    playerSprite: "assets/shooter/player.svg",
+    bulletSprite: "assets/shooter/bullet.svg",
+    bgSprite: "assets/shooter/bg_space.svg",
     enemyTypes: [
-        { emoji: "👾", points: 1500,   hp: 1, weight: 50, kind: "regular" },
-        { emoji: "🛸", points: 3000,   hp: 1, weight: 22, kind: "fast",  speedMult: 1.5 },
-        { emoji: "🤖", points: 6000,   hp: 2, weight: 15, kind: "tank",  speedMult: 0.7 },
-        { emoji: "⭐", points: 10000,  hp: 1, weight: 8,  kind: "bonus" },
-        { emoji: "🐉", points: 50000,  hp: 5, weight: 3,  kind: "boss",  speedMult: 0.6 },
-        { emoji: "💀", points: -3000,  hp: 1, weight: 2,  kind: "skull" },
+        { emoji: "👾", sprite: "assets/shooter/enemy_regular.svg", points: 1500,   hp: 1, weight: 50, kind: "regular" },
+        { emoji: "🛸", sprite: "assets/shooter/enemy_fast.svg",    points: 3000,   hp: 1, weight: 22, kind: "fast",  speedMult: 1.5 },
+        { emoji: "🤖", sprite: "assets/shooter/enemy_tank.svg",    points: 6000,   hp: 2, weight: 15, kind: "tank",  speedMult: 0.7 },
+        { emoji: "⭐", sprite: "assets/shooter/enemy_bonus.svg",   points: 10000,  hp: 1, weight: 8,  kind: "bonus" },
+        { emoji: "🐉", sprite: "assets/shooter/enemy_boss.svg",    points: 50000,  hp: 5, weight: 3,  kind: "boss",  speedMult: 0.6 },
+        { emoji: "💀", sprite: "assets/shooter/enemy_skull.svg",   points: -3000,  hp: 1, weight: 2,  kind: "skull" },
     ],
     comboMultipliers: [1, 1.3, 1.6, 2, 2.5, 3, 4, 5, 7, 10],
 };

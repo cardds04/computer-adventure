@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 48" width="24" height="48">
+  <defs>
+    <linearGradient id="blBolt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.4" stop-color="#9af0ff"/>
+      <stop offset="1" stop-color="#18b6ff"/>
+    </linearGradient>
+    <radialGradient id="blGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#bdf3ff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#bdf3ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="12" cy="24" rx="11" ry="22" fill="url(#blGlow)"/>
+  <path d="M12 2 C7 12 6 20 6 28 C6 38 9 44 12 46 C15 44 18 38 18 28 C18 20 17 12 12 2 Z"
+        fill="url(#blBolt)" stroke="#0f87c9" stroke-width="1.5"/>
+  <ellipse cx="11" cy="18" rx="2.4" ry="6" fill="#ffffff" opacity="0.85"/>
+</svg>

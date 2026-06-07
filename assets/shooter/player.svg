@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="pBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fe3ff"/>
+      <stop offset="0.5" stop-color="#36a9ff"/>
+      <stop offset="1" stop-color="#1d63d6"/>
+    </linearGradient>
+    <linearGradient id="pWing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5fc6ff"/>
+      <stop offset="1" stop-color="#1746a8"/>
+    </linearGradient>
+    <radialGradient id="pGlass" cx="0.5" cy="0.35" r="0.7">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.5" stop-color="#aef0ff"/>
+      <stop offset="1" stop-color="#2bb7e6"/>
+    </radialGradient>
+    <linearGradient id="pFlame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6a0"/>
+      <stop offset="0.4" stop-color="#ffb74d"/>
+      <stop offset="1" stop-color="#ff5722" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- engine flames -->
+  <path d="M38 74 Q42 96 44 74 Z" fill="url(#pFlame)"/>
+  <path d="M62 74 Q58 96 56 74 Z" fill="url(#pFlame)"/>
+  <!-- wings -->
+  <path d="M30 52 L8 70 L14 78 L34 70 Z" fill="url(#pWing)" stroke="#15205c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M70 52 L92 70 L86 78 L66 70 Z" fill="url(#pWing)" stroke="#15205c" stroke-width="3" stroke-linejoin="round"/>
+  <!-- body -->
+  <path d="M50 6 C40 16 34 34 34 56 C34 70 40 80 50 84 C60 80 66 70 66 56 C66 34 60 16 50 6 Z"
+        fill="url(#pBody)" stroke="#15205c" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- cockpit -->
+  <ellipse cx="50" cy="38" rx="10" ry="14" fill="url(#pGlass)" stroke="#15205c" stroke-width="2.5"/>
+  <!-- side accents -->
+  <path d="M40 60 L60 60 L57 74 L43 74 Z" fill="#0e3f9e" opacity="0.55"/>
+  <!-- highlight -->
+  <path d="M46 12 C42 20 40 32 40 46" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+</svg>
