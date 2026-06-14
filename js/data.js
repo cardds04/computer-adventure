@@ -2190,7 +2190,7 @@ const SENTENCE_GAME_CONFIG = {
 const QUIZ_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 교과 내용",
+            label: "1단계 — 쉬운 상식",
             duration: 60000,
             pointsPerCorrect: 50000,
             timeBonusPerSec: 1000,
@@ -2256,7 +2256,7 @@ const QUIZ_GAME_CONFIG = {
             ],
         },
         {
-            label: "3단계 — 교과 내용",
+            label: "3단계 — 송양초 챌린지!",
             duration: 90000,
             pointsPerCorrect: 50000,
             timeBonusPerSec: 1800,
