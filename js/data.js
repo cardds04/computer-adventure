@@ -2096,9 +2096,17 @@ const INTERNET_GAME_CONFIG = {
 const URL_GAME_CONFIG = {
     stages: [
         {
-            label: "1단계 — 주소창 타이핑",
+            label: "1단계 — 네이버 주소창 타이핑",
             duration: 90000,
-            urls: ["www.naver.com", "www.google.co.kr"],
+            urls: ["www.naver.com"],
+            pointsPerUrl: 10000,
+            wrongPenalty: 200,
+            timeBonusPerSec: 1000,
+        },
+        {
+            label: "2단계 — 구글 주소창 타이핑",
+            duration: 90000,
+            urls: ["www.google.co.kr"],
             pointsPerUrl: 10000,
             wrongPenalty: 200,
             timeBonusPerSec: 1000,

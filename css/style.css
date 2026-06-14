@@ -3759,7 +3759,8 @@ body {
 /* 게임 시작 시 이전 점수 안내 */
 .carry-over-banner {
     position: fixed;
-    top: 90px;
+    /* 상단 미션 문구(이 주소를 입력하세요 등)를 가리지 않도록 하단에 배치 */
+    bottom: 88px;
     left: 50%;
     transform: translate(-50%, 0);
     background: linear-gradient(135deg, var(--primary), #ffb088);
@@ -3955,7 +3956,7 @@ body {
 }
 
 @keyframes carry-over-in {
-    0%   { transform: translate(-50%, -30px); opacity: 0; }
+    0%   { transform: translate(-50%, 30px); opacity: 0; }
     100% { transform: translate(-50%, 0); opacity: 1; }
 }
 
