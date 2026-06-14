@@ -2229,7 +2229,7 @@ const QUIZ_GAME_CONFIG = {
             ],
         },
         {
-            label: "2단계 — 4학년 교과",
+            label: "2단계 — 교과 내용",
             duration: 75000,
             pointsPerCorrect: 50000,
             timeBonusPerSec: 1300,
