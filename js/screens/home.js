@@ -4,6 +4,9 @@
 
 SCREEN_RENDERERS.home = function (root) {
     const screen = el("div", { class: "screen home" });
+    // 배경: 졸업 후 → 평화(결혼) 장면 / 그 전엔 5단원만 드래곤 장면, 1~4단원 하늘
+    document.body.classList.toggle("theme-peace", !!state.graduated);
+    document.body.classList.toggle("theme-unit5", !state.graduated && state.currentUnit === 5);
     const progress = getLevelProgress(state.points);
     const emoji = getCurrentEmoji();
     const currentLessons = getLessonsForUnit(state.currentUnit);
@@ -63,7 +66,7 @@ SCREEN_RENDERERS.home = function (root) {
 
     // ----- 프로필 패널 -----
     const avatar = el("div", { class: "profile-avatar profile-avatar--big" },
-        el("span", { text: emoji }),
+        applyGfx(el("span", { class: "profile-avatar__face", text: emoji }), getCurrentSprite(), emoji),
         el("span", { class: "profile-avatar__sparkle s1", text: "✨" }),
         el("span", { class: "profile-avatar__sparkle s2", text: "⭐" }),
     );

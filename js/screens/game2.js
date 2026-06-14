@@ -151,9 +151,11 @@ SCREEN_RENDERERS.game2 = function (root, params) {
             },
         });
         const emojiEl = el("div", {
-            style: { fontSize: "64px", lineHeight: "1", filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" },
+            style: { fontSize: "64px", lineHeight: "1", width: "64px", height: "64px",
+                     filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.15))" },
             text: info.emoji,
         });
+        gfxify(emojiEl);
         const hintEl = el("div", {
             style: {
                 fontSize: "13px",

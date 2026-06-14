@@ -1,3 +1,6 @@
 .DS_Store
 *.log
 node_modules/
+
+# 버린 프로토타입(배포 제외)
+_pixel_poc.html

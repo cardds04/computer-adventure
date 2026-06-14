@@ -21,6 +21,7 @@ function freshState() {
         currentUnit: 1,                  // 현재 보고 있는 단원
         shooterAttempts: 0,              // 스텝5 슈터 도전 횟수 (단계 진행 결정)
         grade: null,                     // 선택한 학년 (1~6) — 명예의 전당 분리용
+        taWeapons: null,                 // 5단원 타자원정대: 관문별 획득 무기 등급
     };
 }
 
@@ -178,6 +179,15 @@ function getEmojiForLevel(level) {
     const ch = getCharacter();
     if (!ch) return "🥚";
     return ch.evolved[Math.min(level - 1, ch.evolved.length - 1)];
+}
+
+// 레벨별 캐릭터 SVG 경로 (없으면 null → 이모지 폴백)
+function getSpriteForLevel(level) {
+    if (typeof LEVEL_SPRITES === "undefined") return null;
+    return LEVEL_SPRITES[level - 1] || null;
+}
+function getCurrentSprite() {
+    return getSpriteForLevel(getLevelFromPoints(state.points));
 }
 
 // ============================================================

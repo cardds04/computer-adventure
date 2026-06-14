@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="kg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e0a878"/><stop offset="1" stop-color="#b06a3a"/>
+    </linearGradient>
+    <linearGradient id="kgd" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c8895a"/><stop offset="1" stop-color="#8a5028"/>
+    </linearGradient>
+  </defs>
+  <!-- 꼬리: 뒤(왼쪽 아래)로 길게 뻗음 -->
+  <path d="M30 64 q-16 4 -22 18 q-2 6 4 6 q4 -10 18 -16 q8 -3 10 -6 Z"
+        fill="url(#kgd)" stroke="#6a3c1c" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 강력한 뒷다리 -->
+  <path d="M34 58 q-6 14 -4 22 q1 5 6 4 q3 -8 10 -12 q6 -3 4 -12 Z"
+        fill="url(#kgd)" stroke="#6a3c1c" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="46" cy="84" rx="14" ry="6" fill="url(#kgd)" stroke="#6a3c1c" stroke-width="3"/>
+  <!-- 몸통 (오른쪽 위로 기울인 점프 자세) -->
+  <path d="M34 56 C30 40 42 28 58 30 q14 2 16 16 q2 12 -8 20 q-14 8 -26 0 q-4 -3 -2 -6 Z"
+        fill="url(#kg)" stroke="#7a4422" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- 배 주머니 -->
+  <ellipse cx="50" cy="58" rx="8" ry="10" fill="#f0d4ac" opacity="0.7"/>
+  <!-- 앞발 (오른쪽 앞으로) -->
+  <path d="M62 50 q10 0 14 6" fill="none" stroke="#7a4422" stroke-width="6" stroke-linecap="round"/>
+  <!-- 머리 (오른쪽을 향함) -->
+  <path d="M58 22 q16 -2 20 12 q2 12 -10 16 q-12 2 -16 -10 q-2 -14 6 -18 Z"
+        fill="url(#kg)" stroke="#7a4422" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- 주둥이 (오른쪽 끝으로 뾰족) -->
+  <path d="M74 32 q10 0 14 5 q-3 6 -12 5 q-4 -5 -2 -10 Z" fill="url(#kg)" stroke="#7a4422" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="86" cy="36" r="2.5" fill="#2a1810"/>
+  <!-- 귀 (위로) -->
+  <path d="M60 16 q-3 -14 3 -16 q6 4 5 16 Z" fill="url(#kg)" stroke="#7a4422" stroke-width="2.5"/>
+  <path d="M70 16 q3 -13 9 -13 q3 6 -2 16 Z" fill="url(#kg)" stroke="#7a4422" stroke-width="2.5"/>
+  <!-- 눈 (오른쪽 향함) -->
+  <circle cx="72" cy="32" r="3.5" fill="#2a1810"/>
+  <circle cx="73" cy="31" r="1.2" fill="#fff"/>
+</svg>

@@ -98,6 +98,7 @@ SCREEN_RENDERERS.gameJump = function (root, params) {
 
     // 플레이어 (캥거루)
     const playerEl = el("div", { class: "jump-player", text: "🦘" });
+    gfxify(playerEl);
     playArea.appendChild(playerEl);
 
     // ----- 점수 표시 갱신 -----
@@ -162,6 +163,7 @@ SCREEN_RENDERERS.gameJump = function (root, params) {
             class: `jump-obj jump-obj--${type}`,
         });
         const emojiSpan = el("span", { class: "jump-obj__emoji", text: emoji });
+        gfxify(emojiSpan);
         objEl.appendChild(emojiSpan);
 
         if (type === "fruit") {

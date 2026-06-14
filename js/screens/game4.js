@@ -260,8 +260,9 @@ SCREEN_RENDERERS.game4 = function (root, params) {
 
         const tEl = el("div", {
             class: "cannon-target" + bonusClass,
-            html: `${emoji}${isBonus ? `<span class="cannon-target-bonus-badge">×${bonusMultiplier}</span>` : ''}`,
+            html: `<span class="cannon-target__icon">${emoji}</span>${isBonus ? `<span class="cannon-target-bonus-badge">×${bonusMultiplier}</span>` : ''}`,
         });
+        gfxify(tEl.querySelector(".cannon-target__icon"));
         tEl.style.left = `${x}px`;
         tEl.style.top  = `${y}px`;
         playArea.appendChild(tEl);

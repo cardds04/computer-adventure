@@ -3,10 +3,10 @@
    가짜 바탕화면 / 폴더·파일 아이콘 / 우클릭 메뉴 / 단축키 카드
    ============================================================ */
 
-// 폴더/파일 아이콘 만들기
+// 폴더/파일 아이콘 만들기 (이모지 → SVG 스프라이트 자동 적용)
 function makeFolderIcon(label, opts = {}) {
     const wrap = el("div", { class: "fd-icon fd-icon--folder", "data-label": label },
-        el("div", { class: "fd-icon__emoji", text: opts.emoji || "📁" }),
+        gfxify(el("div", { class: "fd-icon__emoji", text: opts.emoji || "📁" })),
         el("div", { class: "fd-icon__label", text: label }),
     );
     return wrap;
@@ -14,7 +14,7 @@ function makeFolderIcon(label, opts = {}) {
 
 function makeFileIcon(label, opts = {}) {
     const wrap = el("div", { class: "fd-icon fd-icon--file", "data-label": label },
-        el("div", { class: "fd-icon__emoji", text: opts.emoji || "📄" }),
+        gfxify(el("div", { class: "fd-icon__emoji", text: opts.emoji || "📄" })),
         el("div", { class: "fd-icon__label", text: label }),
     );
     return wrap;

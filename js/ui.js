@@ -19,6 +19,15 @@ function navigate(screenName, params) {
     document.querySelectorAll(".help-btn, .tutorial-modal, .carry-over-banner, .lvl-up-burst").forEach(n => n.remove());
     app.innerHTML = "";
     renderer(app, params || {});
+    // 렌더 후 플레이어 아바타에 현재 레벨 SVG 캐릭터 적용 (없으면 이모지 유지)
+    if (typeof getCurrentSprite === "function") {
+        const sp = getCurrentSprite();
+        if (sp) {
+            document.querySelectorAll(".player-character").forEach(elm => {
+                applyGfx(elm, sp, elm.textContent);
+            });
+        }
+    }
     // 화면 전환 후 포커스 해제 — 게임에서 쓰던 키(스페이스/엔터/탭)가
     // 다음 화면의 버튼을 실수로 누르는 것 방지 (예: 학년변경 확인창이 갑자기 뜸)
     if (document.activeElement && document.activeElement.blur) {
@@ -51,6 +60,33 @@ function el(tag, opts = {}, ...children) {
         else e.appendChild(child);
     }
     return e;
+}
+
+// ----- 전역 스프라이트 헬퍼 -----
+// 모든 게임에서 이모지 대신 SVG 그래픽을 입힘.
+// src(경로)가 있으면 background-image로 그리고(.gfx-sprite), 없으면 이모지 텍스트로 폴백.
+// 요소의 크기는 각 게임 CSS의 font-size/width를 그대로 따른다.
+function applyGfx(elm, src, emoji) {
+    if (!elm) return elm;
+    if (src) {
+        elm.style.backgroundImage = `url("${src}")`;
+        elm.classList.add("gfx-sprite");
+    } else {
+        // 스프라이트 없음 → 기존 스프라이트 제거하고 이모지로 표시
+        elm.style.backgroundImage = "";
+        elm.classList.remove("gfx-sprite");
+        if (emoji != null) elm.textContent = emoji;
+    }
+    return elm;
+}
+// 요소의 이모지 텍스트를 읽어 SPRITE_MAP에 있으면 자동으로 SVG 입힘.
+// 게임 오브젝트 요소에 한 줄로 호출: gfxify(el)
+function gfxify(elm) {
+    if (!elm || typeof SPRITE_MAP === "undefined") return elm;
+    const key = (elm.textContent || "").trim();
+    const src = SPRITE_MAP[key];
+    if (src) applyGfx(elm, src, key);
+    return elm;
 }
 
 // 게임 HUD용 레벨 칩 (실시간 갱신 + 레벨업 감지)
@@ -95,7 +131,8 @@ function showLevelUpBurst(level) {
 
     const burst = el("div", { class: "lvl-up-burst" },
         el("div", { class: "lvl-up-burst__text", text: `레벨 ${level} 달성!` }),
-        el("div", { class: "lvl-up-burst__emoji", text: emoji }),
+        applyGfx(el("div", { class: "lvl-up-burst__emoji", text: emoji }),
+                 (typeof getSpriteForLevel === "function" ? getSpriteForLevel(level) : null), emoji),
         el("div", { class: "lvl-up-burst__name", text: levelName }),
     );
     document.body.appendChild(burst);
@@ -118,15 +155,18 @@ function showLevelUpBurst(level) {
 // 화면 캐릭터들의 이모지를 새 레벨에 맞춰 갱신
 function updatePlayerCharacters(level) {
     const emoji = getEmojiForLevel(level);
+    const sp = (typeof getSpriteForLevel === "function") ? getSpriteForLevel(level) : null;
     // 배경 캐릭터 (큰 워터마크) — translate 기반 애니메이션
     document.querySelectorAll(".player-character").forEach(node => {
         node.textContent = emoji;
+        applyGfx(node, sp, emoji);        // 새 레벨 스프라이트(또는 이모지)로 교체
         node.classList.add("level-up-morph");
         setTimeout(() => node.classList.remove("level-up-morph"), 900);
     });
     // 미로 안 캐릭터 — left/top 기반이라 별도 애니메이션
     document.querySelectorAll(".maze-player").forEach(node => {
         node.textContent = emoji;
+        applyGfx(node, sp, emoji);
         node.classList.add("maze-player--morph");
         setTimeout(() => node.classList.remove("maze-player--morph"), 900);
     });

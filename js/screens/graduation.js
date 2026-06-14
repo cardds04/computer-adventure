@@ -5,6 +5,8 @@
 
 SCREEN_RENDERERS.graduation = function (root) {
     const screen = el("div", { class: "screen graduation" });
+    // 졸업장을 받으면 평화 시대 — 메인 배경이 결혼/평화 장면으로 바뀜 (영구)
+    if (!state.graduated) { state.graduated = true; commit(); }
     const emoji = getCurrentEmoji();
     const levelName = getCurrentLevelName();
     const currentUnit = UNITS.find(u => u.num === state.currentUnit) || UNITS[0];

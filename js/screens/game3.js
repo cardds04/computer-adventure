@@ -100,6 +100,7 @@ SCREEN_RENDERERS.game3 = function (root, params) {
 
         // 트럭 모양 (캡 + 적재칸)
         const cab = el("div", { class: "truck-cab", text: "🚛" });
+        gfxify(cab);
 
         // 적재 칸 (슬롯 그리드)
         const cargoBed = el("div", { class: "cargo-bed" });
@@ -173,8 +174,9 @@ SCREEN_RENDERERS.game3 = function (root, params) {
                     animationDelay: `${i * 0.06}s`,
                     animationFillMode: "both",
                 },
-                html: `${type}${isBonus ? '<span class="truck-item-bonus-badge">×10</span>' : ''}`,
+                html: `<span class="truck-item__icon">${type}</span>${isBonus ? '<span class="truck-item-bonus-badge">×10</span>' : ''}`,
             });
+            gfxify(wrapper.querySelector(".truck-item__icon"));
             const itemObj = { el: wrapper, type, originLeft: cx, originTop: cy, loaded: false, isBonus };
             bindDrag(itemObj);
             items.push(itemObj);

@@ -22,7 +22,7 @@ SCREEN_RENDERERS.results = function (root, params) {
             style: { color: "var(--text-mid)", fontSize: "16px", marginBottom: "8px" },
             text: `목표 ${lesson.goalScore}점 — ${lesson.goalScore - params.score}점 더 필요해요!`,
         }),
-        el("div", { class: "results__char", text: emoji }),
+        applyGfx(el("div", { class: "results__char", text: emoji }), getCurrentSprite(), emoji),
         el("div", { class: "results__points-row" },
             el("div", { class: "results__stat" },
                 el("div", { class: "results__stat-label", text: "이번 점수" }),

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs><radialGradient id="md" cx="0.42" cy="0.4" r="0.7">
+    <stop offset="0" stop-color="#ffb48a"/><stop offset="0.6" stop-color="#e08a4a"/><stop offset="1" stop-color="#a8541f"/>
+  </radialGradient></defs>
+  <!-- bone -->
+  <path d="M64 64 L82 82" stroke="#f7ecd8" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="84" cy="84" r="7" fill="#f7ecd8" stroke="#c8b89a" stroke-width="2"/>
+  <circle cx="80" cy="88" r="6" fill="#f7ecd8" stroke="#c8b89a" stroke-width="2"/>
+  <!-- drumstick meat -->
+  <path d="M22 22 C8 36 16 60 34 66 C52 72 70 58 66 38 C62 18 38 8 22 22 Z"
+        fill="url(#md)" stroke="#7a3a14" stroke-width="3.5" stroke-linejoin="round"/>
+  <ellipse cx="34" cy="32" rx="9" ry="13" fill="#ffd0a8" opacity="0.45"/>
+  <g stroke="#8a4418" stroke-width="2" stroke-linecap="round" opacity="0.5"><path d="M30 48 q10 4 18 -2"/></g>
+</svg>

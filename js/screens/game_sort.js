@@ -119,7 +119,7 @@ SCREEN_RENDERERS.gameSort = function (root, params) {
         // 폴더들
         useTypes.forEach(t => {
             const fEl = el("div", { class: "sort-folder", "data-type": t.id },
-                el("div", { class: "sort-folder__icon", text: t.folder }),
+                gfxify(el("div", { class: "sort-folder__icon", text: t.folder })),
                 el("div", { class: "sort-folder__label", text: t.label }),
             );
             fEl.dataset.type = t.id;
@@ -139,7 +139,7 @@ SCREEN_RENDERERS.gameSort = function (root, params) {
                 const type = useTypes[Math.floor(Math.random() * useTypes.length)];
                 const name = type.names[Math.floor(Math.random() * type.names.length)];
                 const fileEl = el("div", { class: "sort-file" },
-                    el("div", { class: "sort-file__icon", text: type.fileEmoji }),
+                    gfxify(el("div", { class: "sort-file__icon", text: type.fileEmoji })),
                     el("div", { class: "sort-file__name", text: name }),
                 );
                 fileEl.dataset.type = type.id;

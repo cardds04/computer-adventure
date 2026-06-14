@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs><radialGradient id="ze8" cx="0.4" cy="0.4" r="0.7"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#e8e0d0"/></radialGradient></defs>
+  <!-- crown -->
+  <path d="M32 24 L38 14 L50 22 L62 14 L68 24 Z" fill="#ffd23f" stroke="#c8920c" stroke-width="2.5" stroke-linejoin="round"/>
+  <!-- head -->
+  <circle cx="50" cy="44" r="20" fill="url(#ze8)" stroke="#b8a888" stroke-width="3.5"/>
+  <!-- beard -->
+  <path d="M34 48 q16 26 32 0 q-2 22 -16 24 q-14 -2 -16 -24 Z" fill="#fff" stroke="#b8a888" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="43" cy="44" r="2.6" fill="#3a4a78"/><circle cx="57" cy="44" r="2.6" fill="#3a4a78"/>
+  <!-- lightning -->
+  <path d="M78 40 l-10 14 7 0 -9 16 18 -22 -8 0 6 -8 Z" fill="#fff23f" stroke="#e8a00c" stroke-width="2" stroke-linejoin="round"/>
+</svg>

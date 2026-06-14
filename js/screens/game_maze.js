@@ -123,6 +123,7 @@ SCREEN_RENDERERS.gameMaze = function (root, params) {
                 fontSize: `${dynamicCellSize * 0.7}px`,
             },
         });
+        gfxify(goalEl);
         mazeContainer.appendChild(goalEl);
 
         // 아이템
@@ -137,7 +138,7 @@ SCREEN_RENDERERS.gameMaze = function (root, params) {
                     fontSize: `${dynamicCellSize * 0.55}px`,
                 },
             });
-            itemEl.appendChild(el("span", { class: "maze-item__emoji", text: item.emoji }));
+            itemEl.appendChild(gfxify(el("span", { class: "maze-item__emoji", text: item.emoji })));
             if (item.type === "fruit") {
                 itemEl.appendChild(el("div", { class: "maze-item__value", text: `+${item.value}` }));
             } else {

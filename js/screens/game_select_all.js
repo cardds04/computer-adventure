@@ -74,7 +74,7 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
 
     // 휴지통 (드래그해서 폴더 버리기)
     const trash = el("div", { class: "copy-trash sa-trash" },
-        el("div", { class: "copy-trash__icon", text: "🗑️" }),
+        gfxify(el("div", { class: "copy-trash__icon", text: "🗑️" })),
         el("div", { class: "copy-trash__label", text: "휴지통" }),
     );
     screen.appendChild(trash);
@@ -116,9 +116,9 @@ SCREEN_RENDERERS.gameSelectAll = function (root, params) {
             const fEl = makeFolderIcon(isGolden ? `★${i + 1}★` : `폴더${i + 1}`);
             if (isGolden) {
                 fEl.classList.add("fd-icon--golden");
-                // 폴더 아이콘 이모지 교체: ⭐ 표시
+                // 황금 폴더 스프라이트로 교체
                 const emojiEl = fEl.querySelector(".fd-icon__emoji");
-                if (emojiEl) emojiEl.textContent = "⭐";
+                if (emojiEl) applyGfx(emojiEl, "assets/shared/folder_gold.svg", "⭐");
             }
             fEl.style.userSelect = "none";
             const obj = { el: fEl, selected: false, deleted: false, isGolden, goldenMult };

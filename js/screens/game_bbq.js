@@ -162,6 +162,7 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
                 class: "bbq-meat bbq-meat--raw" + (isGolden ? " bbq-meat--golden" : ""),
                 text: meatType.emoji,
             });
+            gfxify(meatEl);
             const meat = {
                 id: nextMeatId++,
                 el: meatEl,
@@ -206,6 +207,7 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
 
             // 고스트 만들기
             dragGhost = el("div", { class: "bbq-drag-ghost", text: meat.el.textContent });
+            gfxify(dragGhost);
             if (meat.isGolden) dragGhost.classList.add("bbq-meat--golden");
             document.body.appendChild(dragGhost);
             moveGhost(e.clientX, e.clientY);
@@ -288,6 +290,7 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
             class: "bbq-meat bbq-meat--raw" + (meat.isGolden ? " bbq-meat--golden" : ""),
             text: meat.meatType.emoji,
         });
+        gfxify(newEl);
         // 이전 hint 가리기
         const hint = slot.el.querySelector(".bbq-slot__hint");
         if (hint) hint.style.display = "none";
@@ -389,6 +392,7 @@ SCREEN_RENDERERS.gameBbq = function (root, params) {
         // 접시에 작은 표시 (1초)
         const placed = el("div", { class: "bbq-plate__placed" + (burntFlag ? " bbq-plate__placed--burnt" : ""),
             text: burntFlag ? "🌶️" : meat.meatType.emoji });
+        if (!burntFlag) gfxify(placed);
         plate.appendChild(placed);
         setTimeout(() => placed.remove(), 1500);
 

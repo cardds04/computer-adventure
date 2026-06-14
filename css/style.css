@@ -2443,12 +2443,14 @@ body {
 .jump-player {
     position: absolute;
     left: 18%;
-    bottom: 26%;
-    font-size: 100px;
+    bottom: 24%;
+    font-size: 132px;                 /* 100 → 132 (캥거루 더 크게) */
+    width: 132px;
+    height: 132px;
     line-height: 1;
     z-index: 10;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-    transform: translateX(-50%) scaleX(-1);   /* 오른쪽을 바라보게 */
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.35));
+    transform: translateX(-50%);      /* SVG가 이미 오른쪽을 보므로 뒤집지 않음 */
     transition: transform 0.1s;
 }
 
@@ -2457,9 +2459,9 @@ body {
 }
 
 @keyframes jump-anim {
-    0%   { transform: translateX(-50%) scaleX(-1) rotate(0); }
-    50%  { transform: translateX(-50%) scaleX(-1) rotate(15deg); }
-    100% { transform: translateX(-50%) scaleX(-1) rotate(0); }
+    0%   { transform: translateX(-50%) rotate(0); }
+    50%  { transform: translateX(-50%) rotate(-15deg); }
+    100% { transform: translateX(-50%) rotate(0); }
 }
 
 .jump-player.hurt {
@@ -2467,7 +2469,7 @@ body {
 }
 
 @keyframes jump-hurt {
-    0%, 100% { transform: translateX(-50%) scaleX(-1); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+    0%, 100% { transform: translateX(-50%); filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
     25%, 75% { transform: translateX(-50%) scaleX(-1) translateX(-10px); filter: drop-shadow(0 4px 8px rgba(255,0,0,0.5)) hue-rotate(-30deg); }
     50%      { transform: translateX(-50%) scaleX(-1) translateX(10px); }
 }
@@ -2482,7 +2484,9 @@ body {
 }
 
 .jump-obj__emoji {
-    font-size: 80px;
+    font-size: 96px;
+    width: 96px;
+    height: 96px;
     line-height: 1;
 }
 
@@ -7480,3 +7484,1124 @@ body {
     .grade-card { padding: 16px 6px; border-radius: 18px; }
     .grade-pw__keypad { width: min(260px, 84vw); }
 }
+
+/* ============================================================
+   전역 스프라이트 — 이모지 자리에 SVG 그래픽 (모든 단원 공통)
+   요소의 기존 크기(font-size/width/height)를 그대로 채운다.
+   ============================================================ */
+.gfx-sprite {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: transparent !important;
+    text-shadow: none !important;
+}
+/* 이모지를 font-size로만 키우던 요소도 스프라이트가 그 박스를 채우도록 */
+.gfx-sprite::first-line { color: transparent; }
+
+/* 레벨 캐릭터 아바타 — 스프라이트가 박스를 채우도록 */
+.profile-avatar__face { display: inline-block; width: 1em; height: 1em; line-height: 1; }
+.lvl-up-burst__emoji.gfx-sprite { width: 120px; height: 120px; }
+
+/* ============================================================
+   🔥 BBQ 프리미엄 리메이크 (3단원 스텝6) — 고급 숯불 그릴 느낌
+   (아래 규칙들이 기존 BBQ 스타일을 오버라이드)
+   ============================================================ */
+.game--bbq {
+    background:
+        radial-gradient(ellipse 80% 50% at 50% 118%, rgba(255, 120, 30, 0.35) 0%, rgba(255,120,30,0) 60%),
+        radial-gradient(ellipse at 50% 0%, #142036 0%, #0a0e18 55%),
+        linear-gradient(180deg, #0a0e18 0%, #1a1008 100%);
+    overflow: hidden;
+}
+/* 캠핑 이모지 → 흐릿한 배경 실루엣으로 (촌스러움 제거) */
+.bbq-tent, .bbq-tree {
+    opacity: 0.22;
+    filter: blur(2px) brightness(0.5) drop-shadow(0 6px 12px #000) !important;
+}
+.bbq-moon { filter: drop-shadow(0 0 26px rgba(255,235,150,0.5)) brightness(0.9); opacity: 0.8; }
+
+/* 패널 공통 — 고급 다크 글래스 + 미세 보더 */
+.bbq-tray-panel, .bbq-grill-panel, .bbq-plate-panel {
+    background: linear-gradient(180deg, rgba(28,30,40,0.92), rgba(14,16,24,0.92));
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+    backdrop-filter: blur(2px);
+}
+.bbq-panel__title {
+    color: #ffe0b0;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(255,170,80,0.25);
+}
+
+/* 트레이 — 따뜻한 원목 도마 */
+.bbq-tray {
+    background:
+        repeating-linear-gradient(96deg, rgba(0,0,0,0.06) 0 18px, rgba(255,255,255,0.04) 18px 36px),
+        linear-gradient(160deg, #a06a38, #6e4422);
+    border: 2px solid #3a2410;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.35);
+    border-radius: 12px;
+}
+
+/* ===== 진짜 숯불 그릴 ===== */
+.bbq-grill-panel {
+    background: linear-gradient(180deg, #2c2e34 0%, #16171c 100%);
+    border-color: rgba(255,255,255,0.14);
+}
+.bbq-grill-row {
+    position: relative;
+    flex: 1;
+    border-radius: 12px;
+    padding: 14px 12px;
+    /* 빨갛게 달아오른 숯불 베드 */
+    background:
+        radial-gradient(circle at 25% 80%, rgba(255,150,40,0.55), transparent 40%),
+        radial-gradient(circle at 70% 90%, rgba(255,90,20,0.5), transparent 42%),
+        radial-gradient(circle at 50% 60%, rgba(255,60,10,0.35), transparent 55%),
+        linear-gradient(180deg, #2a140a 0%, #120802 100%);
+    box-shadow: inset 0 -10px 26px rgba(255,90,20,0.45), inset 0 4px 14px rgba(0,0,0,0.7),
+                0 0 30px rgba(255,90,20,0.25);
+    border: 2px solid #0a0604;
+    overflow: hidden;
+    animation: bbq-embers 3.5s ease-in-out infinite alternate;
+}
+@keyframes bbq-embers {
+    0%   { box-shadow: inset 0 -10px 24px rgba(255,90,20,0.40), inset 0 4px 14px rgba(0,0,0,0.7), 0 0 26px rgba(255,90,20,0.22); }
+    100% { box-shadow: inset 0 -12px 32px rgba(255,140,40,0.60), inset 0 4px 14px rgba(0,0,0,0.7), 0 0 38px rgba(255,120,30,0.35); }
+}
+/* 금속 그릴망 (가로 바) */
+.bbq-grill-row::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg,
+        rgba(20,20,24,0) 0 16px,
+        rgba(40,42,48,0.85) 16px 19px,
+        rgba(90,94,104,0.5) 19px 20px,
+        rgba(20,20,24,0) 20px 22px);
+    pointer-events: none;
+    border-radius: 12px;
+    z-index: 1;
+}
+
+/* 그릴 위 자리 — 그릴망 위 영역 */
+.bbq-slot {
+    position: relative;
+    z-index: 2;
+    background: rgba(255,140,40,0.06) !important;
+    border: 1.5px dashed rgba(255,180,90,0.4) !important;
+    border-radius: 10px;
+    box-shadow: inset 0 -6px 14px rgba(255,90,20,0.25);
+}
+.bbq-slot__hint { color: rgba(255,210,160,0.7) !important; }
+
+/* 고기 스프라이트 크기 보장 + 굽힘 효과(필터는 기존 클래스가 처리) */
+.bbq-meat.gfx-sprite { width: 56px; height: 56px; }
+.bbq-slot .bbq-meat.gfx-sprite { width: 60px; height: 60px; }
+/* 황금 고기 — 텍스트섀도 대신 글로우 필터 (스프라이트에서도 보이게) */
+.bbq-meat--golden { filter: drop-shadow(0 0 14px gold) drop-shadow(0 3px 5px rgba(0,0,0,0.5)) !important; }
+.bbq-drag-ghost.gfx-sprite { width: 64px; height: 64px; }
+
+/* 불꽃 — 더 강한 발광 */
+.bbq-grill-panel .bbq-flame { filter: drop-shadow(0 0 10px #ff6b1a) drop-shadow(0 0 20px #ff3a00); opacity: 0.95; }
+
+/* 접시 — 깔끔한 도자기 */
+.bbq-plate {
+    background: radial-gradient(ellipse at 50% 40%, #ffffff, #d4dae6 75%, #aab2c4);
+    border: 3px solid #8a93a8 !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.4), inset 0 2px 6px rgba(255,255,255,0.7);
+}
+.bbq-plate__placed.gfx-sprite { width: 52px; height: 52px; }
+
+/* 택배/포트리스 아이템 아이콘 스프라이트 — 박스 채우기 */
+.truck-item__icon, .cannon-target__icon {
+    display: inline-block;
+    width: 1em; height: 1em; line-height: 1;
+    vertical-align: middle;
+}
+
+/* ============================================================
+   5단원 타자편 — 타자 원정대 : 공주 구출 작전
+   ============================================================ */
+.game--typingadv { background: #0c0a18; overflow: hidden; user-select: none; }
+
+/* HUD HP 바 */
+.ta-hp { gap: 6px !important; }
+.ta-hp__bar { width: 72px; height: 12px; background: rgba(0,0,0,0.5); border-radius: 999px; overflow: hidden; border: 1px solid rgba(255,255,255,0.25); }
+.ta-hp__fill { height: 100%; width: 100%; background: #4caf50; border-radius: 999px; transition: width 0.25s, background 0.25s; }
+.ta-hp__text { font-weight: 900; font-size: 13px; min-width: 24px; }
+
+/* 무대 */
+.ta-stage {
+    position: absolute; top: 64px; bottom: 78px; left: 0; right: 0;
+    overflow: hidden;
+}
+.ta-stage--words {
+    background:
+        radial-gradient(ellipse at 70% 20%, rgba(90,180,120,0.18), transparent 60%),
+        linear-gradient(180deg, #102016 0%, #0a140f 60%, #1a1208 100%);
+}
+.ta-stage--words::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+        radial-gradient(circle at 12% 100%, #16301f 0 60px, transparent 62px),
+        radial-gradient(circle at 32% 100%, #112818 0 80px, transparent 82px),
+        radial-gradient(circle at 60% 100%, #16301f 0 70px, transparent 72px),
+        radial-gradient(circle at 85% 100%, #112818 0 90px, transparent 92px);
+    opacity: 0.8;
+}
+.ta-stage--wall {
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(180,40,30,0.35), transparent 55%),
+        linear-gradient(180deg, #3a1410 0%, #1a0c12 60%, #2a2630 100%);
+}
+.ta-stage--monsters {
+    background:
+        radial-gradient(ellipse at 50% 30%, rgba(120,80,30,0.2), transparent 60%),
+        linear-gradient(180deg, #1a1622 0%, #100c18 100%);
+}
+.ta-stage--monsters::before {
+    content: "🔥 🔥"; position: absolute; top: 12px; left: 0; right: 0; text-align: center;
+    font-size: 28px; letter-spacing: 60vw; filter: drop-shadow(0 0 14px #ff8a1a); opacity: 0.85;
+}
+.ta-stage--boss {
+    background:
+        radial-gradient(ellipse at 80% 40%, rgba(150,20,80,0.4), transparent 55%),
+        linear-gradient(180deg, #2a0a2a 0%, #160616 70%, #0a0410 100%);
+}
+
+/* 기사 */
+.ta-knight {
+    position: absolute; left: 24px; bottom: 8%;
+    width: 92px; height: 92px;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6));
+    z-index: 6;
+}
+.ta-knight--attack { animation: ta-attack 0.3s ease-out; }
+@keyframes ta-attack { 0%{transform:translateX(0) rotate(0);} 40%{transform:translateX(14px) rotate(-8deg);} 100%{transform:translateX(0) rotate(0);} }
+
+/* 적 (장애물/몬스터) */
+.ta-foe {
+    position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    z-index: 4; transform: translateY(-50%);
+}
+.ta-foe__sprite { width: 70px; height: 70px; background-size: contain; background-repeat: no-repeat; background-position: center;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+.ta-foe--monster .ta-foe__sprite { width: 64px; height: 64px; }
+.ta-foe__word {
+    font-family: 'Jua', sans-serif; font-size: 22px; color: #fff;
+    background: rgba(0,0,0,0.65); padding: 3px 12px; border-radius: 999px;
+    border: 2px solid rgba(255,255,255,0.3); white-space: nowrap;
+}
+.ta-foe__word--active { background: #ffd23f; color: #2a1810; border-color: #fff; box-shadow: 0 0 14px #ffd23f; }
+.ta-foe--dead { animation: ta-foe-die 0.35s ease-out forwards; }
+@keyframes ta-foe-die { to { transform: translateY(-50%) scale(0) rotate(40deg); opacity: 0; } }
+
+.ta-slash {
+    position: absolute; height: 6px; z-index: 5;
+    background: linear-gradient(90deg, transparent, #fff, #9af0ff, transparent);
+    box-shadow: 0 0 14px #9af0ff; border-radius: 4px;
+    animation: ta-slash 0.24s ease-out forwards;
+}
+@keyframes ta-slash { 0%{opacity:0; transform: scaleX(0.2);} 30%{opacity:1; transform: scaleX(1);} 100%{opacity:0;} }
+
+/* 성벽 단계 */
+.ta-wall {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 120px;
+    background: repeating-linear-gradient(0deg, #6b6358 0 22px, #545049 22px 24px),
+                repeating-linear-gradient(90deg, #6b6358 0 40px, #4a463f 40px 42px);
+    border-left: 5px solid #3a352e; z-index: 3;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 14px;
+}
+.ta-wall--hit { animation: ta-wall-hit 0.18s; }
+@keyframes ta-wall-hit { 0%,100%{transform:translateX(0);} 50%{transform:translateX(-6px); filter:brightness(1.5);} }
+.ta-wall__hpbar { width: 90px; height: 12px; background: rgba(0,0,0,0.5); border-radius: 999px; overflow: hidden; border: 1px solid #2a2620; }
+.ta-wall__hpfill { height: 100%; width: 100%; background: linear-gradient(90deg, #e8362f, #ffb300); transition: width 0.2s; }
+.ta-wall__label { color: #fff; font-size: 11px; margin-top: 4px; text-shadow: 0 1px 2px #000; }
+.ta-fallword {
+    position: absolute; font-family: 'Jua', sans-serif; font-size: 22px; color: #fff;
+    background: rgba(30,10,10,0.8); padding: 4px 14px; border-radius: 10px;
+    border: 2px solid rgba(255,150,90,0.5); z-index: 4; white-space: nowrap;
+}
+.ta-fallword--active { background: #ffd23f; color: #2a1810; border-color: #fff; box-shadow: 0 0 14px #ffd23f; }
+.ta-fallword--hit { animation: ta-foe-die 0.3s forwards; }
+.ta-combo {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    font-family: 'Jua', sans-serif; font-size: 18px; color: #ffd23f; opacity: 0;
+    text-shadow: 0 2px 6px #000; transition: opacity 0.2s; z-index: 7;
+}
+.ta-combo--on { opacity: 1; animation: ta-combo-pulse 0.4s ease-in-out infinite alternate; }
+@keyframes ta-combo-pulse { to { transform: translateX(-50%) scale(1.12); } }
+
+/* 보스전 */
+.ta-boss { position: absolute; inset: 0; }
+.ta-boss__monster {
+    position: absolute; right: 8%; top: 50%; transform: translateY(-50%);
+    width: 140px; height: 140px; background-size: contain; background-repeat: no-repeat; background-position: center;
+    filter: drop-shadow(0 0 20px rgba(150,20,120,0.6)); z-index: 4;
+    animation: ta-boss-idle 2.4s ease-in-out infinite;
+}
+@keyframes ta-boss-idle { 0%,100%{transform:translateY(-50%) scale(1);} 50%{transform:translateY(-54%) scale(1.04);} }
+.ta-boss__monster--hurt { animation: ta-hurt 0.2s; }
+@keyframes ta-hurt { 0%,100%{filter:drop-shadow(0 0 20px rgba(150,20,120,0.6));} 50%{filter:brightness(3) drop-shadow(0 0 26px #fff);} }
+.ta-boss__monster--cast { filter: drop-shadow(0 0 30px #ff1744) brightness(1.4); }
+.ta-boss__princess { position: absolute; right: 2%; top: 48%; transform: translateY(-50%); width: 70px; height: 70px;
+    background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 3; opacity: 0.9; }
+.ta-boss__cage { position: absolute; right: 1.5%; top: 36%; width: 90px; height: 110px; z-index: 5; pointer-events: none;
+    background: repeating-linear-gradient(90deg, rgba(180,180,200,0.7) 0 3px, transparent 3px 18px); border-radius: 6px; }
+.ta-boss__hpbar { position: absolute; right: 6%; top: 16%; width: 180px; height: 14px; background: rgba(0,0,0,0.6);
+    border-radius: 999px; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); z-index: 6; }
+.ta-boss__hpfill { height: 100%; width: 100%; background: linear-gradient(90deg, #9b1030, #ff4d6d); transition: width 0.2s; }
+.ta-boss__hint { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); color: #ffe0b0;
+    font-size: 14px; background: rgba(0,0,0,0.6); padding: 6px 16px; border-radius: 999px; z-index: 7; white-space: nowrap; }
+.ta-minion { position: absolute; width: 56px; height: 56px; background-size: contain; background-repeat: no-repeat;
+    background-position: center; transform: translateY(-50%); z-index: 4; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.5)); }
+.ta-minion--hurt { animation: ta-hurt 0.18s; }
+.ta-minion--dead { animation: ta-foe-die 0.3s forwards; }
+.ta-proj { position: absolute; width: 18px; height: 6px; border-radius: 3px; transform: translateY(-50%); z-index: 5; }
+.ta-proj--bow { background: #8a5a30; box-shadow: 0 0 6px #ffd23f; width: 22px; }
+.ta-proj--gun { background: #ffd23f; box-shadow: 0 0 8px #fff; width: 12px; }
+.ta-proj--sword { background: linear-gradient(90deg, #fff, #9af0ff); box-shadow: 0 0 12px #9af0ff; width: 26px; height: 8px; }
+
+/* 하단 입력바 */
+.ta-inputbar {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    width: min(620px, 94vw); display: flex; align-items: center; gap: 10px;
+    background: rgba(20,16,30,0.92); border: 2px solid #6a4fd0; border-radius: 16px;
+    padding: 8px 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.5); z-index: 8;
+}
+.ta-inputbar__icon { font-size: 24px; }
+.ta-input {
+    flex: 1; font-family: 'Gaegu', cursive; font-size: 24px; padding: 8px 12px;
+    border: 2px solid #4a3aa0; border-radius: 10px; background: #0f0c1a; color: #fff; outline: none;
+}
+.ta-input:focus { border-color: #ffd23f; box-shadow: 0 0 0 3px rgba(255,210,63,0.25); }
+.ta-stat { font-family: 'Jua', sans-serif; font-size: 14px; color: #c8b8ff; min-width: 88px; text-align: right; }
+
+/* 배너 */
+.ta-banner {
+    position: absolute; top: 38%; left: 50%; transform: translate(-50%,-50%);
+    text-align: center; z-index: 20; animation: ta-banner-in 0.4s ease-out;
+}
+.ta-banner--out { animation: ta-banner-out 0.45s ease-in forwards; }
+@keyframes ta-banner-in { from{opacity:0; transform:translate(-50%,-50%) scale(0.7);} to{opacity:1; transform:translate(-50%,-50%) scale(1);} }
+@keyframes ta-banner-out { to{opacity:0; transform:translate(-50%,-50%) scale(1.2);} }
+.ta-banner__title { font-family: 'Jua', sans-serif; font-size: 40px; color: #ffd23f; text-shadow: 0 4px 0 #8a5a08, 0 0 24px rgba(255,210,63,0.6); }
+.ta-banner__sub { font-family: 'Gaegu', cursive; font-size: 19px; color: #fff; margin-top: 10px; max-width: 90vw;
+    background: rgba(0,0,0,0.5); padding: 8px 18px; border-radius: 14px; }
+
+/* 스토리 인트로 / 엔딩 / 보상 / 게임오버 — 풀스크린 오버레이 */
+.ta-story, .ta-ending, .ta-gameover, .ta-reward {
+    position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; gap: 10px; padding: 20px;
+    background: radial-gradient(ellipse at center, rgba(30,16,48,0.96), rgba(8,6,16,0.98));
+}
+.ta-story--out, .ta-reward--out { animation: ta-fadeout 0.35s forwards; }
+@keyframes ta-fadeout { to { opacity: 0; } }
+.ta-story__scene, .ta-ending__scene { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px; }
+.ta-actor { width: 92px; height: 92px; background-size: contain; background-repeat: no-repeat; background-position: center;
+    filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6)); }
+.ta-actor--knight { animation: ta-bob 1.8s ease-in-out infinite; }
+.ta-actor--boss { width: 110px; height: 110px; animation: ta-bob 2.2s ease-in-out infinite 0.3s; }
+.ta-actor--princess { width: 76px; height: 76px; }
+@keyframes ta-bob { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.ta-story__vs { font-size: 40px; filter: drop-shadow(0 0 12px #ffd23f); }
+.ta-story__title { font-family: 'Jua', sans-serif; font-size: 46px; color: #ffd23f; text-shadow: 0 4px 0 #8a5a08; margin: 6px 0 0; }
+.ta-story__sub { font-family: 'Jua', sans-serif; font-size: 24px; color: #ff7ab8; }
+.ta-story__text, .ta-ending__text, .ta-gameover__text {
+    font-family: 'Gaegu', cursive; font-size: 19px; color: #e8e0ff; line-height: 1.6; white-space: pre-line; margin: 10px 0;
+}
+.ta-story__cta { margin-top: 8px; }
+
+.ta-reward__grade { font-family: 'Jua', sans-serif; font-size: 90px; line-height: 1;
+    text-shadow: 0 0 30px currentColor; animation: ta-grade-pop 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+.ta-reward__grade--S { color: #ffd23f; } .ta-reward__grade--A { color: #7fe3ff; } .ta-reward__grade--B { color: #b0b8d0; }
+@keyframes ta-grade-pop { 0%{transform:scale(0) rotate(-30deg);} 60%{transform:scale(1.3) rotate(10deg);} 100%{transform:scale(1);} }
+.ta-reward__weapon { font-size: 56px; }
+.ta-reward__label { font-family: 'Jua', sans-serif; font-size: 26px; color: #fff; }
+
+.ta-ending__title { font-family: 'Jua', sans-serif; font-size: 40px; color: #ffd23f; text-shadow: 0 0 24px gold; }
+.ta-ending__heart { font-size: 44px; animation: ta-heartbeat 0.8s ease-in-out infinite; }
+@keyframes ta-heartbeat { 0%,100%{transform:scale(1);} 30%{transform:scale(1.3);} }
+.ta-gameover__icon { font-size: 80px; filter: grayscale(0.3); }
+.ta-gameover__title { font-family: 'Jua', sans-serif; font-size: 34px; color: #ff6b6b; }
+
+.ta-shake { animation: ta-screen-shake 0.3s; }
+@keyframes ta-screen-shake { 0%,100%{transform:translate(0);} 25%{transform:translate(-6px,2px);} 75%{transform:translate(6px,-2px);} }
+
+@media (max-width: 640px) {
+    .ta-banner__title, .ta-story__title { font-size: 30px; }
+    .ta-foe__word, .ta-fallword { font-size: 18px; }
+    .ta-input { font-size: 19px; }
+    .ta-boss__monster { width: 110px; height: 110px; }
+    .ta-boss__hpbar { width: 130px; }
+}
+
+/* 멀티 장면 스토리 인트로 추가 연출 */
+.ta-story__scenewrap { min-height: 130px; display: flex; align-items: center; justify-content: center; }
+.ta-story__anim { animation: ta-story-pop 0.4s ease-out; }
+@keyframes ta-story-pop { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.ta-story__heart { font-size: 40px; animation: ta-heartbeat 0.9s ease-in-out infinite; }
+.ta-story__grabbed { animation: ta-grabbed 0.6s ease-in-out infinite alternate; }
+@keyframes ta-grabbed { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-6px) rotate(8deg); } }
+.ta-story__shake-actor { animation: ta-villain-shake 0.4s ease-in-out infinite; }
+@keyframes ta-villain-shake { 0%,100%{transform:translateX(0) scale(1.05);} 50%{transform:translateX(-5px) scale(1.1);} }
+.ta-story__charge { animation: ta-charge 0.7s ease-in-out infinite; }
+@keyframes ta-charge { 0%,100%{transform:translateX(0) rotate(-3deg);} 50%{transform:translateX(10px) rotate(3deg);} }
+.ta-story__dots { display: flex; gap: 8px; margin: 4px 0 8px; }
+.ta-story__dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.3); }
+.ta-story__dot--on { background: #ffd23f; box-shadow: 0 0 8px #ffd23f; }
+
+/* 보스전 무기 요약 화면 */
+.ta-recap { display: flex; gap: 18px; margin: 14px 0; }
+.ta-recap__item { display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.15); border-radius: 14px; padding: 12px 16px; }
+.ta-recap__icon { font-size: 38px; }
+.ta-recap__grade { font-family: 'Jua', sans-serif; font-size: 30px; line-height: 1; text-shadow: 0 0 16px currentColor; }
+.ta-recap__grade--S { color: #ffd23f; } .ta-recap__grade--A { color: #7fe3ff; } .ta-recap__grade--B { color: #b0b8d0; }
+.ta-recap__name { font-size: 14px; color: #c8b8ff; }
+
+/* ============================================================
+   5단원 타자 어드벤처 — 레트로 16비트 픽셀 리스킨 (.game--unit5)
+   게임 로직/구조는 그대로, 비주얼만 픽셀 RPG 톤으로 덮어씀.
+   ============================================================ */
+.game--unit5 { image-rendering: pixelated; }
+.game--unit5 .ta-foe__word,
+.game--unit5 .ta-input,
+.game--unit5 .ta-stat,
+.game--unit5 .ta-banner__title { font-family: 'Galmuri11', 'Jua', sans-serif; }
+
+/* 무대 배경 — 어두운 숲·늪 + 잔디 타일 */
+.game--unit5 .ta-stage--words,
+.game--unit5 .ta-stage--monsters {
+    background-color: #0c130d;
+    background-image:
+        radial-gradient(120% 85% at 50% 42%, transparent 45%, rgba(4,8,10,0.6) 80%, rgba(2,4,8,0.95) 100%),
+        linear-gradient(180deg, rgba(20,40,25,0.5), transparent 28%),
+        url('../assets/retro/sprites/grass.png');
+    background-size: cover, cover, 48px 48px;
+    background-repeat: no-repeat, no-repeat, repeat;
+    image-rendering: pixelated;
+}
+/* 기존 풀숲 데코(::after) 자리에 CRT 스캔라인 */
+.game--unit5 .ta-stage--words::after,
+.game--unit5 .ta-stage--monsters::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.09) 0 1px, transparent 1px 4px);
+    mix-blend-mode: multiply; opacity: 1; filter: none; letter-spacing: normal; font-size: 0;
+}
+
+/* 적 몬스터 — 픽셀 렌더, 부드럽게 떠다님 */
+.game--unit5 .ta-foe__sprite {
+    width: 72px; height: 72px; image-rendering: pixelated;
+    animation: u5-mbob 1s ease-in-out infinite;
+    filter: drop-shadow(0 4px 2px rgba(0,0,0,0.55));
+}
+.game--unit5 .ta-foe--monster .ta-foe__sprite { width: 72px; height: 72px; }
+@keyframes u5-mbob { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px); } }
+
+/* 단어 라벨 — 픽셀 말풍선 */
+.game--unit5 .ta-foe__word {
+    font-size: 17px; color: #eafff0; border-radius: 0;
+    background: rgba(8,12,10,0.85); border: 2px solid #000;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5); text-shadow: 1px 1px 0 #000;
+    padding: 3px 9px;
+}
+.game--unit5 .ta-foe__word--active {
+    background: rgba(8,12,10,0.85); color: #ffd23a;
+    border-color: #ffd23a; box-shadow: 0 0 10px rgba(255,210,58,0.7);
+}
+
+/* 픽셀 기사 */
+.game--unit5 .ta-knight {
+    image-rendering: pixelated; width: 80px; height: 80px;
+    filter: drop-shadow(0 4px 3px rgba(0,0,0,0.6));
+}
+
+/* 입력바 — 픽셀 나무 패널 톤 */
+.game--unit5 .ta-inputbar {
+    background: linear-gradient(180deg,#1d2a1a,#0e160c);
+    border: 3px solid #07120a; border-radius: 4px;
+    box-shadow: inset 0 3px 0 #3e5a32, inset 0 -4px 0 #07120a;
+}
+.game--unit5 .ta-input {
+    background: #0c130d; border: 2px solid #2c3a26; border-radius: 2px;
+    font-size: 20px; letter-spacing: 1px;
+}
+.game--unit5 .ta-input:focus { border-color: #9be08a; box-shadow: 0 0 0 3px rgba(155,224,138,0.25); }
+.game--unit5 .ta-stat { color: #9be08a; }
+
+/* 배너 타이틀 픽셀 톤 */
+.game--unit5 .ta-banner__title {
+    color: #cdeccf; text-shadow: 2px 2px 0 #0a2010, 0 0 14px rgba(120,220,130,0.4);
+}
+
+/* ============================================================
+   1관문 "마법의 숲" — 레퍼런스(디테일 늪) 분위기 강화
+   ============================================================ */
+/* 늪 배경: 중앙 수면 햇빛 + 갓레이 + 비네트 (배경 이미지는 추후 교체) */
+.game--unit5 .ta-stage--words {
+    background-color: #0a1410;
+    background-image:
+        radial-gradient(58% 42% at 50% 30%, rgba(190,205,130,0.20), transparent 72%),
+        radial-gradient(120% 92% at 50% 38%, transparent 38%, rgba(3,8,6,0.74) 82%, rgba(1,3,5,0.97) 100%),
+        linear-gradient(180deg, rgba(22,44,28,0.55), transparent 30%),
+        url('../assets/retro/sprites/grass.png');
+    background-size: cover, cover, cover, 48px 48px;
+    background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+}
+/* 갓레이(빛줄기) */
+.game--unit5 .ta-stage--words::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background: linear-gradient(158deg, transparent 28%, rgba(225,235,165,0.12) 44%, transparent 60%);
+    mix-blend-mode: screen;
+}
+
+/* 반딧불 */
+.u5-firefly {
+    position: absolute; width: 6px; height: 6px; border-radius: 50%; z-index: 3; pointer-events: none;
+    background: radial-gradient(#eaffb0, rgba(180,255,120,0.55) 50%, transparent 72%);
+    box-shadow: 0 0 9px 2px rgba(190,255,120,0.75);
+    animation: u5-fly 6s ease-in-out infinite, u5-glow 1.8s ease-in-out infinite;
+}
+@keyframes u5-fly {
+    0% { transform: translate(0,0); } 25% { transform: translate(22px,-18px); }
+    50% { transform: translate(-14px,-32px); } 75% { transform: translate(12px,-12px); }
+    100% { transform: translate(0,0); }
+}
+@keyframes u5-glow { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+/* 몬스터 크게 + 초록 글로우 */
+.game--unit5 .ta-stage--words .ta-foe__sprite {
+    width: 112px; height: 112px;
+    filter: drop-shadow(0 0 9px rgba(120,255,140,0.45)) drop-shadow(0 6px 4px rgba(0,0,0,0.6));
+}
+.game--unit5 .ta-stage--words .ta-foe__word { font-size: 18px; }
+
+/* 미니맵 (우상단, HUD 아래) */
+.u5-minimap {
+    position: absolute; top: 8px; right: 12px; width: 156px; height: 98px; z-index: 9;
+    background: linear-gradient(180deg, rgba(20,30,22,0.94), rgba(8,14,10,0.94));
+    border: 3px solid #0a1410; border-radius: 3px;
+    box-shadow: inset 0 2px 0 #2c3a2a, inset 0 -3px 0 #06100a, 0 3px 0 rgba(0,0,0,0.5);
+    padding: 6px 8px; font-family: 'Galmuri9','Jua',sans-serif;
+}
+.u5-minimap__title { font-size: 10px; color: #cdeccf; text-shadow: 1px 1px 0 #000; }
+.u5-minimap__grid {
+    position: absolute; inset: 24px 8px 8px 8px; opacity: 0.7;
+    background:
+        repeating-linear-gradient(0deg, rgba(130,170,120,0.18) 0 1px, transparent 1px 12px),
+        repeating-linear-gradient(90deg, rgba(130,170,120,0.18) 0 1px, transparent 1px 16px),
+        radial-gradient(circle at 30% 65%, rgba(120,200,130,0.25), transparent 40%);
+    border: 1px solid rgba(120,160,110,0.25);
+}
+.u5-minimap__you {
+    position: absolute; left: 32%; top: 62%; width: 7px; height: 7px; border-radius: 50%;
+    background: #ffd23a; box-shadow: 0 0 7px 1px #ffd23a; transform: translate(-50%,-50%);
+}
+
+/* ============================================================
+   1관문 "마법의 늪" — 배경 이미지 + 마법 처치 메커니즘
+   (이전 .ta-stage--words 규칙들을 덮어씀)
+   ============================================================ */
+.game--unit5 .ta-stage--words {
+    background-color: #0a1410;
+    background-image: url('../assets/retro/bg_swamp.jpeg');
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+/* 가장자리 살짝 어둡게(단어 가독성) — 배경 빛은 그대로 */
+.game--unit5 .ta-stage--words::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background: radial-gradient(120% 100% at 50% 42%, transparent 56%, rgba(2,8,6,0.42) 100%);
+    mix-blend-mode: normal;
+}
+
+/* 마법사 기사 — 좌하단 바닥 위 */
+.game--unit5 .ta-stage--words .ta-knight.u5-mage {
+    left: 15%; right: auto; bottom: auto; top: 67%;
+    width: 96px; height: 96px; z-index: 7;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 7px 6px rgba(0,0,0,0.7));
+}
+.game--unit5 .ta-stage--words .ta-knight.u5-mage::after {
+    content: ""; position: absolute; right: -4px; top: 28%;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: radial-gradient(#e3f6ff, #7fd0ff 52%, transparent 72%);
+    box-shadow: 0 0 13px 3px rgba(120,200,255,0.85);
+    animation: u5-orbpulse 1.4s ease-in-out infinite;
+}
+@keyframes u5-orbpulse { 0%,100% { opacity: 0.5; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+.game--unit5 .ta-stage--words .ta-knight.u5-mage.u5-mage--cast { animation: u5-cast 0.32s ease-out; }
+@keyframes u5-cast { 0%,100% { transform: translate(-50%,-50%) scale(1); } 38% { transform: translate(-46%,-58%) scale(1.14); } }
+
+/* 마법 투사체 */
+.u5-bolt {
+    position: absolute; width: 24px; height: 24px; z-index: 8; pointer-events: none;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(#ffffff, #8fe0ff 44%, rgba(120,160,255,0.25) 70%, transparent 76%);
+    box-shadow: 0 0 18px 7px rgba(130,200,255,0.85);
+}
+
+/* 몬스터 — 고정 지점, 중심 정렬 */
+.game--unit5 .ta-stage--words .ta-foe { transform: translate(-50%, -50%); z-index: 5; }
+.game--unit5 .ta-stage--words .ta-foe__sprite {
+    width: 96px; height: 96px;
+    filter: drop-shadow(0 0 9px rgba(120,255,140,0.5)) drop-shadow(0 6px 4px rgba(0,0,0,0.6));
+    animation: u5-mbob 1.7s ease-in-out infinite;
+}
+.game--unit5 .ta-stage--words .ta-foe__word { font-size: 18px; }
+/* 등장 연출 */
+.game--unit5 .ta-stage--words .ta-foe.u5-foe { opacity: 0; transform: translate(-50%,-50%) scale(0.5);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(.2,1.3,.4,1); }
+.game--unit5 .ta-stage--words .ta-foe.u5-foe--shown { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+/* 처치 연출 (중심 기준) */
+.game--unit5 .ta-stage--words .ta-foe--dead { animation: u5-die 0.35s ease-out forwards; }
+@keyframes u5-die { to { transform: translate(-50%,-50%) scale(0) rotate(40deg); opacity: 0; } }
+/* 방치 공격 연출 */
+.game--unit5 .ta-stage--words .ta-foe.u5-foe--attack { animation: u5-foeatk 0.32s ease-out forwards; }
+@keyframes u5-foeatk {
+    0% { transform: translate(-50%,-50%) scale(1); }
+    50% { transform: translate(-50%,-58%) scale(1.18); filter: brightness(1.7) sepia(1) hue-rotate(-40deg) saturate(5); }
+    100% { transform: translate(-50%,-50%) scale(0.9); opacity: 0; }
+}
+
+/* ============================================================
+   타자 원정대 스토리 인트로 — 픽셀 톤 (한 장 요약)
+   ============================================================ */
+.game--unit5 .ta-story--pixel {
+    image-rendering: pixelated;
+    background:
+        linear-gradient(rgba(6,12,10,0.80), rgba(4,8,8,0.93)),
+        url('../assets/retro/bg_swamp.jpeg');
+    background-size: cover; background-position: center;
+}
+.game--unit5 .ta-story--pixel .ta-story__title {
+    font-family: 'Galmuri11','Jua',sans-serif; color: #ffe9b0; font-size: 42px;
+    text-shadow: 3px 3px 0 #5a2d0a, 0 0 16px rgba(255,180,80,0.45);
+}
+.game--unit5 .ta-story--pixel .ta-story__sub {
+    font-family: 'Galmuri11','Jua',sans-serif; color: #9be08a; font-size: 18px;
+    text-shadow: 1px 1px 0 #08210f;
+}
+.game--unit5 .ta-story--pixel .ta-story__text {
+    font-family: 'Galmuri11','Gaegu',sans-serif; color: #eafff0; font-size: 16px;
+    text-shadow: 1px 1px 0 #000; line-height: 1.95; max-width: 560px;
+    background: rgba(8,14,12,0.55); border: 2px solid rgba(0,0,0,0.55); padding: 14px 22px;
+}
+.u5-story-actor {
+    width: 112px; height: 112px; image-rendering: pixelated;
+    background-size: contain; background-repeat: no-repeat; background-position: center bottom;
+    filter: drop-shadow(0 6px 8px rgba(0,0,0,0.7));
+}
+.u5-story-actor--knight { animation: ta-bob 1.8s ease-in-out infinite; }
+.u5-story-actor--princess { width: 88px; height: 88px; animation: ta-bob 2s ease-in-out infinite 0.4s; }
+.game--unit5 .ta-story--pixel .ta-story__cta {
+    font-family: 'Galmuri11','Jua',sans-serif; font-size: 20px; color: #fff; border-radius: 4px;
+    background: linear-gradient(180deg,#4f9b3e,#2e6a24); border: 3px solid #0a0a0a;
+    box-shadow: inset 0 3px 0 rgba(255,255,255,0.3), 0 5px 0 #0a0a0a; padding: 14px 30px;
+}
+.game--unit5 .ta-story--pixel .ta-story__cta:active {
+    transform: translateY(3px); box-shadow: inset 0 3px 0 rgba(255,255,255,0.3), 0 2px 0 #0a0a0a;
+}
+
+/* ============================================================
+   5단원 전용 바깥 배경 (홈) — 드래곤이 공주를 납치하는 장면
+   1~4단원은 기존 하늘·언덕 배경 그대로 유지
+   ============================================================ */
+body.theme-unit5 #scene {
+    background-image:
+        linear-gradient(rgba(10,14,24,0.16), rgba(10,14,24,0.32)),
+        url('../assets/retro/bg_unit5_outer.jpeg');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+}
+/* 기존 하늘 요소(해·구름·언덕·나무) 숨김 */
+body.theme-unit5 #scene > * { display: none !important; }
+
+/* ============================================================
+   명예의 전당 — 살짝 투명하게 (뒤 배경이 은은히 비치도록)
+   ============================================================ */
+.hall-board {
+    background: linear-gradient(180deg, rgba(255,253,243,0.80) 0%, rgba(255,248,232,0.80) 100%);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+/* ============================================================
+   1관문 — 시간 제한 카운트다운 + 처치 점수 팝업
+   ============================================================ */
+.u5-timer {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 9;
+    font-family: 'Galmuri11','Jua',sans-serif; font-size: 16px; color: #fff;
+    background: rgba(8,14,12,0.78); border: 2px solid #000; border-radius: 4px;
+    padding: 5px 14px; text-shadow: 1px 1px 0 #000;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.5);
+}
+.u5-timer b { font-family: 'Press Start 2P'; font-size: 15px; color: #ffe06a; margin: 0 2px; }
+.u5-timer--low b { color: #ff5a5a; }
+.u5-timer--low { animation: u5-timerblink 0.6s steps(1) infinite; }
+@keyframes u5-timerblink { 50% { opacity: 0.45; } }
+
+.u5-scorepop {
+    position: absolute; transform: translate(-50%,-50%); z-index: 12; pointer-events: none;
+    font-family: 'Galmuri11','Jua',sans-serif; font-size: 24px; color: #ffe06a; font-weight: 700;
+    text-shadow: 2px 2px 0 #000, 0 0 8px rgba(255,210,58,0.75);
+    animation: u5-scorepop 0.85s ease-out forwards;
+}
+@keyframes u5-scorepop {
+    0% { opacity: 0; transform: translate(-50%,-50%) scale(0.6); }
+    20% { opacity: 1; transform: translate(-50%,-120%) scale(1.15); }
+    100% { opacity: 0; transform: translate(-50%,-210%) scale(1); }
+}
+
+/* ============================================================
+   남은 시간 — 엄청 크게 (오버레이)
+   ============================================================ */
+.u5-timer {
+    background: none; border: none; box-shadow: none; padding: 0;
+    top: 6px; font-size: 22px; color: #fff;
+    text-shadow: 2px 2px 0 #000, 0 0 16px rgba(0,0,0,0.75);
+}
+.u5-timer b {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 64px; line-height: 1; margin: 0 10px; vertical-align: middle;
+    color: #ffe06a;
+    text-shadow: 4px 4px 0 #000, 0 0 22px rgba(255,210,58,0.7);
+}
+.u5-timer--low b { color: #ff4d4d; text-shadow: 4px 4px 0 #000, 0 0 26px rgba(255,70,70,0.85); }
+
+/* 남은 시간 — 가독성 위해 어두운 패널 배경 추가 */
+.u5-timer {
+    background: rgba(8, 14, 12, 0.80);
+    border: 3px solid #0a0a0a;
+    border-radius: 12px;
+    padding: 2px 24px 10px;
+    box-shadow: inset 0 3px 0 rgba(255,255,255,0.12), 0 4px 0 rgba(0,0,0,0.55);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+/* ============================================================
+   2관문 "성문 방어전" — 활 쏘기 게임
+   ============================================================ */
+.game--unit5 .ta-stage--wall {
+    background-color: #1a1410;
+    background-image: url('../assets/retro/bg_castle.jpeg');
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.game--unit5 .ta-stage--wall::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background: radial-gradient(120% 100% at 50% 55%, transparent 58%, rgba(2,4,8,0.42) 100%);
+}
+
+/* 궁수 */
+.u5-archer {
+    position: absolute; width: 84px; height: 84px; z-index: 7;
+    transform: translate(-50%, -50%);
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    image-rendering: pixelated; filter: drop-shadow(0 5px 4px rgba(0,0,0,0.6));
+}
+.u5-archer--shoot { animation: u5-shoot 0.16s ease-out; }
+@keyframes u5-shoot { 50% { transform: translate(-50%, -50%) scale(1.12); } }
+.u5-archer--hurt { animation: u5-hurtflash 0.22s linear; }
+@keyframes u5-hurtflash { 0%,100% { filter: drop-shadow(0 5px 4px rgba(0,0,0,0.6)); } 50% { filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(6); } }
+
+/* 조준선 */
+.u5-aim {
+    position: absolute; width: 150px; height: 5px; z-index: 6; pointer-events: none;
+    transform-origin: 0 50%; border-radius: 3px;
+    background: linear-gradient(90deg, rgba(255,230,120,0.95), rgba(255,230,120,0.08));
+    box-shadow: 0 0 8px rgba(255,210,80,0.6);
+}
+.u5-aim::after {
+    content: ""; position: absolute; right: -3px; top: -6px;
+    border-left: 12px solid rgba(255,230,120,0.95);
+    border-top: 8px solid transparent; border-bottom: 8px solid transparent;
+}
+/* 화살 */
+.u5-arrow {
+    position: absolute; width: 40px; height: 5px; z-index: 8; pointer-events: none;
+    transform-origin: 50% 50%; border-radius: 3px;
+    background: linear-gradient(90deg, rgba(255,233,176,0.6), #ffe9b0);
+    box-shadow: 0 0 7px rgba(255,220,120,0.85);
+}
+.u5-arrow::after {
+    content: ""; position: absolute; right: -3px; top: -5px;
+    border-left: 12px solid #fff3c4; border-top: 6px solid transparent; border-bottom: 6px solid transparent;
+}
+
+/* 성문 몬스터 */
+.game--unit5 .ta-stage--wall .ta-foe { transform: translate(-50%, -50%); z-index: 5; }
+.game--unit5 .ta-stage--wall .ta-foe__sprite {
+    width: 72px; height: 72px; image-rendering: pixelated;
+    filter: drop-shadow(0 0 8px rgba(255,120,80,0.4)) drop-shadow(0 5px 3px rgba(0,0,0,0.6));
+    animation: u5-mbob 1.6s ease-in-out infinite;
+}
+
+/* 하트 */
+.u5-hearts {
+    position: absolute; top: 12px; left: 14px; z-index: 9; display: flex; gap: 3px;
+    font-size: 26px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.65));
+}
+.u5-heart--empty { filter: grayscale(1) brightness(0.45); opacity: 0.5; }
+
+/* 조작 안내 */
+.u5-archery-hint {
+    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 9;
+    font-family: 'Galmuri11','Jua',sans-serif; font-size: 15px; color: #ffe9b0;
+    background: rgba(8,12,12,0.80); border: 2px solid #000; border-radius: 8px;
+    padding: 7px 16px; text-shadow: 1px 1px 0 #000;
+}
+
+/* 2관문 보강 — 캐릭터·몬스터 크게 + 바닥에서 솟는 등장 */
+.u5-archer { width: 122px; height: 122px; }
+.game--unit5 .ta-stage--wall .ta-foe__sprite { width: 104px; height: 104px; }
+/* 바닥에서 솟아나는 등장 연출 */
+.game--unit5 .ta-stage--wall .ta-foe.u5-amon .ta-foe__sprite {
+    animation: u5-emerge 0.45s ease-out, u5-mbob 1.6s ease-in-out infinite 0.45s;
+    transform-origin: center bottom;
+}
+@keyframes u5-emerge {
+    0%   { transform: translateY(26px) scaleY(0.35); opacity: 0; }
+    60%  { transform: translateY(-5px) scaleY(1.08); opacity: 1; }
+    100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+
+/* 활 (궁수가 든 활) */
+.u5-bow {
+    position: absolute; width: 22px; height: 62px; z-index: 7; pointer-events: none;
+    border: 6px solid transparent; border-left-color: #6b4423; border-radius: 50%;
+    filter: drop-shadow(1px 1px 0 #38220f);
+}
+.u5-bow::after {   /* 활시위 */
+    content: ""; position: absolute; left: 3px; top: -2px; bottom: -2px; width: 2px;
+    background: rgba(240,238,215,0.92); box-shadow: 0 0 3px rgba(255,255,230,0.6);
+}
+.u5-bow--shoot { animation: u5-bowpluck 0.16s ease-out; }
+@keyframes u5-bowpluck { 50% { width: 17px; } }
+
+/* 활 파워 게이지 (스페이스 충전) */
+.u5-charge {
+    position: absolute; width: 68px; height: 11px; z-index: 8;
+    transform: translate(-50%, -50%); pointer-events: none;
+    background: rgba(8,12,12,0.72); border: 2px solid #000; border-radius: 6px;
+    overflow: hidden; opacity: 0; transition: opacity 0.1s;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+}
+.u5-charge__fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg,#9be08a,#ffe06a);
+    transition: width 0.03s linear;
+}
+
+/* ============================================================
+   3관문 "성 내부 난전" — 홀 배경 + 가운데 뒷모습 캐릭터 + 타자 처치
+   ============================================================ */
+.game--unit5 .ta-stage--monsters {
+    background-color: #10141c;
+    background-image: url('../assets/retro/bg_hall.jpeg');
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+/* 캐릭터 — 가운데 아래, 뒷모습, 크게 */
+.u5-hallmage {
+    position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+    width: 150px; height: 150px; z-index: 7;
+    background-size: contain; background-repeat: no-repeat; background-position: center bottom;
+    image-rendering: pixelated; filter: drop-shadow(0 6px 7px rgba(0,0,0,0.75));
+}
+.u5-hallmage--cast { animation: u5-hallcast 0.3s ease-out; }
+@keyframes u5-hallcast {
+    0%,100% { transform: translateX(-50%) scale(1); }
+    40% { transform: translateX(-50%) translateY(-8px) scale(1.08); }
+}
+/* 홀 몬스터 (통로·하늘) */
+.game--unit5 .ta-stage--monsters .ta-foe { transform: translate(-50%, -50%); z-index: 5; }
+.game--unit5 .ta-stage--monsters .ta-foe__sprite {
+    width: 68px; height: 68px; image-rendering: pixelated;
+    filter: drop-shadow(0 0 8px rgba(180,160,255,0.45)) drop-shadow(0 4px 3px rgba(0,0,0,0.6));
+    animation: u5-mbob 1.6s ease-in-out infinite;
+}
+.game--unit5 .ta-stage--monsters .ta-foe__word { font-size: 16px; }
+.game--unit5 .ta-stage--monsters .ta-foe.u5-foe {
+    opacity: 0; transform: translate(-50%,-50%) scale(0.5);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(.2,1.3,.4,1);
+}
+.game--unit5 .ta-stage--monsters .ta-foe.u5-foe--shown { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+.game--unit5 .ta-stage--monsters .ta-foe--dead { animation: u5-die 0.35s ease-out forwards; }
+.game--unit5 .ta-stage--monsters .ta-foe.u5-foe--attack { animation: u5-foeatk 0.32s ease-out forwards; }
+
+/* 3관문 공중 몬스터(박쥐) — 더 크게 떠다니게 */
+.game--unit5 .ta-stage--monsters .ta-foe.u5-foe--air .ta-foe__sprite {
+    animation: u5-fly2 2.4s ease-in-out infinite;
+}
+@keyframes u5-fly2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-11px); } }
+
+/* 3관문 몬스터 크기 ↑ */
+.game--unit5 .ta-stage--monsters .ta-foe__sprite { width: 90px; height: 90px; }
+.game--unit5 .ta-stage--monsters .ta-foe__word { font-size: 17px; }
+
+/* ============================================================
+   4관문 "잠든 공주" — 마법주문서 작성 (긴 문장, 30초)
+   ============================================================ */
+.game--unit5 .ta-stage--scroll {
+    background-color: #1a140e;
+    background-image: url('../assets/retro/bg_princess.jpeg');
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.u5-scroll {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    width: min(720px, 92vw); z-index: 20;
+    background: rgba(245,236,208,0.95);
+    border: 3px solid #6b4a25; border-radius: 6px;
+    box-shadow: inset 0 0 0 2px rgba(120,80,40,0.35), 0 6px 0 rgba(0,0,0,0.45);
+    padding: 12px 18px 14px;
+}
+.u5-scroll__head { font-family: 'Galmuri11','Jua',sans-serif; font-size: 15px; color: #8a531c; text-align: center; margin-bottom: 8px; }
+.u5-scroll__text {
+    font-family: 'Galmuri11','Jua',sans-serif; font-size: 20px; line-height: 1.65; word-break: keep-all;
+    background: rgba(255,250,235,0.65); border: 1px dashed #b89a6a; border-radius: 4px;
+    padding: 10px 12px; min-height: 56px;
+}
+.u5-ch { color: #b4a482; }
+.u5-ch--done { color: #1c7a2a; font-weight: 700; }
+.u5-scroll__prog { height: 10px; background: rgba(120,90,50,0.22); border: 1px solid #7a5a2a; border-radius: 6px; overflow: hidden; margin: 10px 0; }
+.u5-scroll__progfill { height: 100%; width: 0%; background: linear-gradient(90deg,#5bbf5b,#2e9a3a); transition: width 0.1s; }
+.u5-scroll__input {
+    width: 100%; box-sizing: border-box; font-family: 'Galmuri11','Jua',sans-serif; font-size: 18px;
+    padding: 9px 11px; border: 2px solid #8a6a3a; border-radius: 4px; background: #fffdf3; color: #3a2a14; outline: none;
+}
+.u5-scroll__input:focus { border-color: #d49a2a; box-shadow: 0 0 0 3px rgba(212,154,42,0.25); }
+.u5-scroll__foe {
+    position: absolute; right: 8%; top: 40%; width: 66px; height: 66px; z-index: 15;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    image-rendering: pixelated; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.6));
+    animation: u5-mbob 1s ease-in-out infinite; transition: right 0.9s linear;
+}
+
+/* 4관문 — 틀린 글자 빨간색 표시 */
+.u5-ch--wrong { color: #e23b3b; background: rgba(226,59,59,0.16); border-radius: 2px; }
+.u5-scroll__input--err { border-color: #e23b3b !important; box-shadow: 0 0 0 3px rgba(226,59,59,0.28) !important; }
+
+/* ============================================================
+   최종장 — 드래곤 레인 슈터 (가운데 길쭉한 전투 레인)
+   ============================================================ */
+.game--unit5 .ta-stage--boss {
+    background-color: #0a0a18;
+    background-image: url('../assets/retro/bg_boss.jpeg');
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.u5-lane {
+    position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: min(440px, 44vw); z-index: 5; overflow: hidden;
+    background: linear-gradient(180deg, rgba(10,8,24,0.30), rgba(10,8,24,0.50));
+    border-left: 3px solid rgba(255,200,90,0.35); border-right: 3px solid rgba(255,200,90,0.35);
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+}
+.u5-laancher {
+    position: absolute; top: 90%; transform: translate(-50%,-50%);
+    width: 76px; height: 76px; image-rendering: pixelated; z-index: 8;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.7));
+}
+.u5-laancher--hurt { animation: u5-hurtflash 0.22s linear; }
+.u5-uparrow {
+    position: absolute; transform: translate(-50%,-50%); width: 6px; height: 24px; z-index: 7;
+    background: linear-gradient(180deg,#fff3c4,#ffd23a); border-radius: 3px; box-shadow: 0 0 8px rgba(255,220,120,0.9);
+}
+.u5-uparrow::before {
+    content: ""; position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+    border-bottom: 10px solid #fff3c4; border-left: 6px solid transparent; border-right: 6px solid transparent;
+}
+.u5-fallmon {
+    position: absolute; transform: translate(-50%,-50%); width: 62px; height: 62px; z-index: 6;
+    background-size: contain; background-repeat: no-repeat; background-position: center; image-rendering: pixelated;
+    filter: drop-shadow(0 0 7px rgba(255,120,80,0.4)) drop-shadow(0 4px 3px rgba(0,0,0,0.6));
+    animation: u5-mbob 1.2s ease-in-out infinite;
+}
+.u5-fallmon--dead { animation: u5-die 0.3s ease-out forwards; }
+.u5-bossbar {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 9;
+    width: min(420px, 80vw); text-align: center;
+}
+.u5-bossbar__label { font-family: 'Galmuri9','Jua',sans-serif; font-size: 13px; color: #ffd9d9; text-shadow: 1px 1px 0 #000; }
+.u5-bossbar__track { height: 15px; background: rgba(20,8,8,0.85); border: 2px solid #000; border-radius: 8px; overflow: hidden; margin-top: 3px; box-shadow: 0 2px 0 rgba(0,0,0,0.5); }
+.u5-bossbar__fill { height: 100%; width: 100%; background: linear-gradient(90deg,#ff3b3b,#ff8a3b); transition: width 0.2s; }
+
+/* ============================================================
+   게임 화면 내 점수 표시 (오른쪽 아래, 큰 글씨 + 오를 때 애니메이션)
+   ============================================================ */
+.u5-score {
+    position: absolute; right: 26px; bottom: 84px; z-index: 25;
+    display: inline-flex; align-items: baseline; gap: 7px;
+    font-family: 'Galmuri11','Jua',sans-serif; pointer-events: none;
+    background: rgba(8,12,12,0.6); border: 2px solid rgba(0,0,0,0.55); border-radius: 12px;
+    padding: 8px 18px; box-shadow: 0 3px 0 rgba(0,0,0,0.45);
+    transform-origin: center;
+}
+.u5-score__star { font-size: 26px; filter: drop-shadow(0 0 6px rgba(255,210,80,0.6)); }
+.u5-score__num {
+    font-family: 'Press Start 2P', monospace; font-size: 40px; line-height: 1; color: #ffe06a;
+    text-shadow: 3px 3px 0 #000, 0 0 16px rgba(255,210,58,0.55);
+}
+.u5-score__goal { font-family: 'Galmuri9','Jua',sans-serif; font-size: 16px; color: #d8c4a4; text-shadow: 1px 1px 0 #000; }
+.u5-score--passed .u5-score__num { color: #8be86a; text-shadow: 3px 3px 0 #000, 0 0 18px rgba(120,255,110,0.6); }
+.u5-score--pop { animation: u5-scorepop2 0.34s cubic-bezier(.3,1.6,.5,1); }
+@keyframes u5-scorepop2 {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
+/* ============================================================
+   스테이지 라벨(좌상단) + 레벨(좌하단) — 게임 화면 내 오버레이
+   ============================================================ */
+.u5-stagelabel {
+    position: absolute; top: 56px; left: 18px; z-index: 25;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Galmuri9','Jua',sans-serif; font-size: 14px;
+    background: rgba(8,12,12,0.6); border: 2px solid rgba(0,0,0,0.55); border-radius: 10px;
+    padding: 6px 13px; text-shadow: 1px 1px 0 #000; box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+}
+.u5-stagelabel__ico { font-size: 16px; }
+.u5-stagelabel__t { color: #9fd0a0; }
+.u5-stagelabel > span:last-child { color: #ffe9b0; font-weight: 700; font-size: 15px; }
+
+.u5-levelbox { position: absolute; bottom: 82px; left: 24px; z-index: 25; }
+
+/* ============================================================
+   좌측 겹침 해결 + 레벨칩 다크 톤(게임 화면에 녹아들게)
+   ============================================================ */
+/* 좌상단 반투명 캐릭터(🥚) 제거 — 스테이지/하트와 겹침 */
+.game--unit5 .player-character--topleft { display: none !important; }
+/* 하트 → 우상단 (스테이지 라벨과 분리) */
+.u5-hearts { left: auto !important; right: 14px; }
+/* 레벨칩 — 점수/스테이지와 같은 다크 오버레이 톤 */
+.u5-levelbox .hud-chip {
+    background: rgba(8,12,12,0.62) !important;
+    border: 2px solid rgba(0,0,0,0.55) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.45) !important;
+    padding: 6px 13px !important;
+}
+.u5-levelbox .hud-chip, .u5-levelbox .hud-chip span { color: #fdf3dc !important; text-shadow: 1px 1px 0 #000 !important; }
+.u5-levelbox .hud-chip__lvl { color: #ffe06a !important; }
+.u5-levelbox .hud-chip__lvlname { color: #9fd0a0 !important; }
+.u5-levelbox .hud-chip__lvlnext, .u5-levelbox .hud-chip__sep { color: #cdb89a !important; }
+
+/* ============================================================
+   최종장 레인 슈터 — 넓은 레인 + 단계/무기/상자
+   ============================================================ */
+.game--unit5 .ta-stage--boss {
+    background-color: #0a0a1a;
+    background-image: url('../assets/retro/bg_boss.jpeg');
+    background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+.u5-lane--wide { width: min(820px, 70vw) !important; }
+
+/* 단계 표시 (상단 중앙) */
+.u5-stagecount {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%); z-index: 9;
+    font-family: 'Press Start 2P', monospace; font-size: 12px; color: #ffd9a0;
+    background: rgba(8,12,12,0.72); border: 2px solid #000; border-radius: 8px;
+    padding: 5px 12px; text-shadow: 1px 1px 0 #000;
+}
+.game--unit5 .ta-stage--boss .u5-timer { top: 40px; }
+
+/* 무기 배지 (하단 중앙, 힌트 위) */
+.u5-weapon {
+    position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%); z-index: 9;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'Galmuri11','Jua',sans-serif; font-size: 14px; color: #fff;
+    background: rgba(8,12,12,0.78); border: 2px solid #888; border-radius: 10px;
+    padding: 6px 14px; text-shadow: 1px 1px 0 #000; box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+}
+.u5-weapon__ico { font-size: 20px; }
+.u5-weapon__lv { font-family: 'Press Start 2P', monospace; font-size: 11px; color: #ffe06a; }
+.u5-weapon__name { color: #cdeccf; }
+
+/* 무기상자 */
+.u5-chest {
+    position: absolute; transform: translate(-50%, -50%); font-size: 48px; z-index: 6;
+    filter: drop-shadow(0 0 9px rgba(255,210,80,0.75)) drop-shadow(0 4px 3px rgba(0,0,0,0.6));
+    animation: u5-mbob 1s ease-in-out infinite;
+}
+.u5-hit { animation: u5-hitflash 0.12s; }
+@keyframes u5-hitflash { 50% { filter: brightness(2.2); } }
+
+/* 무기 획득 연출 */
+.u5-weaponget {
+    position: absolute; top: 38%; left: 50%; transform: translate(-50%,-50%); z-index: 30; pointer-events: none;
+    font-family: 'Galmuri11','Jua',sans-serif; font-size: 28px; color: #ffe06a;
+    text-shadow: 2px 2px 0 #000, 0 0 18px rgba(255,210,58,0.75);
+    animation: u5-weaponget 1.5s ease-out forwards;
+}
+@keyframes u5-weaponget {
+    0% { opacity: 0; transform: translate(-50%,-30%) scale(0.6); }
+    20% { opacity: 1; transform: translate(-50%,-50%) scale(1.18); }
+    80% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%,-78%) scale(1); }
+}
+
+/* ============================================================
+   HUD 좌측 정렬 — 스테이지/점수/레벨/하트를 좌측에 세로로 한 줄
+   ============================================================ */
+.u5-stagelabel { top: 60px !important; left: 14px !important; }
+.u5-score {
+    top: 98px !important; left: 14px !important; right: auto !important; bottom: auto !important;
+    padding: 5px 13px;
+}
+.u5-score__num { font-size: 27px; }
+.u5-score__star { font-size: 18px; }
+.u5-score__goal { font-size: 12px; }
+.u5-levelbox { top: 140px !important; left: 14px !important; bottom: auto !important; }
+.u5-hearts { top: 182px !important; left: 14px !important; right: auto !important; }
+
+/* 최종장 레이저 빔 (즉발) */
+.u5-laser {
+    position: absolute; bottom: 12%; top: 5%; width: 9px; z-index: 7;
+    transform: translateX(-50%); pointer-events: none; border-radius: 5px;
+    background: linear-gradient(180deg, rgba(150,220,255,0.1), #8fd0ff 40%, #ffffff);
+    box-shadow: 0 0 14px 4px rgba(140,210,255,0.9);
+    animation: u5-laserflash 0.2s ease-out forwards;
+}
+.u5-laser--big {
+    width: 64px;
+    background: linear-gradient(180deg, rgba(255,120,200,0.12), #ff5aa0 40%, #ffffff);
+    box-shadow: 0 0 30px 10px rgba(255,90,160,0.9);
+}
+@keyframes u5-laserflash {
+    0% { opacity: 0; transform: translateX(-50%) scaleX(0.3); }
+    25% { opacity: 1; transform: translateX(-50%) scaleX(1); }
+    100% { opacity: 0; transform: translateX(-50%) scaleX(1); }
+}
+
+/* 최종장 ×10 / ×20 점수 몬스터 */
+.u5-fallmon--x10 { filter: drop-shadow(0 0 11px rgba(255,210,80,0.95)) drop-shadow(0 4px 3px rgba(0,0,0,0.6)) !important; }
+.u5-fallmon--x20 { animation: u5-x20glow 0.7s ease-in-out infinite !important; }
+@keyframes u5-x20glow {
+    0%,100% { filter: drop-shadow(0 0 12px rgba(255,90,200,0.95)) drop-shadow(0 4px 3px rgba(0,0,0,0.6)); }
+    50% { filter: drop-shadow(0 0 22px rgba(255,140,230,1)) brightness(1.35) drop-shadow(0 4px 3px rgba(0,0,0,0.6)); }
+}
+.u5-multbadge {
+    position: absolute; top: -8px; left: 50%; transform: translateX(-50%); z-index: 2;
+    font-family: 'Press Start 2P', monospace; font-size: 11px; color: #fff; white-space: nowrap;
+    background: linear-gradient(180deg,#ffb03a,#e8362f); border: 2px solid #000; border-radius: 6px;
+    padding: 2px 5px; text-shadow: 1px 1px 0 #000;
+}
+.u5-fallmon--x20 .u5-multbadge { background: linear-gradient(180deg,#ff5ac8,#b5179e); }
+
+/* ============================================================
+   졸업 후 — 평화 시대 메인 배경 (결혼/평화 장면)
+   ============================================================ */
+body.theme-peace #scene {
+    background-image:
+        linear-gradient(rgba(255,250,240,0.06), rgba(255,245,230,0.12)),
+        url('../assets/retro/bg_peace.jpeg');
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+}
+body.theme-peace #scene > * { display: none !important; }
