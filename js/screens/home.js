@@ -4,9 +4,10 @@
 
 SCREEN_RENDERERS.home = function (root) {
     const screen = el("div", { class: "screen home" });
-    // 배경: 졸업 후 → 평화(결혼) 장면 / 그 전엔 5단원만 드래곤 장면, 1~4단원 하늘
+    // 배경: 졸업 후 → 학교 운동장 / 그 전엔 5단원=싱크홀, 6단원=드래곤, 나머지 하늘
     document.body.classList.toggle("theme-peace", !!state.graduated);
     document.body.classList.toggle("theme-unit5", !state.graduated && state.currentUnit === 5);
+    document.body.classList.toggle("theme-unit6", !state.graduated && state.currentUnit === 6);
     const progress = getLevelProgress(state.points);
     const emoji = getCurrentEmoji();
     const currentLessons = getLessonsForUnit(state.currentUnit);

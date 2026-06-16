@@ -8108,10 +8108,9 @@ body {
 }
 
 /* ============================================================
-   5단원 전용 바깥 배경 (홈) — 드래곤이 공주를 납치하는 장면
-   1~4단원은 기존 하늘·언덕 배경 그대로 유지
+   6단원(타자편) 전용 바깥 배경 (홈) — 드래곤이 공주를 납치하는 장면
    ============================================================ */
-body.theme-unit5 #scene {
+body.theme-unit6 #scene {
     background-image:
         linear-gradient(rgba(10,14,24,0.16), rgba(10,14,24,0.32)),
         url('../assets/retro/bg_unit5_outer.jpeg');
@@ -8119,7 +8118,19 @@ body.theme-unit5 #scene {
     background-position: center top;
     background-repeat: no-repeat;
 }
-/* 기존 하늘 요소(해·구름·언덕·나무) 숨김 */
+body.theme-unit6 #scene > * { display: none !important; }
+
+/* ============================================================
+   5단원(방탈출편) 전용 바깥 배경 (홈) — 운동장 싱크홀 장면
+   ============================================================ */
+body.theme-unit5 #scene {
+    background-image:
+        linear-gradient(rgba(10,14,24,0.06), rgba(10,14,24,0.14)),
+        url('../assets/escape/home_unit5.jpeg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
 body.theme-unit5 #scene > * { display: none !important; }
 
 /* ============================================================
@@ -8599,10 +8610,96 @@ body.theme-unit5 #scene > * { display: none !important; }
    ============================================================ */
 body.theme-peace #scene {
     background-image:
-        linear-gradient(rgba(255,250,240,0.06), rgba(255,245,230,0.12)),
-        url('../assets/retro/bg_peace.jpeg');
+        linear-gradient(rgba(255,250,240,0.04), rgba(255,245,230,0.10)),
+        url('../assets/escape/home_grad.jpeg');
     background-size: cover;
-    background-position: center top;
+    background-position: center center;
     background-repeat: no-repeat;
 }
 body.theme-peace #scene > * { display: none !important; }
+
+/* ============================================================
+   🚪 5단원 역사 방탈출 (game--escape)
+   ============================================================ */
+.game--escape { padding: 0; overflow: hidden; }
+.esc-bg { position:absolute; inset:0; z-index:0; background:#0b0806 center/cover no-repeat; }
+.esc-shade { position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg, rgba(0,0,0,.55) 0%, transparent 16%, transparent 60%, rgba(0,0,0,.45) 100%); }
+
+.esc-hud { position:absolute; top:0; left:0; right:0; padding:16px 20px 0; z-index:5;
+  display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.esc-hud__col { display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
+.esc-hud__col--r { align-items:flex-end; }
+.esc-exit { font-family:inherit; font-size:14px; padding:5px 14px; border-radius:999px;
+  border:2px solid rgba(255,176,84,.5); background:rgba(18,11,6,.7); color:#ffe7c2; cursor:pointer; }
+.esc-exit:hover { background:#ff7a3c; border-color:#ff7a3c; color:#fff; }
+.esc-chip { display:inline-flex; align-items:center; gap:6px; background:rgba(18,11,6,.72);
+  border:2px solid rgba(255,176,84,.6); border-radius:999px; padding:6px 15px;
+  font-size:clamp(13px,1.5vw,18px); color:#ffe7c2; }
+.esc-chip b { color:#ffce6a; }
+.esc-chip--era { border-color:#ffd27a; color:#fff2d6; font-size:clamp(14px,1.7vw,20px); }
+
+.esc-locks { position:absolute; top:8%; left:50%; transform:translateX(-50%); z-index:5;
+  display:flex; gap:4px; background:rgba(18,11,6,.55); padding:6px 12px; border-radius:999px;
+  border:1px solid rgba(255,176,84,.35); max-width:88vw; flex-wrap:wrap; justify-content:center; }
+.esc-locks i { width:13px; height:13px; border-radius:50%; background:rgba(255,255,255,.25); }
+.esc-locks i.done { background:#ffce6a; }
+.esc-locks i.now { background:#ff7a3c; box-shadow:0 0 9px #ff7a3c; transform:scale(1.3); }
+
+.esc-compass { position:absolute; left:2%; top:40%; z-index:5; width:clamp(64px,7vw,96px); aspect-ratio:1;
+  border-radius:50%; background:rgba(18,11,6,.6); border:2px solid #ffb45a;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; color:#ffe7c2; }
+.esc-compass__ico { font-size:clamp(24px,3vw,36px); line-height:1; }
+.esc-compass__num { font-size:clamp(10px,1.2vw,14px); margin-top:3px; }
+
+.esc-story { position:absolute; top:15%; left:50%; z-index:7; transform:translateX(-50%) translateY(-8px);
+  width:min(70%,760px); background:rgba(12,7,4,.85); border:2px solid #ffb45a; border-radius:14px;
+  padding:10px 22px; font-family:"Gaegu","Jua",sans-serif; font-weight:700; text-align:center;
+  font-size:clamp(15px,1.9vw,22px); line-height:1.4; color:#ffeccb; opacity:0; pointer-events:none;
+  transition:opacity .4s, transform .4s; }
+.esc-story.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.esc-story em { color:#ff9a4a; font-style:normal; }
+
+.esc-panel { position:absolute; left:50%; top:53%; transform:translate(-50%,-50%); z-index:6;
+  width:min(620px,82vw); background:rgba(14,9,5,.76); border:3px solid #e0a85c; border-radius:18px;
+  padding:22px 24px; box-shadow:0 12px 36px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,210,140,.25); }
+.esc-tag { display:inline-block; background:#e0a85c; color:#3a2410; font-size:clamp(12px,1.4vw,15px);
+  padding:4px 14px; border-radius:999px; margin-bottom:14px; }
+.esc-q { font-size:clamp(18px,2.4vw,28px); color:#fff3da; margin-bottom:18px; line-height:1.3;
+  text-shadow:0 2px 6px rgba(0,0,0,.6); }
+.esc-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.esc-choice { display:flex; align-items:center; gap:10px; background:rgba(255,250,238,.94);
+  border:3px solid #c9a86a; border-radius:12px; padding:14px 16px; font-size:clamp(15px,1.8vw,21px);
+  color:#3a2c18; cursor:pointer; font-family:inherit; transition:.12s; text-align:left; }
+.esc-choice:hover { background:#fff3cf; border-color:#ff9a4a; transform:translateY(-2px); }
+.esc-choice b { display:inline-flex; width:30px; height:30px; flex:none; align-items:center; justify-content:center;
+  background:#9c7b4a; color:#fff; border-radius:8px; font-size:16px; }
+.esc-choice.correct { background:#bfe8c0; border-color:#3aa64a; }
+.esc-choice.wrong { background:#f6c5c0; border-color:#d63031; animation:esc-shakeX .4s; }
+.esc-subrow { display:flex; gap:10px; }
+.esc-input { flex:1; font-family:inherit; font-size:clamp(16px,2vw,22px); padding:14px 16px;
+  border:3px solid #c9a86a; border-radius:12px; background:rgba(255,250,238,.96); color:#3a2c18; }
+.esc-input.correct { background:#bfe8c0; border-color:#3aa64a; }
+.esc-input.wrong { border-color:#d63031; animation:esc-shakeX .4s; }
+.esc-submit { font-family:inherit; font-size:clamp(16px,2vw,21px); padding:0 26px; border:none;
+  border-radius:12px; background:#ff7a3c; color:#fff; cursor:pointer; }
+.esc-submit:hover { background:#ff8f57; }
+.esc-hint { margin-top:16px; text-align:center; font-family:"Gaegu","Jua",sans-serif; font-weight:700;
+  font-size:clamp(13px,1.6vw,18px); color:#ffd9a3; }
+.esc-hint span { background:rgba(255,200,110,.25); padding:2px 10px; border-radius:7px; color:#ffe7bf; }
+
+.esc-panel.shake { animation:esc-nudge .4s; }
+@keyframes esc-nudge { 0%,100%{transform:translate(-50%,-50%)} 25%{transform:translate(-53%,-50%)} 75%{transform:translate(-47%,-50%)} }
+@keyframes esc-shakeX { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+.esc-pass { position:absolute; top:31%; left:50%; transform:translateX(-50%); z-index:9;
+  background:linear-gradient(135deg,#ffce6a,#ff7a3c); color:#3a1c08; font-family:inherit;
+  font-size:clamp(18px,2.4vw,28px); padding:12px 30px; border-radius:999px;
+  box-shadow:0 10px 30px rgba(0,0,0,.5); animation:esc-pop .35s cubic-bezier(.2,1.4,.4,1); }
+@keyframes esc-pop { 0%{transform:translateX(-50%) scale(.6); opacity:0} 100%{transform:translateX(-50%) scale(1); opacity:1} }
+
+.esc-win { position:absolute; inset:0; z-index:20; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; background:rgba(10,6,4,.82); color:#fff; text-align:center; gap:8px; padding:20px; }
+.esc-win__ico { font-size:72px; }
+.esc-win__title { font-size:clamp(28px,5vw,48px); color:#ffce6a; }
+.esc-win__text { font-size:clamp(15px,2vw,20px); color:#ffeccb; white-space:pre-line; line-height:1.5; }

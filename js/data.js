@@ -808,8 +808,8 @@ const UNITS = [
     { num: 2,  title: "키보드편",  icon: "⌨️", active: true  },
     { num: 3,  title: "단축키편",  icon: "🪄", active: true  },
     { num: 4,  title: "검색편",    icon: "🔍", active: true  },
-    { num: 5,  title: "타자편",    icon: "⚔️", active: true  },
-    { num: 6,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 5,  title: "방탈출편",  icon: "🚪", active: true  },
+    { num: 6,  title: "타자편",    icon: "⚔️", active: true  },
     { num: 7,  title: "준비 중",   icon: "🔒", active: false },
     { num: 8,  title: "준비 중",   icon: "🔒", active: false },
     { num: 9,  title: "준비 중",   icon: "🔒", active: false },
@@ -995,7 +995,9 @@ const LESSONS_UNIT4 = [
 // 하나의 연속 어드벤처 (4단계 + 보스전). 각 단계 타자 성적 → 무기 등급 → 보스전 위력
 // ============================================================
 // 각 관문이 별도 스텝. 1~3관문에서 얻은 무기 등급(state.taWeapons)이 최종장 보스전 위력이 됨.
-const LESSONS_UNIT5 = [
+// ⚔️ 6단원(타자편) — 원래 5단원이던 "타자 원정대"를 6단원으로 이동
+//    (레슨 id는 u5_* 그대로 유지 — 게임 코드/저장점수 호환)
+const LESSONS_UNIT6 = [
     {
         id: "u5_lesson1",
         num: "1관문",
@@ -1088,12 +1090,139 @@ const TYPING_ADV_CONFIG = {
     ],
 };
 
+// 🚪 5단원(방탈출편) — 새 단원. 스텝 1개(역사 방탈출)
+const LESSONS_UNIT5 = [
+    {
+        id: "u5_escape",
+        num: "스텝 1",
+        title: "역사 방탈출",
+        desc: "씽크홀에 빠져 구석기로! 20개 시대의 문제를 풀어 탈출하라 🚪",
+        icon: "🚪",
+        game: "gameEscape",
+        goalScore: 1000000,
+    },
+];
+
 const LESSONS_BY_UNIT = {
     1: LESSONS_UNIT1,
     2: LESSONS_UNIT2,
     3: LESSONS_UNIT3,
     4: LESSONS_UNIT4,
-    5: LESSONS_UNIT5,
+    5: LESSONS_UNIT5,   // 방탈출편 (새)
+    6: LESSONS_UNIT6,   // 타자편 (이동)
+};
+
+// ============================================================
+//  🚪 5단원 역사 방탈출 — 20단계 (시대 배경 + 검색형 문제)
+//  1~10단계: 객관식(보기 4개, answer=정답 index)
+//  11~20단계: 주관식(answers=정답 후보, answerLabel=대표 정답)
+//  배경: assets/escape/stageNN.jpeg
+// ============================================================
+const ESCAPE_GAME_CONFIG = {
+    pointsPerCorrect: 60000,   // 한 단계 정답
+    wrongPenalty: 2000,        // 오답 시 소량 감점(0 미만으로는 안 내려감)
+    timeBonusPerStage: 0,      // (타이머 없음 — 풀면 다음 시대로)
+    stages: [
+        { era: "구석기 시대", icon: "🏛️", bg: "assets/escape/stage01.jpeg",
+          story: "😱 씽크홀에 빠졌다…! 눈을 떠보니 <em>구석기 시대</em>. 문제를 풀어야 다음 시대로 탈출!",
+          type: "obj", q: "독일의 수도는 어디일까요?",
+          choices: ["베를린", "뮌헨", "함부르크", "프랑크푸르트"], answer: 0 },
+
+        { era: "신석기 시대", icon: "🌾", bg: "assets/escape/stage02.jpeg",
+          story: "🚪 <em>신석기 시대</em>에 도착! 농사를 짓기 시작한 시대야. 문제를 풀고 탈출하자!",
+          type: "obj", q: "호주(오스트레일리아)의 수도는 어디일까요?",
+          choices: ["캔버라", "시드니", "멜버른", "브리즈번"], answer: 0 },
+
+        { era: "청동기·철기 시대", icon: "⚒️", bg: "assets/escape/stage03.jpeg",
+          story: "🚪 <em>청동기·철기 시대</em>! 금속으로 도구를 만들던 때야. 문제를 풀자!",
+          type: "obj", q: "세계에서 가장 높은 산은 무엇일까요?",
+          choices: ["에베레스트산", "K2", "후지산", "몽블랑"], answer: 0 },
+
+        { era: "고대 이집트", icon: "🔺", bg: "assets/escape/stage04.jpeg",
+          story: "🚪 <em>고대 이집트</em>에 도착! 피라미드가 보인다. 문제를 풀고 탈출!",
+          type: "obj", q: "태양에서 가장 가까운 행성은 무엇일까요?",
+          choices: ["수성", "금성", "지구", "화성"], answer: 0 },
+
+        { era: "고대 그리스", icon: "🏛️", bg: "assets/escape/stage05.jpeg",
+          story: "🚪 <em>고대 그리스</em>! 철학자들이 토론하는 아크로폴리스야. 문제를 풀자!",
+          type: "obj", q: "명화 ‘모나리자’를 그린 화가는 누구일까요?",
+          choices: ["레오나르도 다 빈치", "반 고흐", "피카소", "미켈란젤로"], answer: 0 },
+
+        { era: "고대 로마 제국", icon: "🏟️", bg: "assets/escape/stage06.jpeg",
+          story: "🚪 <em>고대 로마 제국</em>! 웅장한 콜로세움이 보인다. 문제를 풀고 탈출!",
+          type: "obj", q: "올림픽은 보통 몇 년마다 열릴까요?",
+          choices: ["4년", "2년", "3년", "5년"], answer: 0 },
+
+        { era: "아시아의 황금기", icon: "🏯", bg: "assets/escape/stage07.jpeg",
+          story: "🚪 <em>아시아의 황금기</em>! 등불이 빛나는 성곽 도시야. 문제를 풀자!",
+          type: "obj", q: "세계에서 가장 큰 동물은 무엇일까요?",
+          choices: ["대왕고래(흰수염고래)", "아프리카코끼리", "기린", "백상아리"], answer: 0 },
+
+        { era: "중세 유럽", icon: "🏰", bg: "assets/escape/stage08.jpeg",
+          story: "🚪 <em>중세 유럽</em>! 절벽 위 성과 기사들의 시대야. 문제를 풀고 탈출!",
+          type: "obj", q: "다이아몬드를 이루는 원소는 무엇일까요?",
+          choices: ["탄소", "산소", "철", "규소"], answer: 0 },
+
+        { era: "대항해 시대", icon: "⛵", bg: "assets/escape/stage09.jpeg",
+          story: "🚪 <em>대항해 시대</em>! 범선이 신대륙으로 나아간다. 문제를 풀자!",
+          type: "obj", q: "무지개는 보통 몇 가지 색으로 이루어져 있을까요?",
+          choices: ["7가지", "5가지", "6가지", "8가지"], answer: 0 },
+
+        { era: "르네상스", icon: "🎨", bg: "assets/escape/stage10.jpeg",
+          story: "🚪 <em>르네상스</em>! 예술과 과학이 꽃핀 시대야. 객관식 마지막 문제!",
+          type: "obj", q: "현재 세계에서 인구가 가장 많은 나라는 어디일까요?",
+          choices: ["인도", "중국", "미국", "인도네시아"], answer: 0 },
+
+        { era: "조선 시대", icon: "👑", bg: "assets/escape/stage11.jpeg",
+          story: "🚪 <em>조선 시대</em>! 여기서부터는 <em>직접 정답을 입력</em>하는 주관식이야!",
+          type: "sub", q: "에베레스트산의 높이는 약 몇 m일까요?",
+          answers: ["8849", "8848", "8850"], answerLabel: "약 8,849 m" },
+
+        { era: "과학 혁명·계몽주의", icon: "🔭", bg: "assets/escape/stage12.jpeg",
+          story: "🚪 <em>과학 혁명·계몽주의</em>! 망원경과 책이 가득한 서재야. 정답을 입력!",
+          type: "sub", q: "치타의 최고 속도는 시속 약 몇 km일까요?",
+          answers: ["120", "110", "113", "112"], answerLabel: "약 120 km/h" },
+
+        { era: "1차 산업혁명", icon: "🏭", bg: "assets/escape/stage13.jpeg",
+          story: "🚪 <em>1차 산업혁명</em>! 증기기관차가 달린다. 정답을 검색해 입력!",
+          type: "sub", q: "세계에서 가장 큰 대양(바다)의 이름은 무엇일까요?",
+          answers: ["태평양"], answerLabel: "태평양" },
+
+        { era: "2차 산업혁명", icon: "💡", bg: "assets/escape/stage14.jpeg",
+          story: "🚪 <em>2차 산업혁명</em>! 전기와 전구가 거리를 밝힌다. 정답을 입력!",
+          type: "sub", q: "어른의 몸에는 뼈가 모두 몇 개 있을까요?",
+          answers: ["206", "206개"], answerLabel: "206개" },
+
+        { era: "1920·30년대 뉴욕", icon: "🌆", bg: "assets/escape/stage15.jpeg",
+          story: "🚪 <em>1920·30년대 뉴욕</em>! 화려한 네온사인 거리야. 정답을 입력!",
+          type: "sub", q: "태양계에서 가장 큰 행성의 이름은 무엇일까요?",
+          answers: ["목성"], answerLabel: "목성" },
+
+        { era: "20세기 우주·냉전", icon: "🚀", bg: "assets/escape/stage16.jpeg",
+          story: "🚪 <em>20세기 우주·냉전</em>! 아폴로가 달에 착륙한다. 정답을 입력!",
+          type: "sub", q: "인류 최초로 달에 발을 디딘 우주비행사의 성(姓)은 무엇일까요?",
+          answers: ["암스트롱", "닐암스트롱", "암스트롱이요"], answerLabel: "(닐) 암스트롱" },
+
+        { era: "현대 디지털", icon: "💻", bg: "assets/escape/stage17.jpeg",
+          story: "🚪 <em>현대 디지털</em>! 전 세계가 데이터로 연결된 시대야. 정답을 입력!",
+          type: "sub", q: "세계에서 가장 높은 빌딩 ‘부르즈 할리파’가 있는 도시는 어디일까요?",
+          answers: ["두바이"], answerLabel: "두바이" },
+
+        { era: "미래 우주 정거장", icon: "🛰️", bg: "assets/escape/stage18.jpeg",
+          story: "🚪 <em>미래 우주 정거장</em>! 우주에서 지구를 바라본다. 정답을 입력!",
+          type: "sub", q: "국제우주정거장을 영어 알파벳 3글자로 줄이면 무엇일까요?",
+          answers: ["ISS", "iss"], answerLabel: "ISS" },
+
+        { era: "현재 한국", icon: "🇰🇷", bg: "assets/escape/stage19.jpeg",
+          story: "🚪 <em>현재 한국</em>에 거의 다 왔다! 정답을 입력하고 탈출하자!",
+          type: "sub", q: "대한민국에서 가장 높은 산의 이름은 무엇일까요?",
+          answers: ["한라산"], answerLabel: "한라산" },
+
+        { era: "돌아온 학교", icon: "🏫", bg: "assets/escape/stage20.jpeg",
+          story: "🚪 드디어 <em>학교로 돌아왔다</em>! 마지막 문제를 풀면 탈출 성공! 🎉",
+          type: "sub", q: "세종대왕이 만든 우리나라 글자의 이름은 무엇일까요?",
+          answers: ["한글", "훈민정음"], answerLabel: "한글(훈민정음)" },
+    ],
 };
 
 function getLessonsForUnit(unitNum) {
