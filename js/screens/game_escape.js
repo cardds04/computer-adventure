@@ -71,9 +71,11 @@ SCREEN_RENDERERS.gameEscape = function (root, params) {
     function checkSub(input, answers) {
         const clean = norm(input);
         if (!clean) return false;
+        // 입력이 정답을 '포함'할 때만 정답으로 인정.
+        // (정답의 일부만 쳐서 통과하던 버그 방지 — 예: 정답 8849에 "88"만 입력)
         return answers.some(a => {
             const x = norm(a);
-            return x && (clean.includes(x) || x.includes(clean));
+            return x && clean.includes(x);
         });
     }
     function updateScore() {
