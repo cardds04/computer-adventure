@@ -115,12 +115,18 @@ SCREEN_RENDERERS.gameEscape = function (root, params) {
 
         if (st.type === "obj") {
             const grid = el("div", { class: "esc-choices" });
-            st.choices.forEach((c, i) => {
+            // 보기를 매번 무작위로 섞는다 (정답이 항상 1번에 오지 않도록)
+            const opts = st.choices.map((c, i) => ({ text: c, correct: i === st.answer }));
+            for (let k = opts.length - 1; k > 0; k--) {
+                const j = Math.floor(Math.random() * (k + 1));
+                const tmp = opts[k]; opts[k] = opts[j]; opts[j] = tmp;
+            }
+            opts.forEach((o, i) => {
                 const btn = el("button", { class: "esc-choice" },
                     el("b", { text: `${i + 1}` }),
-                    el("span", { text: c }),
+                    el("span", { text: o.text }),
                 );
-                btn.addEventListener("click", () => onObjPick(i, btn));
+                btn.addEventListener("click", () => onObjPick(o.correct, btn));
                 grid.appendChild(btn);
             });
             panel.appendChild(grid);
@@ -145,10 +151,9 @@ SCREEN_RENDERERS.gameEscape = function (root, params) {
     }
 
     // ----- 정답/오답 -----
-    function onObjPick(i, btn) {
+    function onObjPick(isCorrect, btn) {
         if (finished || locked) return;
-        const st = stages[stageIdx];
-        if (i === st.answer) {
+        if (isCorrect) {
             btn.classList.add("correct");
             correct();
         } else {
