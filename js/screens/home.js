@@ -141,11 +141,14 @@ SCREEN_RENDERERS.home = function (root) {
             }));
             return;
         }
+        let _lastScore = null, _lastRank = 0;   // 동점은 같은 등수(공동 순위)
         list.forEach((entry, i) => {
-            const rank = i + 1;
+            const _score = Number(entry.score) || 0;
+            const rank = (_score === _lastScore) ? _lastRank : (i + 1);
+            _lastScore = _score; _lastRank = rank;
             const rankBadge = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
             // 저장된 level이 아니라 현재 임계점 기준으로 점수에서 다시 산출
-            const lvl = getLevelFromPoints(Number(entry.score) || 0);
+            const lvl = getLevelFromPoints(_score);
             const row = el("div", { class: `hall-board__row ${rank <= 3 ? `hall-board__row--top${rank}` : ""}` },
                 el("div", { class: "hall-board__rank", text: rankBadge }),
                 el("div", { class: "hall-board__name", text: entry.name }),

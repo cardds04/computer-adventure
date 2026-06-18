@@ -49,11 +49,14 @@ SCREEN_RENDERERS.hall = function (root) {
             }));
             return;
         }
+        let _lastScore = null, _lastRank = 0;   // 동점은 같은 등수(공동 순위)
         list.forEach((entry, i) => {
-            const rank = i + 1;
+            const _score = Number(entry.score) || 0;
+            const rank = (_score === _lastScore) ? _lastRank : (i + 1);
+            _lastScore = _score; _lastRank = rank;
             const rankBadge = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `${rank}`;
             // 저장된 level 무시하고 현재 임계점 기준으로 다시 계산
-            const lvl = getLevelFromPoints(Number(entry.score) || 0);
+            const lvl = getLevelFromPoints(_score);
             const row = el("div", { class: `hall__row hall__row--rank${rank <= 3 ? rank : ""}` },
                 el("div", { class: "hall__rank", text: rankBadge }),
                 el("div", { class: "hall__name", text: entry.name }),
