@@ -10,11 +10,14 @@
        create table hall_of_fame (
            id bigserial primary key,
            name text not null unique,
-           score integer not null,
+           score bigint not null,     -- ⚠️ bigint! (integer는 약 21.4억까지라 레벨 200(22억+) 점수가 저장 안 됨)
            level integer,
            created_at timestamptz default now(),
            updated_at timestamptz default now()
        );
+
+       -- 이미 score integer로 만든 경우, 아래 한 줄로 bigint으로 변경 (데이터 유지됨):
+       --   alter table hall_of_fame alter column score type bigint;
 
        create index hall_score_idx on hall_of_fame (score desc);
 
