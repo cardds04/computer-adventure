@@ -8703,3 +8703,45 @@ body.theme-peace #scene > * { display: none !important; }
 .esc-win__ico { font-size:72px; }
 .esc-win__title { font-size:clamp(28px,5vw,48px); color:#ffce6a; }
 .esc-win__text { font-size:clamp(15px,2vw,20px); color:#ffeccb; white-space:pre-line; line-height:1.5; }
+
+/* ============================================================
+   🕵️ 4단원 스텝5: 진짜? 가짜? OX 퀴즈 (game--ox)
+   ============================================================ */
+.game--ox { padding: 0; }
+.ox-card {
+  position: absolute; left: 50%; top: 54%; transform: translate(-50%, -50%);
+  width: min(680px, 92vw); background: var(--card, #fffdf6);
+  border: 3px solid #ffcf8a; border-radius: 22px; padding: 26px 30px;
+  box-shadow: 0 16px 40px rgba(120,70,20,0.18); text-align: center;
+}
+.ox-tag { display: inline-block; background: #ffe2b0; color: #8a5a18;
+  font-size: 15px; font-weight: 800; padding: 5px 16px; border-radius: 999px; margin-bottom: 14px; }
+.ox-q { font-size: clamp(18px, 2.5vw, 25px); font-weight: 800; color: #3a2c18;
+  line-height: 1.5; margin-bottom: 22px; word-break: keep-all; }
+.ox-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ox-btn { display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 20px 10px; border-radius: 16px; border: 4px solid; cursor: pointer;
+  font-family: inherit; transition: transform .12s, box-shadow .12s; background: #fff; }
+.ox-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+.ox-btn--o { border-color: #4aa3ff; }
+.ox-btn--o:hover { background: #eaf4ff; }
+.ox-btn--x { border-color: #ff6b6b; }
+.ox-btn--x:hover { background: #ffeeee; }
+.ox-btn__mark { font-size: clamp(40px, 6vw, 60px); line-height: 1; }
+.ox-btn__lbl { font-size: clamp(14px, 1.8vw, 18px); font-weight: 800; color: #5a4a32; }
+.ox-btn.correct { background: #d6f5d6; border-color: #3aa64a; box-shadow: 0 0 0 4px rgba(58,166,74,0.25); }
+.ox-btn.wrong   { background: #ffd9d6; border-color: #e24b4a; box-shadow: 0 0 0 4px rgba(226,75,74,0.25); }
+.ox-btn.reveal  { background: #d6f5d6; border-color: #3aa64a; animation: ox-pulse 1s ease-in-out infinite; }
+.ox-btn.dim     { opacity: 0.45; }
+@keyframes ox-pulse { 0%,100%{box-shadow:0 0 0 3px rgba(58,166,74,0.3)} 50%{box-shadow:0 0 0 8px rgba(58,166,74,0.15)} }
+
+.ox-result { margin-top: 20px; padding: 16px 18px; border-radius: 14px; text-align: left;
+  opacity: 0; transform: translateY(10px); transition: opacity .3s, transform .3s; }
+.ox-result.show { opacity: 1; transform: translateY(0); }
+.ox-result--ok { background: #eafaef; border: 2px solid #aee3b8; }
+.ox-result--no { background: #fff0ef; border: 2px solid #f3bdbb; }
+.ox-result__head { font-size: clamp(16px, 2vw, 20px); font-weight: 900; margin-bottom: 8px; }
+.ox-result--ok .ox-result__head { color: #2c8a3a; }
+.ox-result--no .ox-result__head { color: #c0392b; }
+.ox-result__explain { font-size: clamp(14px, 1.8vw, 17px); color: #4a3c28; line-height: 1.55; word-break: keep-all; }
+.ox-next { margin-top: 14px; width: 100%; }
