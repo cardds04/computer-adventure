@@ -1113,7 +1113,7 @@ const UNITS = [
     { num: 4,  title: "검색편",    icon: "🔍", active: true  },
     { num: 5,  title: "방탈출편",  icon: "🚪", active: true  },
     { num: 6,  title: "타자편",    icon: "⚔️", active: true  },
-    { num: 7,  title: "준비 중",   icon: "🔒", active: false },
+    { num: 7,  title: "보안편",    icon: "🛡️", active: true  },
     { num: 8,  title: "준비 중",   icon: "🔒", active: false },
     { num: 9,  title: "준비 중",   icon: "🔒", active: false },
     { num: 10, title: "준비 중",   icon: "🔒", active: false },
@@ -1475,6 +1475,35 @@ const LESSONS_UNIT5 = [
     },
 ];
 
+// 🛡️ 7단원(보안편) — 송양초 사이버 수호대. 5스텝, 각각 다른 고전게임 기반
+const LESSONS_UNIT7 = [
+    {
+        id: "u7_lesson1", num: "스텝 1", title: "바이러스 잡기",
+        desc: "구멍에서 튀어나오는 바이러스를 백신 망치로 처치! (두더지 잡기) 🦠🔨",
+        icon: "🦠", game: "gameSecWhack", goalScore: 100000,
+    },
+    {
+        id: "u7_lesson2", num: "스텝 2", title: "방화벽 디펜스",
+        desc: "방화벽 패들로 공을 튕겨 해킹 벽돌을 격파! (벽돌깨기) 🧱🛡️",
+        icon: "🧱", game: "gameSecFirewall", goalScore: 150000,
+    },
+    {
+        id: "u7_lesson3", num: "스텝 3", title: "피싱 피하기",
+        desc: "안전한 정보는 받고 피싱 미끼는 피하자! (받기 게임) 🎣🧺",
+        icon: "🎣", game: "gameSecCatch", goalScore: 200000,
+    },
+    {
+        id: "u7_lesson4", num: "스텝 4", title: "개인정보 지키기",
+        desc: "정보 카드를 모아 금고로! 해커를 피해라! (뱀게임) 🐍🔐",
+        icon: "🐍", game: "gameSecSnake", goalScore: 200000,
+    },
+    {
+        id: "u7_lesson5", num: "스텝 5", title: "안전하게 데이터 전송",
+        desc: "위험한 인터넷 길을 건너 데이터를 안전한 서버로! (길건너기) 🚦💾",
+        icon: "🚦", game: "gameSecCross", goalScore: 250000,
+    },
+];
+
 const LESSONS_BY_UNIT = {
     1: LESSONS_UNIT1,
     2: LESSONS_UNIT2,
@@ -1482,6 +1511,7 @@ const LESSONS_BY_UNIT = {
     4: LESSONS_UNIT4,
     5: LESSONS_UNIT5,   // 방탈출편 (새)
     6: LESSONS_UNIT6,   // 타자편 (이동)
+    7: LESSONS_UNIT7,   // 보안편 (새)
 };
 
 // ============================================================
