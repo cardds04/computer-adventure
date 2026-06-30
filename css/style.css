@@ -8830,3 +8830,28 @@ body.theme-peace #scene > * { display: none !important; }
 .sec-hero.hop { animation:sec-hop .2s; } @keyframes sec-hop { 50%{transform:translate(-50%,-65%) scale(1.15)} }
 .sec-hero.hurt { animation:sec-shake .25s; }
 .sec-haz { position:absolute; transform:translate(-50%,-50%); font-size:clamp(24px,4.5vw,36px); z-index:3; }
+
+/* ---- 1) 바이러스 잡기 — 스토리 인트로 + 이미지 위 바이러스 ---- */
+.sec-story { position:relative; width:min(960px,96vw); height:min(74vh,560px);
+  background:#0b1020 center/cover no-repeat; border:3px solid #3a4a7a; border-radius:18px;
+  overflow:hidden; box-shadow:0 16px 40px rgba(0,0,0,.5); }
+.sec-story__dots { position:absolute; top:14px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:3; }
+.sec-story__dots .dot { width:11px; height:11px; border-radius:50%; background:rgba(255,255,255,.4); }
+.sec-story__dots .dot.on { background:#ffd34d; box-shadow:0 0 8px #ffd34d; }
+.sec-story__skip { position:absolute; top:12px; right:14px; z-index:3; font-family:"Jua"; font-size:14px;
+  background:rgba(0,0,0,.45); color:#fff; border:1px solid rgba(255,255,255,.3); border-radius:999px; padding:5px 12px; cursor:pointer; }
+.sec-story__cap { position:absolute; left:0; right:0; bottom:0; z-index:2; padding:18px 22px;
+  background:linear-gradient(180deg, transparent, rgba(8,10,24,.92)); display:flex; align-items:flex-end; gap:14px; }
+.sec-story__text { flex:1; font-family:"Gaegu",sans-serif; font-weight:700; font-size:clamp(17px,2.4vw,24px);
+  color:#fff; line-height:1.4; text-shadow:0 2px 6px rgba(0,0,0,.7); }
+.sec-story__btn { flex:none; font-family:"Jua"; font-size:clamp(15px,2vw,20px); padding:12px 22px; border:none;
+  border-radius:14px; background:linear-gradient(135deg,#ffce5a,#ff7a3c); color:#5a2a00; cursor:pointer; box-shadow:0 6px 16px rgba(255,120,40,.4); }
+.sec-story__btn:hover { transform:translateY(-2px); }
+
+.sec-vfield { position:relative; width:min(960px,96vw); height:min(74vh,560px);
+  background:#0b1020 center/cover no-repeat; border:3px solid #3a4a7a; border-radius:18px; overflow:hidden;
+  box-shadow:0 16px 40px rgba(0,0,0,.5); }
+.sec-virus { position:absolute; transform:translate(-50%,-50%); font-size:clamp(30px,5vw,46px); cursor:pointer;
+  filter:drop-shadow(0 0 8px rgba(120,255,140,.6)); user-select:none; transition:filter .1s; }
+.sec-virus:hover { filter:drop-shadow(0 0 12px rgba(160,255,170,.9)) brightness(1.15); }
+.sec-virus.caught { animation:sec-squash .18s forwards; pointer-events:none; }
