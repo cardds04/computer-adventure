@@ -1,123 +1,136 @@
 /* ============================================================
-   7단원 스텝 4: 개인정보 지키기 (뱀게임 / Snake)
-   보안로봇이 정보 카드(📇)를 모아 길어진다. 벽·자기몸·바이러스에 닿으면 끝!
+   7단원 스텝 4: 개인정보 지킴이 퀴즈 (4지선다)
+   땅속 바이러스가 사람을 좀비로 만든다! 개인정보 문제를 풀어 좀비를 물리쳐라.
+   (예전 뱀게임 → 4지선다 퀴즈로 교체)
    ============================================================ */
 
 SCREEN_RENDERERS.gameSecSnake = function (root, params) {
-    const screen = el("div", { class: "screen game game--sec game--sec-snake" });
+    const screen = el("div", { class: "screen game game--sec game--sec-quiz" });
 
-    const COLS = 17, ROWS = 13, FOODPTS = 8000, STEP = 135, TIME = 75;
+    const STORY = [
+        { img: "assets/security/info_story1.jpeg", text: "OVERSEER를 물리치고 한숨 돌리는데… 시스템이 뭔가 이상해. 😰" },
+        { img: "assets/security/info_story2.png", text: "땅속에서 바이러스가 스멀스멀 올라온다! 아직 끝난 게 아니야!" },
+        { img: "assets/security/info_story3.jpeg", text: "바이러스가 사람들을 감염시켜 좀비로 만들었다! 개인정보 문제를 풀어 좀비를 물리쳐라! 🧟" },
+    ];
+    const GAME_BG = "assets/security/info_bg.png";
+    const PTS = 25000;
+
+    const QUESTIONS = [
+        { q: "게임에서 처음 만난 사람이 “우리 친구하자! 전화번호 알려줘!”라고 했어요. 어떻게 할까요?",
+          choices: ["바로 알려준다", "친구에게 대신 알려달라고 한다", "모르는 사람이므로 알려주지 않는다", "집 주소도 함께 알려준다"], answer: 2,
+          explain: "인터넷에서 처음 만난 사람에게 전화번호 같은 개인정보를 알려주면 위험해요. 모르는 사람에겐 알려주지 않아요!" },
+        { q: "다음 중 개인정보가 아닌 것은?",
+          choices: ["집 주소", "비밀번호", "좋아하는 색깔", "전화번호"], answer: 2,
+          explain: "집 주소·비밀번호·전화번호는 나를 알아낼 수 있는 개인정보예요. ‘좋아하는 색깔’은 개인정보가 아니에요." },
+        { q: "비밀번호를 만들 때 가장 안전한 것은?",
+          choices: ["123456", "birthday", "qwerty", "B3ar!2026"], answer: 3,
+          explain: "쉬운 숫자·단어·생일은 금방 들켜요. 영어 대소문자·숫자·기호를 섞은 ‘B3ar!2026’ 같은 비밀번호가 안전해요." },
+        { q: "친구와 찍은 사진을 인터넷에 올리려고 해요. 가장 먼저 해야 할 일은?",
+          choices: ["그냥 올린다", "얼굴만 가리면 된다", "친구에게 먼저 허락을 받는다", "이름만 지우면 된다"], answer: 2,
+          explain: "다른 사람이 나온 사진은 그 친구의 개인정보예요. 올리기 전에 꼭 허락을 받아야 해요." },
+        { q: "다음 중 절대로 알려주면 안 되는 것은?",
+          choices: ["좋아하는 음식", "좋아하는 운동", "게임 비밀번호", "좋아하는 계절"], answer: 2,
+          explain: "비밀번호는 누구에게도 알려주면 안 돼요! 계정을 빼앗길 수 있어요." },
+        { q: "학교 홈페이지에서 회원가입을 하려고 해요. 누구의 도움을 받는 게 가장 좋을까요?",
+          choices: ["모르는 사람", "인터넷 친구", "부모님이나 선생님", "아무에게도 말하지 않는다"], answer: 2,
+          explain: "회원가입처럼 개인정보를 적을 때는 믿을 수 있는 부모님·선생님께 도움을 받는 게 가장 안전해요." },
+        { q: "SNS에 올리면 위험할 수 있는 사진은?",
+          choices: ["풍경 사진", "반려동물 사진", "집 주소가 보이는 사진", "꽃 사진"], answer: 2,
+          explain: "집 주소·학교 이름이 보이는 사진은 내가 어디 사는지 알려줘서 위험해요. 올리기 전에 꼭 확인해요!" },
+        { q: "(보너스) 다음 중 가장 안전한 행동은?",
+          choices: ["비밀번호를 친구에게 알려준다", "모든 사이트에서 같은 비밀번호를 쓴다", "모르는 링크는 누르지 않는다", "생일을 비밀번호로 만든다"], answer: 2,
+          explain: "모르는 링크는 누르지 않는 게 안전해요. 비밀번호 공유·같은 비밀번호·생일 비밀번호는 모두 위험해요." },
+    ];
+    const TOTAL = QUESTIONS.length;
 
     const startingScore = getStartingScore(params.lessonId);
-    let score = startingScore, finished = false, secs = TIME;
+    let score = startingScore, qIdx = 0, correctCount = 0, finished = false, locked = false;
     const goalScore = (LESSONS_UNIT7.find(l => l.id === params.lessonId) || {}).goalScore || 0;
-
-    const scoreEl = el("span", { class: "hud-chip__big", text: `${startingScore}` });
-    const timerEl = el("span", { class: "hud-chip__big", text: TIME + ".0", style: { color: "var(--secondary-dark)" } });
-    const lvlChip = makeLevelChip(); lvlChip.update(state.points);
-    const exitBtn = el("button", { class: "btn btn--ghost", text: "← 그만",
-        style: { fontSize: "14px", padding: "6px 14px" }, on: { click: () => { cleanup(); navigate("home"); } } });
-    screen.appendChild(el("div", { class: "game__hud" },
-        exitBtn,
-        el("span", { class: "hud-chip" }, el("span", { text: "⏱️" }), timerEl),
-        lvlChip.chip,
-        el("span", { class: "hud-chip" }, el("span", { text: "⭐" }), scoreEl,
-            el("span", { class: "hud-chip__sep", text: "/" }), el("span", { class: "hud-chip__goal", text: `${goalScore}` })),
-    ));
-    screen.appendChild(el("div", { class: "sec-title", text: "📇 정보 카드를 모아 길어지자! 벽·바이러스·몸에 닿으면 끝! (방향키)" }));
-
-    const board = el("div", { class: "sec-snake-board" });
-    board.style.setProperty("--cols", COLS); board.style.setProperty("--rows", ROWS);
-    screen.appendChild(board);
-    screen.appendChild(el("div", { class: "game-bottom-help", text: "💡 길어질수록 점수 폭발! 방향키로 조종 (반대로는 못 꺾어요)" }));
     root.appendChild(screen);
 
-    let snake = [{ x: 4, y: 6 }, { x: 3, y: 6 }, { x: 2, y: 6 }];
-    let dir = { x: 1, y: 0 }, nextDir = { x: 1, y: 0 };
-    let food = null, viruses = [], tickInt = null, timerInt = null;
+    let scoreEl, stageEl, lvlChip, card;
 
-    function cellStyle(x, y) {
-        return `left:${(x / COLS * 100)}%;top:${(y / ROWS * 100)}%;width:${(1 / COLS * 100)}%;height:${(1 / ROWS * 100)}%;`;
-    }
-    function randEmpty() {
-        for (let tries = 0; tries < 200; tries++) {
-            const x = Math.floor(Math.random() * COLS), y = Math.floor(Math.random() * ROWS);
-            if (snake.some(s => s.x === x && s.y === y)) continue;
-            if (viruses.some(v => v.x === x && v.y === y)) continue;
-            if (food && food.x === x && food.y === y) continue;
-            return { x, y };
-        }
-        return { x: 1, y: 1 };
-    }
-    function spawnFood() { food = randEmpty(); }
-    function spawnVirus() { viruses.push(randEmpty()); }
-    spawnFood(); spawnVirus(); spawnVirus();
+    function startPlay() {
+        screen.innerHTML = "";
+        const bg = el("div", { class: "sec-phish-bg" });
+        bg.style.background = `linear-gradient(rgba(8,10,14,.6),rgba(8,10,14,.68)), url('${GAME_BG}') center/cover no-repeat`;
+        screen.appendChild(bg);
 
-    function render() {
-        board.innerHTML = "";
-        viruses.forEach(v => { const e = el("div", { class: "sec-svirus", text: "🦠" }); e.style.cssText += cellStyle(v.x, v.y); board.appendChild(e); });
-        if (food) { const e = el("div", { class: "sec-food", text: "📇" }); e.style.cssText += cellStyle(food.x, food.y); board.appendChild(e); }
-        snake.forEach((s, i) => { const e = el("div", { class: "sec-seg" + (i === 0 ? " sec-seg--head" : "") , text: i === 0 ? "🤖" : "" }); e.style.cssText += cellStyle(s.x, s.y); board.appendChild(e); });
+        scoreEl = el("span", { class: "hud-chip__big", text: `${score}` });
+        stageEl = el("span", { text: `1 / ${TOTAL}` });
+        lvlChip = makeLevelChip(); lvlChip.update(state.points + (score - startingScore));
+        const exitBtn = el("button", { class: "btn btn--ghost", text: "← 그만",
+            style: { fontSize: "14px", padding: "6px 14px" }, on: { click: () => { cleanup(); navigate("home"); } } });
+        screen.appendChild(el("div", { class: "game__hud" },
+            exitBtn,
+            el("span", { class: "hud-chip" }, el("span", { text: "🧟" }), el("span", { class: "stat-chip__label", text: "문제" }), stageEl),
+            lvlChip.chip,
+            el("span", { class: "hud-chip" }, el("span", { text: "⭐" }), scoreEl,
+                el("span", { class: "hud-chip__sep", text: "/" }), el("span", { class: "hud-chip__goal", text: `${goalScore}` })),
+        ));
+        screen.appendChild(el("div", { class: "sec-title", text: "🕵️ 개인정보 지킴이 퀴즈! 정답을 맞혀 좀비를 물리쳐라!" }));
+        card = el("div", { class: "phish-card" });
+        screen.appendChild(card);
+        showCarryOverBanner(startingScore);
+        loadQuestion();
     }
-    render();
-
-    function onKey(e) {
-        if (finished) return;
-        let nd = null;
-        if (e.key === "ArrowLeft") nd = { x: -1, y: 0 };
-        else if (e.key === "ArrowRight") nd = { x: 1, y: 0 };
-        else if (e.key === "ArrowUp") nd = { x: 0, y: -1 };
-        else if (e.key === "ArrowDown") nd = { x: 0, y: 1 };
-        if (nd) { e.preventDefault(); if (nd.x !== -dir.x || nd.y !== -dir.y) nextDir = nd; }
-    }
-    window.addEventListener("keydown", onKey);
 
     function updateScore() { scoreEl.textContent = score; scoreEl.classList.toggle("passed", score >= goalScore);
         lvlChip.update(state.points + (score - startingScore)); }
 
-    function step() {
-        if (finished) return;
-        dir = nextDir;
-        const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
-        // 벽
-        if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) return gameOver();
-        // 자기 몸 / 바이러스
-        if (snake.some(s => s.x === head.x && s.y === head.y)) return gameOver();
-        if (viruses.some(v => v.x === head.x && v.y === head.y)) return gameOver();
-        snake.unshift(head);
-        if (food && head.x === food.x && head.y === food.y) {
-            const g = FOODPTS + (snake.length - 3) * 400; score += g; updateScore();
-            Audio.bigCorrect && Audio.bigCorrect(Math.min(8, 3 + Math.floor(snake.length / 3)));
-            spawnFood();
-            if (snake.length % 5 === 0) spawnVirus();   // 길어질수록 바이러스 증가
-        } else { snake.pop(); }
-        render();
+    function loadQuestion() {
+        const it = QUESTIONS[qIdx], n = qIdx + 1;
+        stageEl.textContent = `${n} / ${TOTAL}`;
+        locked = false; card.innerHTML = "";
+        card.appendChild(el("div", { class: "phish-tag", text: `문제 ${n} / ${TOTAL}` }));
+        card.appendChild(el("div", { class: "phish-q", text: it.q }));
+        // 보기 섞기 (정답이 항상 같은 번호에 오지 않도록)
+        const opts = it.choices.map((c, i) => ({ text: c, correct: i === it.answer }));
+        for (let k = opts.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); const t = opts[k]; opts[k] = opts[j]; opts[j] = t; }
+        const list = el("div", { class: "quiz-choices" });
+        opts.forEach((o, i) => {
+            const btn = el("button", { class: "quiz-choice" }, el("b", { text: `${i + 1}` }), el("span", { text: o.text }));
+            btn.addEventListener("click", () => answer(o.correct, btn, list));
+            list.appendChild(btn);
+        });
+        card.appendChild(list);
     }
 
-    function cleanup() { finished = true; clearInterval(tickInt); clearInterval(timerInt); window.removeEventListener("keydown", onKey); }
-
-    function gameOver() {
-        const head = snake[0];
-        const r = board.getBoundingClientRect();
-        emitParticles(r.left + (head.x + 0.5) / COLS * r.width, r.top + (head.y + 0.5) / ROWS * r.height, 14, ["💥", "⚠️", "🦠"]);
-        finishGame();
+    function answer(correct, btn, list) {
+        if (finished || locked) return;
+        locked = true;
+        [...list.children].forEach(b => { if (b !== btn) b.classList.add("dim"); });
+        const it = QUESTIONS[qIdx];
+        if (correct) {
+            btn.classList.add("correct"); score += PTS; correctCount++; updateScore();
+            Audio.bigCorrect && Audio.bigCorrect(6);
+            const r = btn.getBoundingClientRect();
+            emitParticles(r.left + r.width / 2, r.top + r.height / 2, 12, ["🧟", "💥", "✨", "🛡️"]);
+        } else {
+            btn.classList.add("wrong"); Audio.wrong && Audio.wrong();
+            // 정답 강조
+            [...list.children].forEach(b => { if (b.querySelector("span").textContent === it.choices[it.answer]) { b.classList.remove("dim"); b.classList.add("correct"); } });
+        }
+        const res = el("div", { class: "phish-result " + (correct ? "phish-result--ok" : "phish-result--no") },
+            el("div", { class: "phish-result__head", text: correct ? "🛡️ 정답! 좀비 격퇴!" : `⚠️ 아쉬워요! 정답은 ‘${it.choices[it.answer]}’` }),
+            el("div", { class: "phish-result__explain", text: it.explain }),
+        );
+        const next = el("button", { class: "btn btn--big phish-next",
+            text: qIdx >= TOTAL - 1 ? "결과 보기 🏁" : "다음 문제 ▶",
+            on: { click: () => { if (qIdx >= TOTAL - 1) finishGame(); else { qIdx++; loadQuestion(); } } } });
+        res.appendChild(next); card.appendChild(res);
+        requestAnimationFrame(() => res.classList.add("show"));
     }
+
+    function cleanup() { finished = true; }
 
     function finishGame() {
         if (finished) return; finished = true; cleanup(); Audio.gameOver && Audio.gameOver();
         const prevLevel = getLevelFromPoints(state.points);
         finishLesson(params.lessonId, score);
         const newLevel = getLevelFromPoints(state.points);
-        navigate("results", { lessonId: params.lessonId, score, bestCombo: snake.length, leveledUp: newLevel > prevLevel, newLevel });
+        navigate("results", { lessonId: params.lessonId, score, bestCombo: correctCount, leveledUp: newLevel > prevLevel, newLevel });
     }
 
-    updateScore();
-    const startGame = () => {
-        showCarryOverBanner(startingScore);
-        tickInt = setInterval(step, STEP);
-        timerInt = setInterval(() => { if (finished) return; secs -= 0.1; timerEl.textContent = Math.max(0, secs).toFixed(1);
-            timerEl.style.color = secs < 8 ? "#d63031" : "var(--secondary-dark)"; if (secs <= 0) finishGame(); }, 100);
-    };
-    if (typeof hasSeenTutorial === "function" && !hasSeenTutorial("gameSecSnake")) showTutorial("gameSecSnake", startGame);
-    else startGame();
+    secStoryIntro(screen, STORY, startPlay);
 };

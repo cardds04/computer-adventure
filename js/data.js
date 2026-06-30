@@ -1489,18 +1489,18 @@ const LESSONS_UNIT7 = [
     },
     {
         id: "u7_lesson3", num: "스텝 3", title: "피싱 피하기",
-        desc: "안전한 정보는 받고 피싱 미끼는 피하자! (받기 게임) 🎣🧺",
+        desc: "수상한 문자! 시키는 대로 해도 될까? 예/아니오로 피싱을 가려내자 📱🎣",
         icon: "🎣", game: "gameSecCatch", goalScore: 200000,
     },
     {
         id: "u7_lesson4", num: "스텝 4", title: "개인정보 지키기",
-        desc: "정보 카드를 모아 금고로! 해커를 피해라! (뱀게임) 🐍🔐",
-        icon: "🐍", game: "gameSecSnake", goalScore: 200000,
+        desc: "땅속 좀비 바이러스! 개인정보 4지선다 퀴즈로 좀비를 물리쳐라 🧟🔐",
+        icon: "🔐", game: "gameSecSnake", goalScore: 200000,
     },
     {
-        id: "u7_lesson5", num: "스텝 5", title: "안전하게 데이터 전송",
-        desc: "위험한 인터넷 길을 건너 데이터를 안전한 서버로! (길건너기) 🚦💾",
-        icon: "🚦", game: "gameSecCross", goalScore: 250000,
+        id: "u7_lesson5", num: "스텝 5", title: "백신 스네이크",
+        desc: "주사기(💉)를 모아 길어지고 바이러스(🦠)는 피해라! 목표 점수 달성 시 성공 🐍",
+        icon: "💉", game: "gameSecCross", goalScore: 250000,
     },
 ];
 
@@ -1636,7 +1636,7 @@ function getLessonsForUnit(unitNum) {
 // ★ 로컬(localhost/127.0.0.1/file)에서만 자동으로 잠금 해제 → 배포(Vercel)에선 정상 잠금
 // ============================================================
 // 단계 잠금: 이전 관문을 통과(최고점 >= 목표점수)해야 다음 관문이 열림
-const BYPASS_LESSON_LOCKS = true;   // ⚠️ 테스트용 전체 잠금해제 — 끝나면 false로 되돌릴 것
+const BYPASS_LESSON_LOCKS = false;   // 운영: 단계별 잠금 정상 동작
 
 // ============================================================
 // 전역 이모지 → SVG 스프라이트 매핑 (모든 단원 공통 그래픽)

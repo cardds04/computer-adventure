@@ -4,10 +4,13 @@
 
 SCREEN_RENDERERS.home = function (root) {
     const screen = el("div", { class: "screen home" });
-    // 배경: 졸업 후 → 학교 운동장 / 그 전엔 5단원=싱크홀, 6단원=드래곤, 나머지 하늘
-    document.body.classList.toggle("theme-peace", !!state.graduated);
-    document.body.classList.toggle("theme-unit5", !state.graduated && state.currentUnit === 5);
-    document.body.classList.toggle("theme-unit6", !state.graduated && state.currentUnit === 6);
+    // 단원별 홈 배경 (해당 단원에서만 적용 — 다른 단원/1~4단원은 기본 하늘)
+    const _grad = !!state.graduated, _u = state.currentUnit;
+    document.body.classList.toggle("theme-unit5",     _u === 5 && !_grad);  // 5단원: 싱크홀
+    document.body.classList.toggle("theme-peace",     _u === 5 && _grad);   // 5단원 졸업 후: 학교 운동장
+    document.body.classList.toggle("theme-unit6",     _u === 6);            // 6단원: 드래곤
+    document.body.classList.toggle("theme-unit7",     _u === 7 && !_grad);  // 7단원(클리어 전): 괴물 도시
+    document.body.classList.toggle("theme-sec-after", _u === 7 && _grad);   // 7단원 졸업 후: 평화로운 도시
     const progress = getLevelProgress(state.points);
     const emoji = getCurrentEmoji();
     const currentLessons = getLessonsForUnit(state.currentUnit);

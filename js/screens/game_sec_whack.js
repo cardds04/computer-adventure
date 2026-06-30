@@ -7,11 +7,11 @@
 SCREEN_RENDERERS.gameSecWhack = function (root, params) {
     const screen = el("div", { class: "screen game game--sec game--sec-whack" });
 
-    // ▼▼ 스토리 3장 — 지금은 같은 이미지(임시). 사장님이 3장 주면 img만 교체 ▼▼
+    // ▼▼ 스토리 3장 + 게임화면 배경 ▼▼
     const STORY = [
-        { img: "assets/security/whack_bg.jpeg", text: "학교 가는 길… 어? 바닥에 USB가 떨어져 있네? ✨" },
-        { img: "assets/security/whack_bg.jpeg", text: "“오, 공짜 USB다!” 무심코 주워서 컴퓨터에 쏙 꽂았어요." },
-        { img: "assets/security/whack_bg.jpeg", text: "그 순간… 화면 가득 바이러스가 쏟아진다! 모두 잡아 없애자! 🦠" },
+        { img: "assets/security/whack_story1.jpeg", text: "학교 가는 길… 어? 바닥에 USB가 떨어져 있네? ✨" },
+        { img: "assets/security/whack_story2.jpeg", text: "“오, 공짜 USB다!” 주워서 컴퓨터실로 가져왔어요." },
+        { img: "assets/security/whack_story3.jpeg", text: "무심코 컴퓨터에 쏙 꽂았더니… ‘DRIVE DETECTED’. 그 순간 바이러스가 쏟아진다! 🦠" },
     ];
     const GAME_BG = "assets/security/whack_bg.jpeg";
     const VIRUS = ["🦠", "🐛", "👾", "💀", "🪲"];
@@ -23,28 +23,6 @@ SCREEN_RENDERERS.gameSecWhack = function (root, params) {
     root.appendChild(screen);
 
     // ====================== 스토리 인트로 ======================
-    function showStory(idx) {
-        screen.innerHTML = "";
-        const s = STORY[idx];
-        const wrap = el("div", { class: "sec-story" });
-        wrap.style.backgroundImage = `url('${s.img}')`;
-        const dots = el("div", { class: "sec-story__dots" });
-        STORY.forEach((_, i) => dots.appendChild(el("span", { class: "dot" + (i === idx ? " on" : "") })));
-        const cap = el("div", { class: "sec-story__cap" },
-            el("div", { class: "sec-story__text", text: s.text }),
-            el("button", {
-                class: "sec-story__btn",
-                text: idx < STORY.length - 1 ? "다음 ▶" : "게임 시작! 🔨",
-                on: { click: () => { if (idx < STORY.length - 1) showStory(idx + 1); else startPlay(); } },
-            }),
-        );
-        const skip = el("button", { class: "sec-story__skip", text: "건너뛰기 ⏭",
-            on: { click: () => startPlay() } });
-        wrap.appendChild(dots); wrap.appendChild(skip); wrap.appendChild(cap);
-        screen.appendChild(wrap);
-        Audio.roundStart && Audio.roundStart();
-    }
-
     // ====================== 게임 ======================
     let viruses = [], rafId = null, last = 0, scoreEl, timerEl, comboEl, lvlChip, field, spawnTimer, tickTimer;
 
@@ -83,8 +61,8 @@ SCREEN_RENDERERS.gameSecWhack = function (root, params) {
     function spawnWave(n) {
         for (let i = 0; i < n; i++) {
             const v = { x: 0.08 + Math.random() * 0.84, y: 0.12 + Math.random() * 0.76,
-                vx: (Math.random() < 0.5 ? -1 : 1) * (0.06 + Math.random() * 0.10 + wave * 0.01),
-                vy: (Math.random() < 0.5 ? -1 : 1) * (0.06 + Math.random() * 0.10 + wave * 0.01), alive: true };
+                vx: (Math.random() < 0.5 ? -1 : 1) * (0.035 + Math.random() * 0.055 + wave * 0.006),
+                vy: (Math.random() < 0.5 ? -1 : 1) * (0.035 + Math.random() * 0.055 + wave * 0.006), alive: true };
             const e = el("div", { class: "sec-virus", text: VIRUS[Math.floor(Math.random() * VIRUS.length)] });
             e.style.left = (v.x * 100) + "%"; e.style.top = (v.y * 100) + "%";
             e.addEventListener("click", () => catchVirus(v));
@@ -140,6 +118,6 @@ SCREEN_RENDERERS.gameSecWhack = function (root, params) {
         navigate("results", { lessonId: params.lessonId, score, bestCombo: wave, leveledUp: newLevel > prevLevel, newLevel });
     }
 
-    // 시작: 튜토리얼은 생략(스토리가 인트로 역할), 바로 스토리부터
-    showStory(0);
+    // 스토리 인트로(공용) → 끝나면 게임 시작
+    secStoryIntro(screen, STORY, startPlay);
 };
