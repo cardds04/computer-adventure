@@ -1398,8 +1398,17 @@ const LESSONS_UNIT6 = [
         goalScore: 1300000,
     },
     {
-        id: "u5_scroll",
+        id: "u6_climb",
         num: "4관문",
+        title: "성벽 오르기",
+        desc: "애국가 1절을 타이핑해 병사가 성벽을 오른다! 1절 완성 시 잠든 공주의 방으로 🧗🎵",
+        icon: "🧗",
+        game: "gameTypeClimb",
+        goalScore: 1400000,
+    },
+    {
+        id: "u5_scroll",
+        num: "5관문",
         title: "잠든 공주",
         desc: "마법주문서를 120초 안에 완성해 잠든 공주를 깨워라! 📜",
         icon: "📜",

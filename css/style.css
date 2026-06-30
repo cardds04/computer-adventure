@@ -8967,3 +8967,68 @@ body.theme-peace #scene > * { display: none !important; }
 .snk-virus { position:absolute; transform:translate(-50%,-50%); z-index:30;
   filter:drop-shadow(0 0 6px rgba(255,90,90,.75)); animation:snk-spin 2.2s linear infinite; }
 @keyframes snk-spin { 100%{ transform:translate(-50%,-50%) rotate(360deg); } }
+
+/* ============================================================
+   6단원 4관문: 성벽 오르기 (애국가 타이핑)
+   ============================================================ */
+.game--climb { padding:0; overflow:hidden; }
+.climb-stage { position:absolute; inset:0; background-size:cover; background-position:center top; background-repeat:no-repeat; }
+.climb-stage::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg, rgba(6,10,26,.05) 40%, rgba(6,10,26,.55) 100%); pointer-events:none; }
+
+/* 병사(기사) — 가운데 탑을 타고 오른다 */
+.climb-actor { position:absolute; left:50%; bottom:18%; transform:translateX(-50%); z-index:6;
+  width:clamp(46px,5.4vw,78px); height:clamp(46px,5.4vw,78px);
+  transition:bottom .45s cubic-bezier(.34,1.4,.5,1); filter:drop-shadow(0 3px 6px rgba(0,0,0,.7)); }
+.climb-actor__char { width:100%; height:100%; background-size:contain; background-repeat:no-repeat; background-position:center;
+  animation:climb-wig .5s ease-in-out infinite; }
+@keyframes climb-wig { 0%,100%{ transform:rotate(-5deg) translateY(0); } 50%{ transform:rotate(5deg) translateY(-3px); } }
+.climb-actor.hop .climb-actor__char { animation:climb-hop .4s ease; }
+@keyframes climb-hop { 30%{ transform:translateY(-14px) scale(1.12); } }
+.climb-actor.arrive .climb-actor__char { animation:climb-cheer .6s ease infinite; }
+@keyframes climb-cheer { 0%,100%{ transform:translateY(0) scale(1);} 50%{ transform:translateY(-10px) scale(1.1);} }
+
+/* 목표 — 성벽 위 공주의 방 */
+.climb-goal { position:absolute; left:50%; top:5%; transform:translateX(-50%); z-index:5; text-align:center; }
+.climb-goal__room { width:clamp(54px,6vw,86px); height:clamp(54px,6vw,86px); margin:0 auto;
+  border-radius:10px 10px 4px 4px; background:radial-gradient(circle at 50% 40%, rgba(255,224,140,.55), rgba(40,28,12,.85));
+  border:2px solid rgba(255,210,120,.55); box-shadow:0 0 18px rgba(255,200,90,.45), inset 0 0 12px rgba(0,0,0,.6);
+  display:flex; align-items:center; justify-content:center; opacity:.85; transition:.4s; }
+.climb-goal__princess { width:74%; height:74%; background-size:contain; background-repeat:no-repeat; background-position:center bottom; }
+.climb-goal__label { margin-top:4px; font-family:"Jua",sans-serif; font-size:clamp(11px,1.4vw,15px); color:#ffe6a3; text-shadow:1px 1px 3px #000; }
+.climb-goal.open .climb-goal__room { opacity:1; box-shadow:0 0 34px rgba(255,210,110,.9), inset 0 0 12px rgba(0,0,0,.4); transform:scale(1.08); }
+
+/* 오른쪽 세로 진행바 */
+.climb-track { position:absolute; right:2.4%; top:9%; bottom:9%; width:12px; z-index:5;
+  background:rgba(8,12,26,.62); border:2px solid rgba(255,255,255,.22); border-radius:8px; overflow:visible; }
+.climb-track__fill { position:absolute; left:0; bottom:0; width:100%; height:0;
+  background:linear-gradient(180deg,#ffe06a,#8ff0a0); border-radius:8px; transition:height .45s ease; box-shadow:0 0 10px rgba(255,220,120,.6); }
+.climb-track__top, .climb-track__bot { position:absolute; left:50%; transform:translateX(-50%); font-size:15px; }
+.climb-track__top { top:-22px; } .climb-track__bot { bottom:-22px; }
+
+/* 가운데 타자 카드 */
+.climb-card { position:absolute; left:50%; bottom:4%; transform:translateX(-50%); z-index:8;
+  width:min(720px,94vw); background:rgba(10,12,26,.86); border:2px solid rgba(255,210,120,.5);
+  border-radius:16px; padding:14px 18px 16px; box-shadow:0 14px 40px rgba(0,0,0,.6); text-align:center; }
+.climb-card__head { font-family:"Jua",sans-serif; font-size:clamp(14px,1.7vw,18px); color:#ffe6a3; margin-bottom:8px; }
+.climb-card__line { font-family:"Jua",sans-serif; font-size:clamp(20px,2.6vw,30px); letter-spacing:2px; color:#cfd6ea; min-height:1.4em; }
+.climb-ch { transition:color .1s; }
+.climb-ch.done { color:#7CFC9A; text-shadow:0 0 8px rgba(120,255,150,.5); }
+.climb-ch.wrong { color:#fff; background:#d63031; border-radius:3px; }
+.climb-card__input { margin-top:10px; width:100%; box-sizing:border-box; font-family:"Jua",sans-serif;
+  font-size:clamp(16px,2vw,22px); text-align:center; padding:9px 12px; border-radius:10px;
+  border:2px solid rgba(255,255,255,.3); background:rgba(255,255,255,.96); color:#222; outline:none; }
+.climb-card__input:focus { border-color:#ffd267; box-shadow:0 0 0 3px rgba(255,210,103,.35); }
+.climb-card__input.err { border-color:#d63031; box-shadow:0 0 0 3px rgba(214,48,49,.3); }
+.climb-card__sub { margin-top:7px; font-family:"Jua",sans-serif; font-size:clamp(11px,1.4vw,14px); color:#9fb0d0; }
+
+/* 인트로 */
+.climb-intro { position:absolute; inset:0; z-index:30; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:6px; background:radial-gradient(circle at 50% 40%, rgba(10,14,34,.78), rgba(4,6,18,.92)); padding:20px;
+  animation:climb-introin .35s ease; }
+.climb-intro.out { animation:climb-introout .32s ease forwards; }
+@keyframes climb-introin { from{ opacity:0; transform:scale(.96);} } @keyframes climb-introout { to{ opacity:0; transform:scale(1.03);} }
+.climb-intro__icon { font-size:54px; }
+.climb-intro__title { font-family:"Jua",sans-serif; font-size:clamp(26px,4vw,40px); color:#ffe6a3; margin:0; text-shadow:2px 2px 0 #000; }
+.climb-intro__sub { font-family:"Jua",sans-serif; color:#9fb0d0; font-size:clamp(13px,1.7vw,17px); }
+.climb-intro__text { font-family:"Jua",sans-serif; color:#e6ecf7; font-size:clamp(14px,1.8vw,18px); line-height:1.7; white-space:pre-line; margin:8px 0 6px; }
+.climb-intro__cta { margin-top:6px; }
